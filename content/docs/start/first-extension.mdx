@@ -1,6 +1,76 @@
 ---
-title: Your first extension
-description: Ship a webhook-based extension — from manifest to install — in under an hour.
+title: Install your first extension
+description: Connect Slack so your workflows can notify your team — then browse the 14-extension catalog.
 ---
 
-> **Stub.** Content coming.
+Kiket ships 14 integrations as **extensions** — signed manifests that run outside the core platform and communicate via webhook. Install one in a few clicks and it becomes available to every workflow automation.
+
+## Install Slack
+
+<Steps>
+
+<Step>
+
+### Open the marketplace
+
+From any project, click **Settings → Integrations → Marketplace**. You'll see the 14 available extensions grouped by category.
+
+</Step>
+
+<Step>
+
+### Pick Slack and click Install
+
+You'll be redirected to Slack's OAuth screen. Grant the requested scopes (they're least-privilege: `chat:write` for the channels you pick, nothing else).
+
+</Step>
+
+<Step>
+
+### Pick a default channel
+
+After OAuth completes, you're back in Kiket. Pick a Slack channel for notifications by default. You can override per-workflow later.
+
+</Step>
+
+<Step>
+
+### Test it
+
+From the workflow automations panel, add an action: **Send notification → Slack → channel**. Save. Trigger it (drag an issue, hit an SLA, whatever) and the message lands.
+
+</Step>
+
+</Steps>
+
+## What extensions can (and can't) do
+
+Extensions are **webhook-based**, signed, and scoped:
+
+- The extension's manifest declares exactly which events it wants (`issue.created`, `sla.breach`, `comment.added`) and which scopes it needs (`issue:read`, `comment:write`).
+- Kiket signs every outbound webhook with an HMAC. The extension verifies before acting.
+- You see a live activity log of every callback — no silent background chatter.
+- Revoking is one click in Settings → Integrations; there's nothing to delete on the extension side.
+
+## Available integrations
+
+<Cards>
+  <Card title="Slack" href="/docs/integrations/slack" description="Approvals, notifications, SLA breaches posted to channels; replies become workflow events." />
+  <Card title="Microsoft Teams" href="/docs/integrations/teams" description="Same-channel approvals via Adaptive Cards." />
+  <Card title="GitHub" href="/docs/integrations/github" description="PRs and commits drive workflow transitions." />
+  <Card title="Jira" href="/docs/integrations/jira" description="Two-way sync for teams bridging both tools." />
+  <Card title="Zoom" href="/docs/integrations/zoom" description="Auto-create meetings for approval gates." />
+  <Card title="Google Calendar" href="/docs/integrations/google-calendar" description="Sync SLAs and deadlines to people's calendars." />
+</Cards>
+
+See the full catalog at **[Integrations](/docs/integrations)**.
+
+## Build your own
+
+If your tool isn't listed, ship an extension in an afternoon:
+
+1. Expose a webhook endpoint (any language, any host).
+2. Write a small `extension.yaml` manifest declaring scopes and events.
+3. Submit it to your org's private marketplace, or publish to the public one.
+
+See **[Extensions (API section)](/docs/api/extensions)** for the full recipe.

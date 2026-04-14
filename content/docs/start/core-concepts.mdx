@@ -1,12 +1,105 @@
 ---
 title: Core concepts
-description: Workflows, states, transitions, SLAs, the audit trail — the ideas that everything else builds on.
+description: The vocabulary you'll use every day — workflows, states, transitions, issues, SLAs, and the audit trail.
 ---
 
-> **Stub.** Content coming. Will cover:
->
-> - Workflows as finite state machines
-> - File-backed config (`.kiket/` directory in your repo)
-> - The engine vs. the host
-> - The audit trail — what gets anchored and why
-> - Projects, organizations, workspaces
+Kiket models real-world processes as **finite state machines**. Issues move through **states**; **transitions** are the arrows between them. Each state can demand approvals, documents, checklists, or SLA timers; the **engine** enforces them. Every change the engine makes lands in the **audit trail**.
+
+<img src="/diagrams/workflow-lifecycle.svg" alt="Example contract-review workflow: Intake → Legal Review → Approval → Anchor → Audit" />
+
+## Workflow
+
+A workflow defines *what your process actually is*. It has:
+
+- **States** — named stages an issue can be in (`intake`, `review`, `approved`, `rejected`).
+- **Transitions** — directed edges between states, with optional conditions, approvers, and events.
+- **Metadata** — SLAs, required documents, checklists, labels — attached per state or per transition.
+
+Workflows live as YAML files in your workspace repo under `.kiket/workflows/`. One file = one workflow.
+
+## State
+
+Every issue is in exactly one state at a time. States have three *categories*:
+
+- **Initial** — where new issues land (usually `intake` or `backlog`).
+- **Active** — where work happens; most states fall here.
+- **Final** — terminal states; an issue cannot leave a final state (`done`, `rejected`).
+
+A state can declare:
+
+- `sla` — warning and breach thresholds; the engine auto-paged on-call when crossed.
+- `required_documents` — transition blockers until the documents are attached.
+- `approval` — who must sign off, and in what order.
+- `on_enter` / `on_exit` — automations that fire on state change (notifications, webhooks, AI checks).
+
+## Transition
+
+Transitions carry an issue from one state to another. They can be:
+
+- **User-driven** — someone clicks a button on the issue page.
+- **Automated** — triggered by a webhook, a schedule, or an AI agent.
+- **Conditional** — evaluated against the issue payload (`priority == high && assignee != null`).
+
+Every transition is recorded with actor, timestamp, before/after state, and a hash of the full change.
+
+## Issue
+
+Issues are the *things* flowing through your workflow — contracts, tickets, incidents, change requests. Each has:
+
+- A **workflow key** pinning it to one workflow.
+- A **state**, always one of the workflow's declared states.
+- **Priority**, **assignee**, **labels**, **due date**, and whatever custom fields the issue type defines.
+- **Comments**, **attachments**, **time entries**, **linked issues**.
+- An **SLA status** computed from the current state's rules.
+
+Issues are the only thing that lives in the database, not in your git repo. The config (what workflows exist, what states they have) is git-backed; the *runtime data* is a PostgreSQL row.
+
+## SLA
+
+Service-level agreements are per-state timers. Declare them in YAML:
+
+```yaml
+states:
+  legal_review:
+    sla:
+      warning: 48h
+      breach: 5d
+```
+
+The engine emits `sla_warning` and `sla_breach` events when thresholds cross. Notifications, auto-escalations, and dashboard widgets all key off those events.
+
+## Approval
+
+Some transitions require human sign-off. Approval chains can be sequential, parallel, or conditional:
+
+```yaml
+transitions:
+  - from: legal_review
+    to: approval
+    approval:
+      chain: [counsel, cfo]   # sequential
+```
+
+Sequential chains require each approver in order. Parallel chains need all approvers to sign off, order-independent. Conditional chains add a predicate: `if total_value > 100000 then cfo`.
+
+## Audit trail
+
+Every significant action — transitions, approvals, AI suggestions, comments on approvals — is recorded as an immutable event. Events are hashed individually, batched periodically into a Merkle tree, and the root is submitted to the Polygon blockchain.
+
+An auditor can verify your history without talking to us or touching our database. See **[Compliance & audit](/docs/compliance)** for the full details.
+
+## Project, organization, workspace
+
+Three concepts that often blur:
+
+- **Organization** — your company account; billing lives here.
+- **Project** — one distinct piece of work (e.g. "Legal" or "Customer Support"); has its own workflows, boards, and members.
+- **Workspace** — the git repository that backs a project's configuration. One project = one workspace.
+
+## File-backed config
+
+When you edit a workflow in the visual canvas, the app writes a commit to your workspace repo. When you edit YAML in your IDE and push, the app picks up the change via webhook and re-syncs. Canvas and YAML are two surfaces over the same file.
+
+<Callout type="info">
+The fastest way to understand Kiket: create a project, open your workspace repo in your file browser, and watch the `.kiket/` directory change as you use the app.
+</Callout>

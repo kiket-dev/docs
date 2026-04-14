@@ -1,4 +1,4 @@
 {
   "title": "Personas",
-  "pages": ["overview"]
+  "pages": ["overview", "designer", "ops", "developer", "compliance"]
 }

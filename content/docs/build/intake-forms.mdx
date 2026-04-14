@@ -1,6 +1,123 @@
 ---
 title: Intake forms
-description: Stub — content coming.
+description: Let non-members submit structured requests that become issues in your workflows.
 ---
 
-> **Stub.** Content coming.
+Intake forms are the front door to your workflows. Someone who doesn't have a Kiket seat — a customer, a vendor, an internal requester — fills out a form; it becomes a new issue in a workflow's initial state. No seat required on the submitter side.
+
+## File location
+
+`.kiket/intakes/*.yaml`. One file per intake form. Each form is addressable at a stable URL: `https://app.kiket.dev/intake/<project-key>/<form-key>`.
+
+## Minimum form
+
+```yaml
+key: contract-request
+name: Request a contract review
+workflow: contract_review
+initial_state: intake
+
+fields:
+  - key: counterparty
+    label: Counterparty
+    type: text
+    required: true
+  - key: total_value_usd
+    label: Contract value (USD)
+    type: number
+    required: true
+  - key: contract_type
+    label: Contract type
+    type: select
+    options: [msa, sow, nda, other]
+    required: true
+  - key: summary
+    label: Brief summary
+    type: textarea
+```
+
+When submitted, Kiket creates an issue in the `contract_review` workflow with these fields pre-populated.
+
+## Field types
+
+| Type | Renders as |
+|------|-----------|
+| `text` | Single-line input |
+| `textarea` | Multi-line input |
+| `number` | Numeric input |
+| `date` | Date picker |
+| `select` | Single-select dropdown |
+| `multiselect` | Multi-select with chips |
+| `checkbox` | Single checkbox |
+| `file` | File upload (stored as an attachment) |
+| `email` | Email with validation |
+| `url` | URL with validation |
+
+## Validation
+
+Per-field:
+
+```yaml
+- key: total_value_usd
+  label: Contract value (USD)
+  type: number
+  min: 0
+  max: 10_000_000
+  required: true
+  help: Approximate USD equivalent.
+```
+
+## Conditional fields
+
+Show a field only when another matches a predicate:
+
+```yaml
+- key: contract_type
+  type: select
+  options: [msa, sow, nda, other]
+- key: other_description
+  type: text
+  visible_when: "contract_type == 'other'"
+  required_when: "contract_type == 'other'"
+```
+
+## Branding
+
+Each form can carry a logo, accent color, and intro markdown:
+
+```yaml
+branding:
+  logo: https://example.com/logo.png
+  accent: "#4f46e5"
+  intro: |
+    Thanks for engaging with Acme Legal.
+    Fill this out and we'll respond within 24 hours.
+```
+
+## Submission confirmation
+
+After submit, show:
+
+- A simple thank-you screen (default), or
+- The issue's public URL (if you've enabled public-issue view), or
+- A redirect to an external URL.
+
+```yaml
+confirmation:
+  kind: redirect
+  url: https://example.com/thanks
+```
+
+## Security
+
+- Forms run on a **separate public subdomain** so they don't share cookies with the main app.
+- CAPTCHA is available (Cloudflare Turnstile); toggle via `captcha: true`.
+- Per-field rate limits are enforced server-side.
+- Attachments go to isolated object storage; they're scanned before anyone in the workflow can open them.
+
+## What's next?
+
+<Cards>
+  <Card title="Automations" href="/docs/build/automations" description="Fire Slack/email on submission, route by field values." />
+  <Card title="Workflows" href="/docs/build/workflows" description="The workflow the intake feeds into." />
+</Cards>

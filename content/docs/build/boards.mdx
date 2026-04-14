@@ -1,6 +1,104 @@
 ---
 title: Boards
-description: Stub — content coming.
+description: Kanban-style views of a workflow — columns, swimlanes, WIP limits, card templates.
 ---
 
-> **Stub.** Content coming.
+Boards visualize a workflow as columns you can drag issues between. Each column is backed by one or more workflow states. Boards don't *own* data — they're pure view config — but they shape how your team sees and moves work.
+
+## File location
+
+`.kiket/boards/*.yaml`. One file per board. A project can have several (e.g. *Engineering sprint*, *Compliance tracker*, *Support triage*).
+
+## Minimum board
+
+```yaml
+key: sprint
+name: Sprint
+workflow: engineering
+
+columns:
+  - key: todo
+    name: To do
+    states: [backlog, ready]
+  - key: doing
+    name: In progress
+    states: [in_progress]
+    wip_limit: 3
+  - key: done
+    name: Done
+    states: [done]
+```
+
+Every column maps to *one or more* workflow states. Moving an issue between columns fires a transition; if multiple transitions could apply, the board picks the first declared.
+
+## Swimlanes
+
+Group rows by a field — assignee, priority, label, issue type:
+
+```yaml
+swimlanes:
+  by: assigneeId
+  labels:
+    strategy: name-then-unassigned
+```
+
+Swimlanes are purely visual — they don't affect workflow logic.
+
+## WIP limits
+
+Per-column ceiling. Setting a column's `wip_limit` makes the board surface a warning (and optionally block) when the limit is exceeded. Useful for continuous-flow teams.
+
+```yaml
+columns:
+  - key: doing
+    name: In progress
+    states: [in_progress]
+    wip_limit: 3
+    wip_policy: block   # or 'warn' (default)
+```
+
+## Card templates
+
+Control what each card shows. Pick from a field list, or write a template:
+
+```yaml
+card:
+  template: |
+    {{title}}
+    {{#if priority}}[{{priority}}]{{/if}}
+    {{assigneeName}}
+  badges:
+    - sla_status
+    - issue_type
+```
+
+The built-in `sla_status` badge is green/amber/red; `issue_type` shows the configured icon.
+
+## Filters
+
+Restrict which issues show on a board:
+
+```yaml
+filters:
+  labels: [customer-facing]
+  issueTypes: [bug, feature]
+  assignee: "@me"
+```
+
+Filters are YAML-declared so they live with the board's config, not hidden in each user's browser.
+
+## Fallback columns
+
+If you haven't written a board YAML yet, Kiket auto-generates one from your workflow's states. That's fine for demos; you'll want a real config to use swimlanes, WIP limits, or filters.
+
+## Editing surfaces
+
+The visual board editor lets you drag columns, configure swimlanes, and wire filters without touching YAML. Every save commits to your repo.
+
+## What's next?
+
+<Cards>
+  <Card title="Issue types" href="/docs/build/issue-types" description="Define what kinds of work live on a board." />
+  <Card title="Dashboards" href="/docs/build/dashboards" description="Go beyond boards — metrics, throughput, cycle time." />
+  <Card title="Templates" href="/docs/build/templates" description="Start from a pre-built board matching your industry." />
+</Cards>

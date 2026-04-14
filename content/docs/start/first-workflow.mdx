@@ -1,6 +1,156 @@
 ---
-title: Your first workflow
-description: Build a two-state approval workflow from scratch using the visual editor.
+title: Build your first workflow
+description: Author a contract-review workflow on the visual canvas, step by step, in about 15 minutes.
 ---
 
-> **Stub.** Content coming.
+By the end of this walkthrough you'll have a three-state workflow with an SLA, a two-person approval chain, and an automation that posts to Slack on breach. Every step is doable on the canvas — we'll also show the YAML so you can see what the canvas is writing.
+
+<Callout>
+Prefer YAML-first? The equivalent workflow file is at the bottom of this page. You can paste it into `.kiket/workflows/contract_review.yaml` in your workspace repo and skip the canvas.
+</Callout>
+
+## Goal: a contract-review workflow
+
+You need legal to review every contract, CFO to co-sign anything over $100k, and the team to be paged if review drags past 48 hours.
+
+<Steps>
+
+<Step>
+
+### Open the visual editor
+
+From your project's sidebar, click **Workflows → New workflow**. Enter a key (`contract_review`), a name (`Contract Review`), and click **Create**.
+
+You'll land in the visual editor with an empty canvas and a single **Intake** state pre-dropped.
+
+</Step>
+
+<Step>
+
+### Add the Legal Review state
+
+Click the **+ Add state** button in the toolbar. Name it **Legal Review**. The canvas places it to the right of Intake; drag it wherever you like.
+
+Click the state to open its inspector. In the **Category** dropdown, leave it as *Active*.
+
+</Step>
+
+<Step>
+
+### Connect Intake → Legal Review
+
+Hover Intake; a small arrow appears on its right edge. Drag from the arrow to the Legal Review state. A transition is created. Click the transition itself to name it — `Start review`.
+
+</Step>
+
+<Step>
+
+### Add the SLA
+
+Back in the inspector for Legal Review, scroll to **SLA**. Set:
+
+- **Warning**: `24h` (notify team early)
+- **Breach**: `48h` (escalate to on-call)
+
+Click **Save**. The canvas commits the change; you'll see a small green dot in the top-right for a second.
+
+<Callout title="What just happened?">
+The canvas wrote a YAML edit to `.kiket/workflows/contract_review.yaml` and committed it to your workspace repo with a message like "Update Legal Review SLA". Open the repo on GitHub to see it.
+</Callout>
+
+</Step>
+
+<Step>
+
+### Add the approval chain
+
+Still in the Legal Review inspector, scroll to **Approval**. Click **Add approver**. Pick `counsel` (the counsel group in your org). Add another approver: `cfo`. Leave the type as *Sequential*.
+
+Now *any* transition out of Legal Review requires counsel → CFO sign-off in order.
+
+</Step>
+
+<Step>
+
+### Add the Approved state
+
+Click **+ Add state**. Name it **Approved**. In the inspector, set **Category** to *Final*. Drag a transition from Legal Review to Approved and name it `Approve`.
+
+</Step>
+
+<Step>
+
+### Wire the breach automation
+
+On the Legal Review state, open the inspector's **Automations** tab. Click **Add automation** and pick the trigger `on_sla_breach`. For the action, pick **Send notification** and choose your Slack channel from the dropdown (if you haven't installed Slack yet, do that first — see [Your first extension](/docs/start/first-extension)).
+
+Save. Now when an issue sits in Legal Review past 48h, Slack gets a message.
+
+</Step>
+
+<Step>
+
+### Test it
+
+Click **Simulate** in the top-right. The simulator drops a dummy issue into Intake and walks it through transitions. You'll see:
+
+- Green check when the transition is allowed.
+- Red cross + reason when it's blocked (missing approval, SLA not expired, etc.).
+
+Simulate is read-only; it doesn't create real issues.
+
+</Step>
+
+<Step>
+
+### Ship it
+
+Click **Publish**. The workflow becomes available on the project's boards. Anyone can now create an issue against it.
+
+Your repo's `.kiket/workflows/contract_review.yaml` now contains the result of everything you did on the canvas.
+
+</Step>
+
+</Steps>
+
+## The YAML the canvas wrote
+
+```yaml
+key: contract_review
+name: Contract Review
+states:
+  intake:
+    category: initial
+
+  legal_review:
+    category: active
+    sla:
+      warning: 24h
+      breach: 48h
+    approval:
+      type: sequential
+      chain: [counsel, cfo]
+    on_sla_breach:
+      - notify:
+          channel: slack:#contracts
+
+  approved:
+    category: final
+
+transitions:
+  - from: intake
+    to: legal_review
+    name: Start review
+  - from: legal_review
+    to: approved
+    name: Approve
+    approval_required: true
+```
+
+## What's next?
+
+<Cards>
+  <Card title="Set up a board" href="/docs/build/boards" description="Visualize issues flowing through this workflow as columns." />
+  <Card title="Create an intake form" href="/docs/build/intake-forms" description="Let people submit contract requests without making them issue authors." />
+  <Card title="Add a dashboard" href="/docs/build/dashboards" description="Track how long contracts spend in each state, and where they stall." />
+</Cards>

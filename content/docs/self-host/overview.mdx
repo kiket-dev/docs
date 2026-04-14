@@ -1,6 +1,137 @@
 ---
-title: Self host
-description: Stub — content coming.
+title: Self-host
+description: Run Kiket in your own Kubernetes cluster or air-gapped environment.
 ---
 
-> **Stub.** Content coming.
+Enterprise customers can run Kiket alongside managed SaaS or replace it entirely. Same product, your data, your network, your compliance boundary.
+
+<img src="/diagrams/architecture.svg" alt="Kiket architecture stack — client, API, engine, workspace repo, trust layer" />
+
+## What you get
+
+- The full platform (API, web, workers, scheduler).
+- Every integration extension as an optional deployable.
+- Managed PostgreSQL via [CloudNativePG](https://cloudnative-pg.io/) with pgvector.
+- Valkey/Redis for jobs + sessions.
+- Your choice of blockchain anchor (Polygon, a private Ethereum chain, or skip anchoring).
+- Identity via OAuth (Google/Microsoft/GitHub) or SAML (SCIM on the enterprise roadmap).
+
+## Requirements
+
+- Kubernetes 1.28+ (managed or self-operated)
+- PostgreSQL 16+ (recommended: CloudNativePG inside the cluster)
+- Redis or Valkey 7+
+- Object storage (S3-compatible): attachments, evidence exports, bundled backups
+- Cert-manager + an ACME issuer (Let's Encrypt or a private CA)
+- Ingress controller (we test with NGINX; any will work)
+
+Minimum resources per node:
+
+| Component | CPU | RAM |
+|-----------|-----|-----|
+| API (2 replicas) | 500m | 512Mi |
+| Workers (2 replicas) | 500m | 1Gi |
+| Web (2 replicas) | 200m | 256Mi |
+| PostgreSQL | 2 vCPU | 4Gi |
+| Redis/Valkey | 200m | 512Mi |
+
+A b2-7-class node (Hetzner, OVH, DigitalOcean droplets) handles a team of ~200 users comfortably.
+
+## Deploy flow
+
+<Steps>
+
+<Step>
+
+### Get the Helm chart
+
+Private OCI registry; contact sales for access. The chart ships with a production-grade `values.yaml` covering secrets, ingress, storage, and the blockchain anchor.
+
+</Step>
+
+<Step>
+
+### Provision infra
+
+Kiket ships OpenTofu modules for OVHcloud + AWS + GCP. Each module stands up:
+
+- Managed K8s cluster
+- Object storage bucket
+- DNS records for the app, API, and webhook subdomains
+- TLS certs (via cert-manager)
+
+For air-gapped: bring-your-own cluster; we provide a values-only path.
+
+</Step>
+
+<Step>
+
+### Configure secrets
+
+- JWT signing key (we generate on first boot if unset)
+- Database URL
+- Redis URL
+- Object storage credentials
+- Blockchain anchor private key (or leave blank to skip)
+- SMTP or SendGrid creds for email notifications
+
+Use [SOPS](https://github.com/getsops/sops) or your Kubernetes-native secrets manager. The chart doesn't prescribe one.
+
+</Step>
+
+<Step>
+
+### Run migrations
+
+One-time:
+
+```bash
+helm upgrade kiket ./chart -f values.yaml --set migrate.run=true
+```
+
+The migrate pod runs `drizzle-kit push` against the DB, then exits.
+
+</Step>
+
+<Step>
+
+### Open the app
+
+Visit the app hostname. First-user-wins creates the org; invite your team from there.
+
+</Step>
+
+</Steps>
+
+## Backups
+
+- CloudNativePG continuously streams WAL to object storage (Barman).
+- Point-in-time recovery is default; tested on every release.
+- Optional: periodic evidence-export jobs for long-term regulatory retention.
+
+## Upgrades
+
+Monthly stable releases. Rolling upgrade procedure:
+
+1. `helm upgrade` with the new chart version.
+2. Wait for migrate pod to finish (backward-compatible migrations are the rule).
+3. API rolls; old pods drain 30s gracefully.
+
+Breaking releases ship a version-jump runbook in the release notes — rare.
+
+## Air-gapped mode
+
+- Disable the blockchain anchor (or anchor to a private EVM chain inside your network).
+- Disable outbound extension callbacks if the extensions would cross the boundary.
+- Kiket itself needs no outbound calls to function.
+
+## Cost
+
+On OVHcloud managed Kubernetes with CloudNativePG and a b2-7 node, total cost for ~200 users is typically under €80/month before extension/external-service usage. See the deploy module README for current numbers.
+
+## What's next?
+
+<Cards>
+  <Card title="Compliance" href="/docs/compliance" description="How self-hosting interacts with audit boundaries." />
+  <Card title="API overview" href="/docs/api" description="Same API, your domain." />
+</Cards>

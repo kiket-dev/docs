@@ -1,6 +1,94 @@
 ---
 title: Templates
-description: Stub — content coming.
+description: Start from a proven workflow instead of a blank canvas. 15+ industry templates ship out of the box.
 ---
 
-> **Stub.** Content coming.
+A template is a complete `.kiket/` directory — workflows, boards, issue types, intake forms, dashboards, automations — curated for a specific kind of work. When you start a project *from a template*, Kiket creates a workspace repo pre-populated with all of it. You ship in minutes instead of days.
+
+## The catalog
+
+<Cards>
+  <Card title="Kanban" href="/docs/build/templates/kanban" description="Simple continuous-flow: backlog, ready, in progress, done." />
+  <Card title="Scrum" href="/docs/build/templates/scrum" description="Sprint-based: planning, sprint, retrospective, with velocity tracking." />
+  <Card title="Engineering" href="/docs/build/templates/engineering" description="Bugs, features, tech debt; PR-linked transitions, deployment gates." />
+  <Card title="Support" href="/docs/build/templates/support" description="Ticket triage → L1 → L2 → resolution; SLA-tracked." />
+  <Card title="Sales" href="/docs/build/templates/sales" description="Pipeline stages with value aggregation and probability." />
+  <Card title="Marketing" href="/docs/build/templates/marketing" description="Campaign planning, creative approvals, launch checklists." />
+  <Card title="Marketing ops" href="/docs/build/templates/marketing_ops" description="Attribution, ad approvals, platform change management." />
+  <Card title="Product" href="/docs/build/templates/product" description="Discovery → spec → build → release; PRD attached as document." />
+  <Card title="Legal" href="/docs/build/templates/legal" description="Contract review with counsel + CFO approvals, redline tracking." />
+  <Card title="Finance" href="/docs/build/templates/finance" description="Purchase requests, expense reports, reconciliation." />
+  <Card title="E-commerce" href="/docs/build/templates/ecommerce" description="Order, fulfillment, returns, customer escalations." />
+  <Card title="Release management" href="/docs/build/templates/release-mgmt" description="Change advisory board workflow with regulatory gates." />
+  <Card title="Partners" href="/docs/build/templates/partners" description="Partner onboarding, certification, co-marketing approvals." />
+  <Card title="Business ops" href="/docs/build/templates/business-ops" description="Vendor intake, contract renewals, policy reviews." />
+  <Card title="Scrum" href="/docs/build/templates/scrum" description="Sprint ceremonies with Kiket-tracked velocity and retros." />
+</Cards>
+
+Template pages above are auto-synced from the upstream template repos — the README you see on each page is the one shipped with the template itself.
+
+## Using a template
+
+<Steps>
+
+<Step>
+
+### Pick it at project creation
+
+In the **New project** wizard, click **From template** and browse the gallery. Each card shows a preview of the states, issue types, and integrations the template uses.
+
+</Step>
+
+<Step>
+
+### Review the included workflows
+
+Every template lists the workflows it ships. Most include one primary workflow (e.g. `contract_review`) plus one or two supporting ones (e.g. `amendment`).
+
+</Step>
+
+<Step>
+
+### Create the project
+
+Kiket creates a workspace repo from the template (via GitHub's template-repo API or a simple copy), connects it, and syncs. You land in the primary board, ready to create your first issue.
+
+</Step>
+
+<Step>
+
+### Customize in place
+
+The template is just a starting point. Edit the YAML in your IDE or the canvas in the app — both write to your repo. You're never locked to the upstream template.
+
+</Step>
+
+</Steps>
+
+## Forking vs. copying
+
+Two ways to start from a template:
+
+| Mode | Result | Use when |
+|------|--------|----------|
+| **Copy** (default) | Independent repo, no upstream link | You want full autonomy; the template is a starting point. |
+| **Fork** | Repo forked from the upstream template | You want to pull upstream updates later. Requires the template repo to be a GitHub template. |
+
+Copy is the right choice ~95% of the time.
+
+## Authoring your own template
+
+Any `.kiket/`-containing repo can be a template. To publish:
+
+1. Mark the GitHub repo as a **template repository** (Settings → Template).
+2. Add `metadata.yaml` at the repo root listing preview details (states, integrations, category).
+3. Share the repo URL; anyone can use it via **From GitHub → Template URL**.
+
+To submit to the public catalog, open a PR against `kiket-dev/kiket-templates`.
+
+## What's next?
+
+<Cards>
+  <Card title="Workflows" href="/docs/build/workflows" description="Edit the workflows that come with a template." />
+  <Card title="Issue types" href="/docs/build/issue-types" description="Tune fields and documents for your team." />
+</Cards>

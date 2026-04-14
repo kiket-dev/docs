@@ -2,6 +2,9 @@ import { DocsPage, DocsBody, DocsTitle, DocsDescription } from 'fumadocs-ui/page
 import { notFound } from 'next/navigation';
 import { source } from '@/lib/source';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
+import { Step, Steps } from 'fumadocs-ui/components/steps';
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
 
 interface PageProps {
   params: Promise<{ slug?: string[] }>;
@@ -19,7 +22,7 @@ export default async function Page({ params }: PageProps) {
       <DocsTitle>{page.data.title}</DocsTitle>
       {page.data.description && <DocsDescription>{page.data.description}</DocsDescription>}
       <DocsBody>
-        <MDX components={defaultMdxComponents} />
+        <MDX components={{ ...defaultMdxComponents, Steps, Step, Tabs, Tab, Accordion, Accordions }} />
       </DocsBody>
     </DocsPage>
   );

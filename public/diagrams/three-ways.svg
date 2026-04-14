@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 320" role="img" aria-label="Three ways to work — no-code canvas, low-code YAML, and API all commit to the same git source of truth">
+  <defs>
+    <marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#64748b"/>
+    </marker>
+    <style>
+      .card { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.5; }
+      .card-indigo { fill: #eef2ff; stroke: #818cf8; stroke-width: 1.5; }
+      .card-violet { fill: #f5f3ff; stroke: #a78bfa; stroke-width: 1.5; }
+      .card-fuchsia { fill: #fdf4ff; stroke: #e879f9; stroke-width: 1.5; }
+      .card-emerald { fill: #ecfdf5; stroke: #34d399; stroke-width: 2; }
+      .title { fill: #0f172a; font: 700 14px system-ui, sans-serif; }
+      .subtitle { fill: #475569; font: 400 11px system-ui, sans-serif; }
+      .tag { font: 600 10px system-ui, sans-serif; }
+      .tag-indigo { fill: #4338ca; }
+      .tag-violet { fill: #6d28d9; }
+      .tag-fuchsia { fill: #a21caf; }
+      .tag-emerald { fill: #047857; }
+      .edge { stroke: #64748b; stroke-width: 1.2; stroke-dasharray: 3 3; fill: none; }
+      @media (prefers-color-scheme: dark) {
+        .card { fill: #0f172a; stroke: #334155; }
+        .card-indigo { fill: rgba(99,102,241,0.15); stroke: #818cf8; }
+        .card-violet { fill: rgba(139,92,246,0.15); stroke: #a78bfa; }
+        .card-fuchsia { fill: rgba(217,70,239,0.15); stroke: #e879f9; }
+        .card-emerald { fill: rgba(16,185,129,0.15); stroke: #34d399; }
+        .title { fill: #f1f5f9; }
+        .subtitle { fill: #94a3b8; }
+      }
+    </style>
+  </defs>
+
+  <g>
+    <rect class="card-indigo" x="30" y="30" width="200" height="100" rx="14"/>
+    <text class="tag tag-indigo" x="46" y="52">NO-CODE</text>
+    <text class="title" x="46" y="76">Visual canvas</text>
+    <text class="subtitle" x="46" y="100">PMs and designers drag</text>
+    <text class="subtitle" x="46" y="114">states, draw transitions.</text>
+  </g>
+
+  <g>
+    <rect class="card-violet" x="260" y="30" width="200" height="100" rx="14"/>
+    <text class="tag tag-violet" x="276" y="52">LOW-CODE</text>
+    <text class="title" x="276" y="76">YAML editor</text>
+    <text class="subtitle" x="276" y="100">Ops tune SLAs, webhooks,</text>
+    <text class="subtitle" x="276" y="114">conditions — schema-aware.</text>
+  </g>
+
+  <g>
+    <rect class="card-fuchsia" x="490" y="30" width="200" height="100" rx="14"/>
+    <text class="tag tag-fuchsia" x="506" y="52">ALL-CODE</text>
+    <text class="title" x="506" y="76">API + SDK + CLI</text>
+    <text class="subtitle" x="506" y="100">Engineers drive it from</text>
+    <text class="subtitle" x="506" y="114">their apps and CI.</text>
+  </g>
+
+  <path class="edge" d="M 130 130 L 260 180" marker-end="url(#a2)"/>
+  <path class="edge" d="M 360 130 L 360 180" marker-end="url(#a2)"/>
+  <path class="edge" d="M 590 130 L 460 180" marker-end="url(#a2)"/>
+
+  <g>
+    <rect class="card-emerald" x="260" y="180" width="200" height="60" rx="14"/>
+    <text class="tag tag-emerald" x="276" y="202">SAME SOURCE OF TRUTH</text>
+    <text class="title" x="276" y="226">git + YAML config</text>
+  </g>
+
+  <path class="edge" d="M 360 240 L 360 268" marker-end="url(#a2)"/>
+
+  <g>
+    <rect class="card" x="230" y="268" width="260" height="40" rx="12"/>
+    <text class="title" x="360" y="284" text-anchor="middle">Anchored audit trail</text>
+    <text class="subtitle" x="360" y="300" text-anchor="middle">Every change — regardless of surface — lands on-chain.</text>
+  </g>
+</svg>

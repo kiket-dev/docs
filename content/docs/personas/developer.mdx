@@ -1,0 +1,200 @@
+---
+title: For developers
+description: Drive Kiket from code — API, six SDKs, CLI, MCP, webhooks.
+---
+
+You're integrating Kiket into a larger automation stack. You want client libraries, idempotency, stable types, and the ability to script anything you can do in the UI.
+
+## Your starter path
+
+<Steps>
+
+<Step>
+
+### Create an API token
+
+App → Settings → API tokens → **New token**. Give it a name and the scopes you need:
+
+- `issue:read`, `issue:write`
+- `workflow:read`, `workflow:write`
+- `comment:write`
+- `webhook:manage`
+
+Tokens are shown once. Store in a secrets manager.
+
+</Step>
+
+<Step>
+
+### Install an SDK
+
+<Tabs items={["Node.js", "Python", "Go", "Ruby", "Java", ".NET"]}>
+  <Tab value="Node.js">
+    ```bash
+    npm install @kiket/sdk
+    ```
+    ```ts
+    import { Client } from '@kiket/sdk';
+    const kiket = new Client({ apiKey: process.env.KIKET_API_KEY });
+    ```
+  </Tab>
+  <Tab value="Python">
+    ```bash
+    pip install kiket
+    ```
+    ```python
+    from kiket import Client
+    kiket = Client(api_key=os.environ["KIKET_API_KEY"])
+    ```
+  </Tab>
+  <Tab value="Go">
+    ```bash
+    go get github.com/kiket-dev/kiket-go-sdk
+    ```
+    ```go
+    import "github.com/kiket-dev/kiket-go-sdk"
+    client := kiket.NewClient(os.Getenv("KIKET_API_KEY"))
+    ```
+  </Tab>
+  <Tab value="Ruby">
+    ```bash
+    gem install kiket
+    ```
+    ```ruby
+    require 'kiket'
+    client = Kiket::Client.new(api_key: ENV['KIKET_API_KEY'])
+    ```
+  </Tab>
+  <Tab value="Java">
+    ```xml
+    <dependency>
+      <groupId>dev.kiket</groupId>
+      <artifactId>kiket-sdk</artifactId>
+      <version>1.0.0</version>
+    </dependency>
+    ```
+  </Tab>
+  <Tab value=".NET">
+    ```bash
+    dotnet add package Kiket.Sdk
+    ```
+  </Tab>
+</Tabs>
+
+</Step>
+
+<Step>
+
+### Drive a workflow from code
+
+```ts
+// Create an issue in the contract_review workflow
+const issue = await kiket.issues.create({
+  projectKey: 'LEGAL',
+  issueType: 'contract',
+  title: 'Acme renewal',
+  fields: { counterparty: 'Acme Corp', total_value_usd: 250_000 },
+});
+
+// Transition it
+await kiket.issues.transition(issue.id, 'legal_review');
+
+// Listen for its transitions
+kiket.webhooks.on('issue.transitioned', async (event) => {
+  if (event.issueId === issue.id && event.to === 'approved') {
+    await startBilling(event.fields.counterparty, event.fields.total_value_usd);
+  }
+});
+```
+
+</Step>
+
+<Step>
+
+### Use the CLI for one-offs
+
+```bash
+# Install
+npm install -g @kiket/cli
+
+# Auth
+kiket login
+
+# List issues
+kiket issues list --project LEGAL --state legal_review
+
+# Transition one
+kiket issues transition ISS-42 approved --comment "Green-lit by CFO"
+```
+
+</Step>
+
+<Step>
+
+### Connect AI agents via MCP
+
+Kiket's Model Context Protocol server exposes tool definitions for issue CRUD, workflow lookup, and audit queries. Wire it into Claude, Cursor, or any MCP-aware client:
+
+```json
+{
+  "mcpServers": {
+    "kiket": {
+      "command": "npx",
+      "args": ["@kiket/mcp"],
+      "env": { "KIKET_API_KEY": "..." }
+    }
+  }
+}
+```
+
+</Step>
+
+</Steps>
+
+## Patterns
+
+### Idempotent writes
+
+Every mutating endpoint accepts an `Idempotency-Key` header. Safe to retry transient failures:
+
+```ts
+await kiket.issues.create(
+  { projectKey: 'LEGAL', title: 'Acme renewal', /* … */ },
+  { idempotencyKey: 'acme-renewal-2026-Q1' },
+);
+```
+
+### Pagination
+
+Collection endpoints use cursor pagination:
+
+```ts
+for await (const page of kiket.issues.list({ projectKey: 'LEGAL' })) {
+  for (const issue of page.items) { /* … */ }
+}
+```
+
+### Webhook signing
+
+Outbound webhooks sign requests with HMAC-SHA256. Verify in your receiver:
+
+```ts
+import { verifyWebhook } from '@kiket/sdk/webhooks';
+
+app.post('/kiket-webhook', express.raw({ type: '*/*' }), (req, res) => {
+  if (!verifyWebhook(req.body, req.headers['x-kiket-signature'], WEBHOOK_SECRET)) {
+    return res.sendStatus(403);
+  }
+  const event = JSON.parse(req.body);
+  // …
+});
+```
+
+## Related pages
+
+<Cards>
+  <Card title="REST API" href="/docs/api" description="Full endpoint reference." />
+  <Card title="SDKs" href="/docs/api/sdk/nodejs" description="Language-specific docs." />
+  <Card title="CLI" href="/docs/api/cli" description="Terminal workflow." />
+  <Card title="MCP server" href="/docs/api/mcp" description="AI agent integration." />
+</Cards>

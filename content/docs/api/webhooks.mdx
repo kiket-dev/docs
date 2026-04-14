@@ -1,0 +1,124 @@
+---
+title: Webhooks
+description: Subscribe to events and have Kiket POST to your endpoint with signed payloads.
+---
+
+Webhooks are how Kiket tells your systems about things happening. Register a URL + a list of events; we POST to it whenever those events fire.
+
+## Register a webhook
+
+<Tabs items={["API", "CLI", "UI"]}>
+  <Tab value="API">
+    ```bash
+    curl -X POST https://api.kiket.dev/api/v1/webhooks \
+      -H "Authorization: Bearer $KIKET_API_KEY" \
+      -d '{
+        "url": "https://your-service.example.com/kiket",
+        "events": ["issue.created", "issue.transitioned", "sla.breach"],
+        "secret": "optional-override"
+      }'
+    ```
+  </Tab>
+  <Tab value="CLI">
+    ```bash
+    kiket webhooks create \
+      --url https://your-service.example.com/kiket \
+      --events issue.created,issue.transitioned,sla.breach
+    ```
+  </Tab>
+  <Tab value="UI">
+    App → Settings → Webhooks → **New webhook**. Paste URL, pick events, save. Secret is generated automatically; copy it somewhere safe.
+  </Tab>
+</Tabs>
+
+## Event catalog
+
+| Event | Fires when |
+|-------|------------|
+| `issue.created` | A new issue is created |
+| `issue.updated` | Any field changes |
+| `issue.transitioned` | State changes (includes `from` and `to`) |
+| `issue.assigned` | Assignee changes |
+| `issue.commented` | Comment added |
+| `sla.warning` | Warning threshold crossed |
+| `sla.breach` | Breach threshold crossed |
+| `approval.requested` | Approval chain starts |
+| `approval.granted` / `approval.denied` | Approver responds |
+| `workflow.updated` | Workflow config changes |
+| `ai.suggested` | AI agent produces a suggestion |
+
+## Payload shape
+
+```json
+{
+  "id": "evt_01HGZ...",
+  "type": "issue.transitioned",
+  "createdAt": "2026-04-14T10:00:00Z",
+  "organizationId": "org_01HGZ...",
+  "projectKey": "LEGAL",
+  "data": {
+    "issue": { "id": "ISS-42", "title": "Acme renewal", "...": "..." },
+    "from": "intake",
+    "to": "legal_review",
+    "actor": { "id": "usr_01HGZ...", "email": "pm@acme.com" }
+  }
+}
+```
+
+## Signing
+
+Every request is signed:
+
+```
+X-Kiket-Signature: sha256=<hex>
+X-Kiket-Timestamp: 1729700400
+```
+
+The signature is `HMAC-SHA256(secret, "<timestamp>.<body>")`. Verify before trusting the payload.
+
+<Tabs items={["Node.js", "Python", "Go"]}>
+  <Tab value="Node.js">
+    ```ts
+    import { verifyWebhook } from '@kiket/sdk/webhooks';
+    const ok = verifyWebhook(rawBody, headers['x-kiket-signature'], headers['x-kiket-timestamp'], WEBHOOK_SECRET);
+    ```
+  </Tab>
+  <Tab value="Python">
+    ```python
+    from kiket.webhooks import verify
+    ok = verify(raw_body, headers['X-Kiket-Signature'], headers['X-Kiket-Timestamp'], WEBHOOK_SECRET)
+    ```
+  </Tab>
+  <Tab value="Go">
+    ```go
+    ok := webhooks.Verify(rawBody, headers.Get("X-Kiket-Signature"), headers.Get("X-Kiket-Timestamp"), webhookSecret)
+    ```
+  </Tab>
+</Tabs>
+
+## Retries
+
+- 5xx and timeouts retry with exponential backoff: 30s, 1m, 5m, 30m, 2h, 8h.
+- After 6 attempts, the delivery is marked **failed** and shown in Settings → Webhooks → Deliveries.
+- 4xx (except 429) don't retry — fix your endpoint and redeliver.
+
+## Redelivery
+
+Every delivery has a unique ID. Redeliver from the UI or:
+
+```bash
+curl -X POST https://api.kiket.dev/api/v1/webhooks/deliveries/dlv_.../redeliver \
+  -H "Authorization: Bearer $KIKET_API_KEY"
+```
+
+## Debugging
+
+- Settings → Webhooks → **Deliveries** shows the last 100 attempts with request + response.
+- Use a tool like [webhook.site](https://webhook.site) or [ngrok](https://ngrok.com) to inspect payloads in dev.
+
+## Best practices
+
+- Return `2xx` fast. If you need to do heavy work, queue it and return immediately.
+- Verify the signature on every call.
+- Use the `id` field for idempotency — Kiket may redeliver the same event if your ack is late.
+- Subscribe to specific events, not wildcards, to avoid noise.

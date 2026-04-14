@@ -1,4 +1,4 @@
 {
   "title": "Integrations",
-  "pages": ["overview"]
+  "pages": ["overview", "slack", "teams", "zoom", "twilio", "email", "make-ai", "github", "jira", "google-oauth", "microsoft-oauth", "google-calendar", "microsoft-calendar", "mailjet-inbound", "time-tracking"]
 }

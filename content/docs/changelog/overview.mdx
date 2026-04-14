@@ -1,6 +1,33 @@
 ---
 title: Changelog
-description: Stub — content coming.
+description: Notable releases, ordered newest first. For a fuller commit log, see the public repos.
 ---
 
-> **Stub.** Content coming.
+The headline changelog — what's worth telling the whole team about when a release ships.
+
+<Callout type="info">
+The full commit log is available on the public GitHub repos. This page is the curated, reader-friendly version: if it's here, it affects how you use Kiket.
+</Callout>
+
+## 2026-04-14 — Background job architecture
+
+- **BullMQ workers** for SLA timers, webhook retries, notifications, blockchain anchoring, and Stripe usage sync.
+- **Recurring schedulers** for SLA sweeps, runtime token cleanup, AI insights refresh, capacity snapshots, and monthly invoices.
+- New `/admin/queues` endpoint for ops visibility into queue depth.
+
+## 2026-04-12 — File-backed config + UX consistency overhaul
+
+- Workflows, boards, intakes, automations, dashboards, issue types, and templates **all live as YAML** in your connected git repo.
+- Issue payloads now ship workflow context and SLA status inline — no more workflow-id leaks in the UI.
+- New list pages for intakes, automations, dashboards, templates, and issue types.
+
+## 2026-04-08 — Knowledge Base + Markdown rendering
+
+- Split-pane Knowledge Base with document detail view.
+- Inline Markdown rendering on documents, with link previews.
+
+## Subscribing to updates
+
+- RSS: `https://docs.kiket.dev/changelog.rss` *(coming soon)*.
+- Email digest: opt in from **Settings → Notifications** in the app.
+- GitHub Releases: `kiket-dev/*` repos publish notes on every tagged release.

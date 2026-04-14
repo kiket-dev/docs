@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 180" role="img" aria-label="Audit trail flow — user action, SHA-256 hash, Merkle root on Polygon, auditor verifies">
+  <defs>
+    <marker id="a3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#10b981"/>
+    </marker>
+    <style>
+      .node { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.5; }
+      .node-anchor { fill: #ecfdf5; stroke: #10b981; stroke-width: 2; }
+      .label { fill: #0f172a; font: 600 12px system-ui, sans-serif; }
+      .num { fill: #10b981; font: 700 11px ui-monospace, monospace; }
+      .body { fill: #475569; font: 400 10px system-ui, sans-serif; }
+      .edge { stroke: #10b981; stroke-width: 1.5; fill: none; }
+      @media (prefers-color-scheme: dark) {
+        .node { fill: #0f172a; stroke: #334155; }
+        .node-anchor { fill: rgba(16,185,129,0.15); stroke: #34d399; }
+        .label { fill: #f1f5f9; }
+        .body { fill: #94a3b8; }
+        .num { fill: #34d399; }
+      }
+    </style>
+  </defs>
+
+  <g>
+    <rect class="node" x="20" y="40" width="150" height="90" rx="12"/>
+    <text class="num" x="36" y="64">01</text>
+    <text class="label" x="36" y="84">Action happens</text>
+    <text class="body" x="36" y="102">Approval, transition,</text>
+    <text class="body" x="36" y="116">comment, AI decision.</text>
+  </g>
+
+  <path class="edge" d="M 170 85 L 190 85" marker-end="url(#a3)"/>
+
+  <g>
+    <rect class="node" x="190" y="40" width="150" height="90" rx="12"/>
+    <text class="num" x="206" y="64">02</text>
+    <text class="label" x="206" y="84">Hash computed</text>
+    <text class="body" x="206" y="102">Content + actor + time</text>
+    <text class="body" x="206" y="116">→ deterministic SHA-256.</text>
+  </g>
+
+  <path class="edge" d="M 340 85 L 360 85" marker-end="url(#a3)"/>
+
+  <g>
+    <rect class="node-anchor" x="360" y="40" width="150" height="90" rx="12"/>
+    <text class="num" x="376" y="64">03</text>
+    <text class="label" x="376" y="84">Anchored on-chain</text>
+    <text class="body" x="376" y="102">Batched Merkle root</text>
+    <text class="body" x="376" y="116">submitted to Polygon.</text>
+  </g>
+
+  <path class="edge" d="M 510 85 L 530 85" marker-end="url(#a3)"/>
+
+  <g>
+    <rect class="node" x="530" y="40" width="170" height="90" rx="12"/>
+    <text class="num" x="546" y="64">04</text>
+    <text class="label" x="546" y="84">Auditor verifies</text>
+    <text class="body" x="546" y="102">Recompute hash, check</text>
+    <text class="body" x="546" y="116">chain. No Kiket access.</text>
+  </g>
+</svg>

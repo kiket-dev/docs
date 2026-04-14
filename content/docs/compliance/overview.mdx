@@ -1,6 +1,77 @@
 ---
-title: Compliance
-description: Stub — content coming.
+title: Compliance & audit
+description: What Kiket produces for your auditors, how the blockchain anchor works, and what frameworks we're built for.
 ---
 
-> **Stub.** Content coming.
+Compliance is not a report Kiket generates *about* your work. Compliance is a *side effect* of doing the work: every action that matters gets recorded, hashed, anchored, and exportable in a format your auditor can verify without ever talking to us.
+
+<img src="/diagrams/audit-trail.svg" alt="Action → hash → anchor → auditor verifies" />
+
+## What gets recorded
+
+Every:
+
+- Issue transition (from / to / actor / time / hash)
+- Approval (granted / denied / comment / approver)
+- AI suggestion (inputs / model / reasoning / acceptance)
+- Config change (workflow edits, issue-type changes, new SLAs — via the git repo)
+- Privileged admin action (role change, token creation, webhook registration)
+
+...lands in an append-only **event log** with a cryptographic hash covering the full content.
+
+## How the anchor works
+
+1. Events are hashed individually as they happen (SHA-256 over canonical JSON).
+2. A batch job runs hourly (configurable to real-time for enterprise) and builds a Merkle tree over the batch.
+3. The Merkle root is written in a single transaction to the **Polygon** blockchain (low fees, EVM-compatible, public).
+4. The anchoring transaction ID + Merkle branch are stored alongside the event.
+
+Result: given any event, anyone can verify against Polygon that it existed at or before the block timestamp and hasn't been altered since — without trusting us.
+
+## Frameworks we're built for
+
+<Cards>
+  <Card title="SOC 2" href="/docs/compliance/soc2" description="Evidence collection for CC controls — access review, change management, incident response." />
+  <Card title="HIPAA / HITECH" href="/docs/compliance/hipaa" description="Breach notification workflows, BAA, PHI access logs." />
+  <Card title="SOX" href="/docs/compliance/sox" description="Change management, segregation of duties, immutable approval history." />
+  <Card title="GDPR" href="/docs/compliance/gdpr" description="Article 30 records, DSAR handling, DPA on request." />
+  <Card title="EU AI Act" href="/docs/compliance/eu-ai-act" description="Article 14 human oversight, AI suggestion reasoning logs." />
+  <Card title="21 CFR Part 11" href="/docs/compliance/21-cfr-part-11" description="Electronic signatures, audit trail, closed system records." />
+  <Card title="ISO 27001" href="/docs/compliance/iso-27001" description="Change management, incident response, vendor review." />
+  <Card title="KYC / AML" href="/docs/compliance/kyc-aml" description="Customer review workflows, sanctions checks, escalation." />
+  <Card title="FOIA" href="/docs/compliance/foia" description="Public records request handling with response SLAs." />
+  <Card title="eDiscovery" href="/docs/compliance/ediscovery" description="Preservation holds, search, export packages." />
+</Cards>
+
+<Callout type="info" title="Attestation status">
+"Built for" means the platform implements the controls and produces the artifacts. External attestation (SOC 2 Type II, HIPAA audit, ISO 27001 cert) is separate and published to the **Trust** page when complete. Contact us for current status.
+</Callout>
+
+## Exporting evidence
+
+Settings → Compliance → **Export evidence**:
+
+<Steps>
+
+<Step>### Pick scope — project, date range, workflows, labels.</Step>
+<Step>### Pick framework — SOC 2, HIPAA, etc. Controls are pre-mapped; the export includes which events satisfy which control.</Step>
+<Step>### Pick format — PDF (human-readable), JSON (machine-readable), YAML (config-friendly).</Step>
+<Step>### Download. The file includes event data, Merkle proofs, and a `verify.sh` script your auditor can run against Polygon.</Step>
+
+</Steps>
+
+## Data residency
+
+- Default hosting is EU (OVHcloud, Gravelines).
+- Customer data never leaves the EU on the default plan.
+- Enterprise customers can deploy to their own VPC or on-prem — see **[Self-host](/docs/self-host)**.
+
+## DPA + subprocessors
+
+- Our DPA covers GDPR Article 28.
+- Subprocessor list is public and maintained on the [trust page](https://kiket.dev/security).
+- Customers are notified 30 days before any subprocessor change.
+
+## Responsible disclosure
+
+Found a vulnerability? Email `security@kiket.dev`. We acknowledge within 24 hours and publish postmortems on the public [changelog](/docs/changelog) when fixes ship.

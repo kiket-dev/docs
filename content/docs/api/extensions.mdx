@@ -1,0 +1,156 @@
+---
+title: Build an extension
+description: Ship a webhook-based integration in an afternoon. Signed manifests, declared scopes, audit-logged.
+---
+
+Extensions are how you add functionality to Kiket without forking it. An extension is a small service that receives signed webhooks, does work, and optionally reports results. Every installed extension is visible in an org's Settings → Integrations → Marketplace.
+
+## Anatomy
+
+An extension ships:
+
+- A **manifest** (`extension.yaml`) declaring scopes, events, and actions.
+- A **webhook endpoint** — any language, any host, just an HTTPS URL.
+- An **OAuth authorization flow** (optional) if the extension needs to call a third-party service on the org's behalf.
+
+## Minimum manifest
+
+```yaml
+name: my-extension
+version: 0.1.0
+vendor: acme.com
+description: My custom extension.
+
+scopes:
+  read: [issue, comment]
+  write: [comment]
+
+events:
+  - issue.transitioned
+
+actions:
+  - key: summarize
+    label: Summarize with Claude
+    inputs:
+      - key: prompt_prefix
+        type: text
+        default: "Summarize this issue for an executive:"
+```
+
+## The webhook contract
+
+<Steps>
+
+<Step>
+
+### Kiket POSTs to your endpoint
+
+```http
+POST https://your-extension.example.com/kiket
+X-Kiket-Signature: sha256=<hex>
+X-Kiket-Timestamp: 1729700400
+Content-Type: application/json
+
+{
+  "id": "evt_...",
+  "type": "issue.transitioned",
+  "data": { "issue": { ... }, "from": "intake", "to": "review" }
+}
+```
+
+</Step>
+
+<Step>
+
+### You verify the signature
+
+HMAC-SHA256 over `<timestamp>.<body>` with your extension's shared secret.
+
+</Step>
+
+<Step>
+
+### Do your work
+
+Call an external API, run an LLM, update a database — whatever your extension does.
+
+</Step>
+
+<Step>
+
+### Respond
+
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "actions": [
+    { "kind": "add_comment", "body": "Summary: Acme wants to renew for $250k." }
+  ]
+}
+```
+
+Your response can include zero or more **action directives**. Kiket performs them as the extension's scoped actor — audit-logged, of course.
+
+</Step>
+
+</Steps>
+
+## Action directives
+
+| Kind | Effect |
+|------|--------|
+| `add_comment` | Post a comment |
+| `set_field` | Set an issue field |
+| `transition` | Move the issue to another state (requires `write: workflow`) |
+| `assign` | Set the assignee |
+| `notify` | Send a notification (within declared channels) |
+
+## Testing locally
+
+Use [ngrok](https://ngrok.com) or [Cloudflare Tunnel](https://www.cloudflare.com/products/tunnel/) to expose localhost to Kiket:
+
+```bash
+ngrok http 3000
+# Copy the https://<random>.ngrok-free.app URL into your extension's webhook config.
+```
+
+## Publishing
+
+Two options:
+
+<Tabs items={["Private", "Public"]}>
+  <Tab value="Private">
+    Your extension is installable only from your org's private marketplace. Perfect for internal-only tools.
+
+    1. Push the extension source + manifest to a repo (any git host).
+    2. In Kiket, Settings → Integrations → **Add custom extension** → paste the manifest URL.
+    3. Done — your org's admins can install it from the marketplace.
+  </Tab>
+  <Tab value="Public">
+    Your extension is listed in the public Kiket marketplace for every org to install.
+
+    1. Open a PR against `kiket-dev/kiket-marketplace`.
+    2. Reviewers check the manifest, run the conformance test suite, and merge.
+    3. Within 24 hours the extension is live for everyone.
+  </Tab>
+</Tabs>
+
+## Scoped calls back to Kiket
+
+Extensions get a narrow API token on install, scoped to the events they subscribed to. Use it to call our API when a webhook response isn't enough:
+
+```ts
+const kiket = new Client({ apiKey: process.env.EXTENSION_API_KEY });
+const issues = await kiket.issues.list({ projectKey: 'LEGAL' });
+```
+
+The token respects the scopes declared in the manifest — scope creep requires a new install.
+
+## What's next?
+
+<Cards>
+  <Card title="Webhooks" href="/docs/api/webhooks" description="Signing + retry behavior — shared with extensions." />
+  <Card title="REST API" href="/docs/api" description="Everything you can call back to." />
+</Cards>

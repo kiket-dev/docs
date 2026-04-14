@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 260" role="img" aria-label="Workflow lifecycle — intake flows through legal review, approval, anchoring, and ends at audit">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#6366f1"/>
+    </marker>
+    <style>
+      .box { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.5; }
+      .box-active { fill: #eef2ff; stroke: #6366f1; stroke-width: 2; }
+      .box-final { fill: #ecfdf5; stroke: #10b981; stroke-width: 2; }
+      .label { fill: #0f172a; font: 600 13px system-ui, sans-serif; }
+      .meta { fill: #64748b; font: 400 10px system-ui, sans-serif; }
+      .edge { stroke: #6366f1; stroke-width: 1.5; stroke-dasharray: 4 4; fill: none; }
+      .sla-badge { fill: #fef3c7; stroke: #f59e0b; stroke-width: 1; }
+      .sla-text { fill: #b45309; font: 600 10px system-ui, sans-serif; }
+      @media (prefers-color-scheme: dark) {
+        .box { fill: #0f172a; stroke: #334155; }
+        .box-active { fill: rgba(99,102,241,0.15); stroke: #818cf8; }
+        .box-final { fill: rgba(16,185,129,0.15); stroke: #34d399; }
+        .label { fill: #f1f5f9; }
+        .meta { fill: #94a3b8; }
+      }
+    </style>
+  </defs>
+
+  <g>
+    <rect class="box" x="20" y="100" width="120" height="52" rx="10"/>
+    <text class="label" x="80" y="126" text-anchor="middle">Intake</text>
+    <text class="meta" x="80" y="142" text-anchor="middle">initial</text>
+  </g>
+
+  <path class="edge" d="M 140 126 L 180 126" marker-end="url(#arr)"/>
+
+  <g>
+    <rect class="sla-badge" x="196" y="78" width="68" height="18" rx="9"/>
+    <text class="sla-text" x="230" y="91" text-anchor="middle">SLA 48h</text>
+    <rect class="box-active" x="180" y="100" width="120" height="52" rx="10"/>
+    <text class="label" x="240" y="126" text-anchor="middle">Legal review</text>
+    <text class="meta" x="240" y="142" text-anchor="middle">active · approvals</text>
+  </g>
+
+  <path class="edge" d="M 300 126 L 340 126" marker-end="url(#arr)"/>
+
+  <g>
+    <rect class="box" x="340" y="100" width="120" height="52" rx="10"/>
+    <text class="label" x="400" y="126" text-anchor="middle">Approval</text>
+    <text class="meta" x="400" y="142" text-anchor="middle">active · chain</text>
+  </g>
+
+  <path class="edge" d="M 460 126 L 500 126" marker-end="url(#arr)"/>
+
+  <g>
+    <rect class="box" x="500" y="100" width="120" height="52" rx="10"/>
+    <text class="label" x="560" y="126" text-anchor="middle">Anchor</text>
+    <text class="meta" x="560" y="142" text-anchor="middle">on-chain write</text>
+  </g>
+
+  <path class="edge" d="M 620 126 L 660 126" marker-end="url(#arr)"/>
+
+  <g>
+    <rect class="box-final" x="590" y="180" width="120" height="52" rx="10"/>
+    <text class="label" x="650" y="206" text-anchor="middle">Audit</text>
+    <text class="meta" x="650" y="222" text-anchor="middle">final</text>
+  </g>
+
+  <path class="edge" d="M 560 152 L 560 200 L 590 200" marker-end="url(#arr)"/>
+
+  <text class="meta" x="360" y="30" text-anchor="middle" font-weight="600">Every transition emits an event hashed and anchored on-chain.</text>
+</svg>

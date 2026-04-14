@@ -1,6 +1,116 @@
 ---
 title: Issue types
-description: Stub — content coming.
+description: The kinds of work a project supports — fields, documents, icons, parent/child rules.
 ---
 
-> **Stub.** Content coming.
+An **issue type** is the shape of a piece of work. A bug looks different from a contract looks different from a change request — different fields, different required attachments, different child-issue rules. Issue types live in `.kiket/issue_types.yaml` and a project can declare as many as it needs.
+
+## File location
+
+`.kiket/issue_types.yaml` — one file per project, all types listed together.
+
+## Minimum file
+
+```yaml
+types:
+  task:
+    label: Task
+    icon: circle
+    color: slate
+
+  bug:
+    label: Bug
+    icon: bug
+    color: rose
+
+  feature:
+    label: Feature
+    icon: sparkles
+    color: indigo
+```
+
+Three buttons in the "New issue" dialog, each producing a differently-tinted card.
+
+## Custom fields
+
+Each type can declare additional fields beyond the standard ones (title, description, assignee, priority, labels, due date):
+
+```yaml
+types:
+  contract:
+    label: Contract
+    icon: file-signature
+    fields:
+      - key: counterparty
+        label: Counterparty
+        type: text
+        required: true
+      - key: total_value_usd
+        label: Total value (USD)
+        type: number
+      - key: start_date
+        label: Start date
+        type: date
+      - key: contract_type
+        label: Type
+        type: select
+        options: [msa, sow, nda, other]
+```
+
+Field types match those in [intake forms](/docs/build/intake-forms#field-types).
+
+## Required documents
+
+Some issue types need specific attachments before certain transitions:
+
+```yaml
+types:
+  contract:
+    documents:
+      - key: draft_contract
+        label: Draft contract PDF
+        required: true
+        accept: application/pdf
+      - key: signed_nda
+        label: Signed NDA
+        required: false
+        accept: application/pdf
+```
+
+`required: true` *declares* what's expected; whether a transition is *blocked* by missing documents is set per state in the workflow (`required_documents: [draft_contract]`).
+
+## Parent / child rules
+
+Issues can have parent/child relationships (epics → stories, contracts → amendments):
+
+```yaml
+types:
+  epic:
+    allow_children: true
+    child_types: [story, task]
+
+  story:
+    parent_types: [epic]
+    allow_children: true
+    child_types: [task]
+
+  task:
+    parent_types: [epic, story]
+```
+
+The API refuses to create a parent/child pair that violates the declared rules.
+
+## Icon + color
+
+Icons reference the [Lucide library](https://lucide.dev). Colors are one of our tone names (slate, indigo, violet, fuchsia, emerald, amber, rose, cyan) — the card border and icon badge pick them up.
+
+## Editing surfaces
+
+The **Issue types** page in settings is a visual editor over this file. Every change commits immediately.
+
+## What's next?
+
+<Cards>
+  <Card title="Workflows" href="/docs/build/workflows" description="Wire document requirements into state transitions." />
+  <Card title="Intake forms" href="/docs/build/intake-forms" description="Let non-members submit issues of a given type." />
+</Cards>

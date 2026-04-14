@@ -1,4 +1,4 @@
 {
   "title": "API & SDKs",
-  "pages": ["overview", "cli", "sdk"]
+  "pages": ["overview", "sdk", "cli", "mcp", "webhooks", "extensions"]
 }

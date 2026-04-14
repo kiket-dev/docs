@@ -1,16 +1,33 @@
 ---
 title: Kiket documentation
-description: The compliance-first workflow automation platform, explained.
+description: Ship compliance-ready workflow automation — visual, YAML, or code.
 ---
 
-Welcome. This site documents **Kiket 2.0** — the platform, its APIs, its extensions, and the operational guides you'll need to run it.
+Kiket runs approval-driven workflows across your tools and produces an audit trail as a *side effect* of doing the work. Designers work on a canvas, ops tune YAML, engineers drive the API — all three edit the same file-backed source of truth.
 
-## Where to start
+<Cards>
+  <Card title="Start here" href="/docs/start/quickstart" description="Set up your first workspace, activate a template, ship your first workflow — 10 minutes." />
+  <Card title="Three ways to work" href="/docs/personas" description="No-code canvas, low-code YAML, all-code API. Same platform, different on-ramps." />
+  <Card title="Build" href="/docs/build/workflows" description="Workflows, boards, intakes, automations, dashboards, issue types — every concept explained." />
+  <Card title="API & SDKs" href="/docs/api" description="REST reference, six language SDKs, CLI, MCP server, webhooks." />
+  <Card title="Integrations" href="/docs/integrations" description="Slack, Teams, GitHub, Jira, Zoom, and more — plug in once, use everywhere." />
+  <Card title="Compliance" href="/docs/compliance" description="SOC 2, HIPAA, GDPR, blockchain anchor, data export — what's ready and how to prove it." />
+</Cards>
 
-- New to Kiket? Read **[Core concepts](/docs/start/core-concepts)** and walk through the **[Quickstart](/docs/start/quickstart)**.
-- Shipping an integration? Jump straight to **[API & SDKs](/docs/api)** or **[Integrations](/docs/integrations)**.
-- Evaluating for a regulated deployment? **[Compliance](/docs/compliance)** and **[Self-host & operate](/docs/self-host)** cover the constraints.
+## What is Kiket, in one diagram?
 
-## What's new
+<img src="/diagrams/architecture.svg" alt="Kiket architecture: client surfaces on top, API, engine, workspace git repo, trust layer" />
 
-The **[changelog](/docs/changelog)** tracks every notable release, oldest to newest.
+## Pick your path
+
+<Tabs items={["I want to evaluate", "I want to build", "I want to integrate"]}>
+  <Tab value="I want to evaluate">
+    Start with the **[Quickstart](/docs/start/quickstart)** to see a live workflow in 10 minutes. Then read **[Core concepts](/docs/start/core-concepts)** and **[Compliance](/docs/compliance)** to check fit.
+  </Tab>
+  <Tab value="I want to build">
+    Follow the **[Build your first workflow](/docs/start/first-workflow)** walkthrough, then browse the **[Build](/docs/build/workflows)** section for each primitive. The **[Templates](/docs/build/templates)** page is the fastest shortcut for standard processes.
+  </Tab>
+  <Tab value="I want to integrate">
+    Jump to **[API & SDKs](/docs/api)** for language-specific quickstarts, or install an **[Integration](/docs/integrations)** and let webhooks do the work. Build a custom one with **[Your first extension](/docs/start/first-extension)**.
+  </Tab>
+</Tabs>

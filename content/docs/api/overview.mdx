@@ -1,6 +1,117 @@
 ---
-title: Api
-description: Stub — content coming.
+title: API & SDKs
+description: Drive Kiket from code — REST, six language SDKs, CLI, MCP, webhooks.
 ---
 
-> **Stub.** Content coming.
+Everything the web app can do is an API call. The API is the single interface; every other surface (SDKs, CLI, MCP) is a thin wrapper over it.
+
+## Base URL
+
+```
+https://api.kiket.dev/api/v1
+```
+
+Self-hosted deployments use their own domain.
+
+## Auth
+
+Two kinds of credentials:
+
+- **Access token** (short-lived, refresh-based) — what the web app and mobile clients use.
+- **API token** (long-lived, scoped) — what SDKs, CLI, and webhook receivers use.
+
+Create an API token in **Settings → API tokens**. Pass it as a Bearer header:
+
+```bash
+curl -H "Authorization: Bearer $KIKET_API_KEY" https://api.kiket.dev/api/v1/issues
+```
+
+## Shape
+
+- **REST**, resource-oriented, JSON bodies.
+- **Versioned** in the URL (`/api/v1`).
+- **Cursor paginated** on collections (`?cursor=<opaque>&limit=50`).
+- **Idempotent** on writes via `Idempotency-Key` header.
+- **RFC 7807** error bodies (`{ "type": "...", "title": "...", "status": 422 }`).
+
+## Live reference
+
+An OpenAPI spec lives at **[api.kiket.dev/api/v1/docs](https://api.kiket.dev/api/v1/docs)** (Swagger UI) and **[`openapi.json`](https://api.kiket.dev/api/v1/openapi.json)** (raw). Most SDK users won't need it — the language bindings mirror it closely.
+
+## Ways to drive the API
+
+<Cards>
+  <Card title="SDKs" description="Six official client libraries: Node.js, Python, Ruby, Java, .NET, Go. Fluent types, auto-retry, idempotency helpers." />
+  <Card title="CLI" href="/docs/api/cli" description="Terminal tooling for one-offs, scripting, and CI pipelines." />
+  <Card title="MCP server" href="/docs/api/mcp" description="Model Context Protocol adapter — wire Kiket into Claude, Cursor, any MCP-aware agent." />
+  <Card title="Webhooks" href="/docs/api/webhooks" description="Subscribe to events and let Kiket call your endpoint." />
+</Cards>
+
+## SDKs
+
+<Cards>
+  <Card title="Node.js" href="/docs/api/sdk/nodejs" description="TypeScript-first, Promise-based." />
+  <Card title="Python" href="/docs/api/sdk/python" description="Sync + asyncio." />
+  <Card title="Go" href="/docs/api/sdk/go" description="Idiomatic, zero-dep." />
+  <Card title="Ruby" href="/docs/api/sdk/ruby" description="Rails-friendly." />
+  <Card title="Java" href="/docs/api/sdk/java" description="Java 17+, Maven." />
+  <Card title=".NET" href="/docs/api/sdk/dotnet" description=".NET 8+, NuGet." />
+</Cards>
+
+## Rate limits
+
+- Default: **1,200 requests/min** per API token.
+- Bulk endpoints have separate, lower caps.
+- `X-RateLimit-Remaining` and `X-RateLimit-Reset` headers on every response.
+- `429` with `Retry-After` when you exceed.
+
+Enterprise plans can raise limits; contact us.
+
+## Webhook security
+
+Outbound webhooks sign requests with HMAC-SHA256. The signature header is `X-Kiket-Signature`; the shared secret is in your webhook settings. Always verify before acting — SDK helpers do this for you.
+
+## Common tasks
+
+<Accordions>
+<Accordion title="Create an issue">
+```bash
+curl -X POST https://api.kiket.dev/api/v1/issues \
+  -H "Authorization: Bearer $KIKET_API_KEY" \
+  -H "Content-Type: application/json" \
+  -H "Idempotency-Key: create-ACME-2026-Q1" \
+  -d '{
+    "projectKey": "LEGAL",
+    "issueType": "contract",
+    "title": "Acme renewal",
+    "fields": { "total_value_usd": 250000 }
+  }'
+```
+</Accordion>
+
+<Accordion title="Transition an issue">
+```bash
+curl -X POST https://api.kiket.dev/api/v1/issues/ISS-42/transitions \
+  -H "Authorization: Bearer $KIKET_API_KEY" \
+  -d '{ "to": "legal_review", "comment": "Contract pinned" }'
+```
+</Accordion>
+
+<Accordion title="Query issues">
+```bash
+curl "https://api.kiket.dev/api/v1/issues?projectKey=LEGAL&state=legal_review&limit=50" \
+  -H "Authorization: Bearer $KIKET_API_KEY"
+```
+</Accordion>
+
+<Accordion title="Subscribe to webhooks">
+```bash
+curl -X POST https://api.kiket.dev/api/v1/webhooks \
+  -H "Authorization: Bearer $KIKET_API_KEY" \
+  -d '{
+    "url": "https://your-service.example.com/kiket",
+    "events": ["issue.created", "issue.transitioned", "sla.breach"]
+  }'
+```
+</Accordion>
+</Accordions>

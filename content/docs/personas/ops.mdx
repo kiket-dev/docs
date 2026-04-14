@@ -1,0 +1,127 @@
+---
+title: For ops engineers
+description: The low-code path — YAML in your editor, schema-aware autocomplete, per-state tuning.
+---
+
+You're comfortable with a terminal and a text editor. You want to tune thresholds, wire webhooks, and maintain config the same way you maintain everything else — in git, with diffs, with code review. Kiket is designed around your workflow.
+
+## Your starter path
+
+<Steps>
+
+<Step>
+
+### Clone your workspace repo
+
+Every Kiket project is backed by a GitHub repo. When your PM creates the project, they connect it to a repo — clone it locally:
+
+```bash
+git clone git@github.com:your-org/your-workspace.git
+cd your-workspace
+ls .kiket/
+# workflows/  boards/  intakes/  automations/  dashboards/  issue_types.yaml
+```
+
+</Step>
+
+<Step>
+
+### Point your editor at our JSON Schema
+
+In VS Code's `settings.json`:
+
+```json
+{
+  "yaml.schemas": {
+    "https://schemas.kiket.dev/workflow.json": ".kiket/workflows/*.yaml",
+    "https://schemas.kiket.dev/board.json":     ".kiket/boards/*.yaml",
+    "https://schemas.kiket.dev/intake.json":    ".kiket/intakes/*.yaml",
+    "https://schemas.kiket.dev/automation.json":".kiket/automations/*.yaml",
+    "https://schemas.kiket.dev/dashboard.json": ".kiket/dashboards/*.yaml"
+  }
+}
+```
+
+IntelliJ/JetBrains: add the same schemas via *Settings → Languages & Frameworks → Schemas and DTDs → JSON Schema Mappings*.
+
+Now every Kiket YAML file gets autocomplete, inline docs, and validation as you type.
+
+</Step>
+
+<Step>
+
+### Edit + commit + push
+
+```bash
+vim .kiket/workflows/contract_review.yaml
+git add -p
+git commit -m "Tighten legal-review SLA to 24h warn / 48h breach"
+git push
+```
+
+A push triggers the project's webhook; the app syncs within seconds.
+
+</Step>
+
+<Step>
+
+### Use sync mode to control cadence
+
+In the app, Settings → Repositories → [repo]. Three sync modes:
+
+- **Webhook** (default) — real-time. Requires the GitHub webhook is installed (the connect flow sets it automatically).
+- **Scheduled** — poll every N minutes. Use when webhooks aren't reachable from your network.
+- **Manual** — only syncs when someone hits the Refresh button.
+
+</Step>
+
+</Steps>
+
+## Powerful low-code patterns
+
+### Conditional approvals
+
+```yaml
+approval:
+  type: sequential
+  chain: [counsel, cfo]
+  conditional:
+    cfo: { when: "total_value_usd > 100000" }
+```
+
+### Cross-workflow automation
+
+```yaml
+trigger:
+  event: issue.transitioned
+  when: "to == 'approved' && workflow == 'contract_review'"
+actions:
+  - create_issue:
+      workflow: billing_setup
+      title: "Invoice setup for {{fields.counterparty}}"
+```
+
+### Cron scheduled jobs
+
+```yaml
+trigger:
+  event: schedule.cron
+  cron: "0 9 * * MON"
+actions:
+  - webhook:
+      url: https://hooks.example.com/weekly-digest
+      body: "{{ query('sla.breached == true') | json }}"
+```
+
+## You won't touch
+
+- The visual canvas, most days. It's there when you want it; everything you do in YAML shows up on it.
+- Git for the actual project content. Workspace = config only. Issues, comments, time entries live in the DB.
+
+## Related pages
+
+<Cards>
+  <Card title="Workflow reference" href="/docs/build/workflows" description="Every field the engine understands." />
+  <Card title="Automations" href="/docs/build/automations" description="Trigger + action catalog." />
+  <Card title="CLI" href="/docs/api/cli" description="Kiket commands from the terminal." />
+</Cards>

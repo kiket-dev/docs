@@ -1,6 +1,101 @@
 ---
 title: Dashboards
-description: Stub — content coming.
+description: Charts, metrics, and widgets answering "how is work flowing?" — declared in YAML, live-updated.
 ---
 
-> **Stub.** Content coming.
+Dashboards go beyond boards by showing *aggregate* views — throughput, cycle time, SLA breach rate, approval bottlenecks, workload by assignee. Like every other config primitive, they're YAML files in your repo.
+
+## File location
+
+`.kiket/dashboards/*.yaml`. One file per dashboard. Addressable at `/dashboards/<key>` in the app.
+
+## Minimum dashboard
+
+```yaml
+key: team-health
+name: Team health
+
+widgets:
+  - kind: stat
+    title: Open issues
+    query: "state_category == 'active'"
+
+  - kind: line-chart
+    title: Throughput (last 30 days)
+    metric: issues.completed
+    group_by: day
+
+  - kind: bar-chart
+    title: Average cycle time by type
+    metric: cycle_time.p50
+    group_by: issueType
+```
+
+## Widget kinds
+
+| Kind | Shows |
+|------|-------|
+| `stat` | Single number (count, p50, sum) |
+| `line-chart` | Time series |
+| `bar-chart` | Grouped counts |
+| `pie-chart` | Share breakdown |
+| `heatmap` | Calendar heatmap (days × assignees) |
+| `table` | Tabular rows with sortable columns |
+| `issue-list` | Filtered list of issues |
+| `sla-stoplight` | Green/amber/red across workflows |
+| `approval-queue` | Who owes an approval right now |
+
+## Metrics
+
+Built-in metrics:
+
+- `issues.created` / `issues.completed`
+- `cycle_time.mean|p50|p95` — time in active states
+- `lead_time.mean|p50|p95` — time from creation to completion
+- `sla.breach_rate`
+- `approvals.pending_count` / `approvals.latency.mean`
+- `ai.suggestion_acceptance_rate`
+
+Custom metrics:
+
+```yaml
+widgets:
+  - kind: stat
+    title: Contract value this quarter
+    query: 'workflow == "contract_review" && completed_at >= start_of_quarter'
+    aggregate: sum(fields.total_value_usd)
+```
+
+## Filters
+
+Global dashboard filters are surfaced as dropdowns at the top:
+
+```yaml
+filters:
+  - kind: date-range
+    default: last_30_days
+  - kind: workflow
+  - kind: assignee
+```
+
+Every widget respects the active filters.
+
+## Sharing
+
+Dashboards can be made **public** with a password or a signed URL — for exec reviews without giving stakeholders full app access:
+
+```yaml
+sharing:
+  mode: public
+  password: "***"
+  allow_export: true
+```
+
+Public dashboards are read-only and have no sidebar.
+
+## What's next?
+
+<Cards>
+  <Card title="Boards" href="/docs/build/boards" description="Per-workflow operational views." />
+  <Card title="Issue types" href="/docs/build/issue-types" description="Define the fields you can aggregate on." />
+</Cards>

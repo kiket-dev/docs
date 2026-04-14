@@ -1,6 +1,124 @@
 ---
 title: Automations
-description: Stub — content coming.
+description: Fire actions on workflow events — notifications, webhooks, AI calls, escalations.
 ---
 
-> **Stub.** Content coming.
+Automations are **triggers** + **actions**. When something happens (state change, SLA breach, comment added, AI decision), run one or more actions. Every automation is declared in YAML and lives with the workflow it belongs to.
+
+## Where automations live
+
+Two places:
+
+1. **Inside a workflow file** (`.kiket/workflows/*.yaml`), scoped to one state:
+
+```yaml
+states:
+  legal_review:
+    on_enter:
+      - notify: { channel: slack:#contracts }
+      - ai_analyze: { agent: legal.risk_scorer }
+    on_sla_breach:
+      - escalate: { to: oncall }
+```
+
+2. **As a standalone automation file** (`.kiket/automations/*.yaml`), scoped to a project:
+
+```yaml
+key: notify-on-high-priority
+name: Notify on high-priority issues
+trigger:
+  event: issue.created
+  when: "priority == 'high'"
+actions:
+  - notify: { channel: slack:#urgent }
+  - assign: { to: "@oncall" }
+```
+
+Use in-workflow for state-specific actions (on-enter, on-breach). Use standalone for cross-workflow patterns ("notify on anything with `security` label, anywhere").
+
+## Triggers
+
+| Event | Fires when |
+|-------|------------|
+| `issue.created` | An issue is created (via UI, intake form, or API) |
+| `issue.updated` | Any field change |
+| `issue.transitioned` | State change (with `from` / `to` attributes) |
+| `issue.commented` | Comment added |
+| `issue.assigned` | Assignee changes |
+| `sla.warning` | SLA warning threshold crossed |
+| `sla.breach` | SLA breach threshold crossed |
+| `approval.requested` | Approval chain started |
+| `approval.granted` / `approval.denied` | Approver responded |
+| `schedule.cron` | Cron expression fires (`0 9 * * *` etc.) |
+
+Every trigger supports a `when:` predicate, evaluated against the event payload. Predicates are JMESPath-lite; they're sandboxed and don't execute arbitrary code.
+
+## Actions
+
+Built-in actions:
+
+- `notify` — send a notification (in-app, email, or via an extension like Slack).
+- `webhook` — POST to an arbitrary URL with the event payload.
+- `transition` — move the issue to another state.
+- `assign` — set the assignee.
+- `set_field` — mutate a field.
+- `add_comment` — post a comment as a system user.
+- `escalate` — page the on-call rotation.
+- `ai_analyze` — call an AI agent; the result attaches as a comment with reasoning.
+- `create_issue` — create a related issue in another workflow.
+
+Custom actions come from installed extensions (Slack, Teams, Twilio, etc.). Each extension declares which actions it exposes.
+
+## Examples
+
+### Re-assign based on a field
+
+```yaml
+trigger:
+  event: issue.created
+  when: "fields.team == 'security'"
+actions:
+  - assign: { to: "@security-oncall" }
+```
+
+### Auto-escalate overdue contracts
+
+```yaml
+trigger: { event: sla.breach }
+actions:
+  - notify: { channel: slack:#contracts-escalations }
+  - set_field: { priority: critical }
+```
+
+### Weekly summary
+
+```yaml
+trigger:
+  event: schedule.cron
+  cron: "0 9 * * MON"
+actions:
+  - webhook:
+      url: https://hooks.example.com/kiket-weekly
+      body: |
+        {
+          "stuck_issues": {{ query("state == 'in_review' && sla.breached") }}
+        }
+```
+
+## Safety rails
+
+- **Rate-limited per action type** (configurable per org; default 60/minute per action).
+- **Idempotent retries** for transient failures (webhook, AI calls).
+- **Audit log entry** for every automation run, with input, output, and duration.
+- **No arbitrary code execution** — predicates and templates are sandboxed.
+
+## Editing surfaces
+
+The workflow visual editor has an **Automations** tab on every state's inspector. The standalone `.kiket/automations/*.yaml` files are edited in the project editor or your IDE.
+
+## What's next?
+
+<Cards>
+  <Card title="Workflows" href="/docs/build/workflows" description="In-workflow automations (on_enter, on_sla_breach, etc.)." />
+  <Card title="Integrations" href="/docs/integrations" description="Each installed extension exposes new actions." />
+</Cards>

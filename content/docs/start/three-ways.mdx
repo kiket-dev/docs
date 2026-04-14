@@ -1,0 +1,79 @@
+---
+title: Three ways to work
+description: Kiket meets your team where they are — no-code canvas, low-code YAML, all-code API. All three edit the same source of truth.
+---
+
+A product manager drags states on a canvas. An ops engineer tweaks SLAs in a YAML file. A platform engineer drives workflows from Python in a CI pipeline. All three actions produce the same commit, the same audit entry, the same result. No feature lives behind a skill paywall.
+
+<img src="/diagrams/three-ways.svg" alt="No-code canvas, low-code YAML, all-code API all converge on the same git config and audit trail" />
+
+## No-code — the visual canvas
+
+Drag states, draw transitions, pick approvers from a dropdown. No syntax, no indentation, no commits to think about.
+
+**Best for**: product managers, designers, compliance officers, solution architects.
+
+**Trade-off**: some advanced patterns (nested conditions, custom automation hooks) fall out of range. The canvas *shows* every field the engine understands, but a power user will hit a ceiling around ~40 states.
+
+Start at **[Build your first workflow](/docs/start/first-workflow)** to learn the canvas.
+
+## Low-code — YAML in your editor
+
+Edit workflow definitions directly. Fully schema-aware (our JSON Schema ships in every release; VS Code and IntelliJ autocomplete, validate, and tooltip everything).
+
+**Best for**: ops engineers, SREs, anyone comfortable with a terminal but not interested in writing application code.
+
+**Trade-off**: your workspace repo is a real git repo. If your team doesn't already work in git, the ceremony (pull/commit/push) can feel heavy. The visual canvas is usually a better starting point even if you eventually migrate to YAML.
+
+Example workflow:
+
+```yaml
+key: contract_review
+states:
+  intake:
+    category: initial
+  legal_review:
+    sla: { warning: 48h, breach: 5d }
+    approval: { chain: [counsel, cfo] }
+  approved:
+    category: final
+transitions:
+  - from: intake
+    to: legal_review
+    name: Start review
+  - from: legal_review
+    to: approved
+    name: Approve
+    approval_required: true
+```
+
+## All-code — the API, SDKs, CLI
+
+Drive Kiket from your own application. Six SDKs, a CLI, a REST API, an MCP server for AI agents, and webhooks for everything else.
+
+**Best for**: platform teams, AI-engineer pairings, anything where Kiket is one integration in a broader automation stack.
+
+**Trade-off**: you write code. The upside: you can embed Kiket workflows inside arbitrary orchestration logic (your CI/CD, your data pipeline, your incident automation).
+
+```python
+from kiket import Client
+
+kiket = Client(api_key=os.environ["KIKET_API_KEY"])
+issue = kiket.issues.create(
+    project_key="LEGAL",
+    issue_type="contract",
+    title="Acme renewal",
+    fields={"total_value_usd": 250_000},
+)
+kiket.issues.transition(issue.id, "legal_review")
+```
+
+Start with **[API & SDKs](/docs/api)**.
+
+## They are the same platform
+
+The canvas writes YAML. The YAML produces the same runtime the SDKs talk to. The SDKs read the same audit events the canvas shows. There's one source of truth — the git-backed YAML config — and every surface is a thin editor on top.
+
+<Callout title="Switching surfaces is always free">
+Start in the canvas. When a YAML edit would be faster, open the file in your editor. When you need to drive it from a script, reach for the SDK. You never need to migrate — every issue, workflow, and audit entry is accessible from every surface.
+</Callout>
