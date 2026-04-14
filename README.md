@@ -1,29 +1,26 @@
 # Kiket docs
 
-Next.js + [Fumadocs](https://fumadocs.vercel.app) powering [docs.kiket.dev](https://docs.kiket.dev).
-
-## Develop
+Source for [docs.kiket.dev](https://docs.kiket.dev).
 
 ```bash
 pnpm install
 pnpm dev        # http://localhost:3001
-```
-
-## Build
-
-```bash
 pnpm build      # static export to ./out
 ```
 
-Deploys to GitHub Pages via `.github/workflows/deploy.yml`.
+## Writing docs
 
-## Content
+MDX files live in `content/docs/<section>/<page>.mdx`. Each page needs frontmatter:
 
-MDX files live in `content/docs/<section>/<page>.mdx`. Navigation comes from `meta.json` in each folder.
+```mdx
+---
+title: Page title
+description: One-liner shown in search and OG cards.
+---
+```
 
-Extension, SDK, CLI, MCP, and industry-template pages are auto-synced from their upstream READMEs by `scripts/sync-submodule-readmes.mjs` during `prebuild`. To add a new one, add an entry to `SOURCES` in that script.
+Sidebar order comes from `meta.json` in each folder — list pages in the order they should appear.
 
-## DNS
+## Auto-synced pages
 
-- Custom domain: `docs.kiket.dev` (`public/CNAME`).
-- Cloudflare: `CNAME docs → kiket-dev.github.io`, DNS-only until GitHub issues the cert, then Proxied. Zone SSL/TLS: Full (strict).
+Integration, SDK, CLI, MCP, and industry-template pages are generated from their upstream READMEs during `prebuild`. Edit the upstream repo, not the generated MDX. To add a new source, extend `SOURCES` in `scripts/sync-submodule-readmes.mjs`.
