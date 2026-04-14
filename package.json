@@ -4,6 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "sync:submodules": "node scripts/sync-submodule-readmes.mjs",
+    "prebuild": "node scripts/sync-submodule-readmes.mjs && fumadocs-mdx",
+    "postinstall": "fumadocs-mdx",
     "dev": "next dev -p 3001",
     "build": "next build",
     "start": "next start",

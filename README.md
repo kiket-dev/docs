@@ -40,4 +40,16 @@ description: Short one-liner surfaced in search and OG cards.
 
 - Visual language mirrors `apps/web` — Geist variable fonts, slate neutrals, indigo accent.
 - Single source of truth for content; nothing is generated at runtime.
-- Future: pull extension/SDK READMEs in a CI pre-step and render them under `/docs/integrations/*` and `/docs/api/sdk/*`.
+- Extension / SDK / CLI READMEs are pulled in the `prebuild` step from their public upstream repos. See `scripts/sync-submodule-readmes.mjs`.
+
+## Security policy: isolation from the private monorepo
+
+This repository is **public**; the `kiket-dev/kiket2` monorepo is **private**. The docs build must never be able to reach kiket2 — not via git clone, not via GitHub API with a token, not via an SSH key.
+
+The sync script enforces this:
+
+- Local filesystem reads only work from a sibling checkout in a dev machine (e.g. the maintainer has kiket2 cloned next to docs-site). CI never has that path available.
+- GitHub REST API calls are **intentionally unauthenticated**. Private repos are silently skipped rather than accessed with a fallback token that could leak.
+- The GitHub Actions workflow does not set `GITHUB_TOKEN` or any PAT on the sync step, and does not `actions/checkout` kiket2 as a sibling.
+
+If an upstream submodule repo needs to stay private, its README cannot be surfaced here. Make the repo public or host the docs content in-tree.

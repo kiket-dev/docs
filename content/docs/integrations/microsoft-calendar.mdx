@@ -1,0 +1,185 @@
+---
+title: Microsoft Calendar
+description: Microsoft Calendar integration for Kiket.
+---
+
+{/* AUTO-SYNCED from the upstream submodule README. Do not edit here — edit the source repo. */}
+
+Sync Outlook Calendar events to Kiket's team capacity planning. Automatically imports events from Microsoft 365 and updates team member availability.
+
+## Features
+
+- **Automatic Sync**: Periodically imports calendar events to capacity planning
+- **Multiple Calendars**: Sync from multiple Outlook Calendars per user
+- **Event Type Mapping**: Automatically categorize events (PTO, meetings, focus time, etc.)
+- **Timezone Support**: Handles timezone-aware events correctly
+- **Private Event Handling**: Optionally sync private events (title only)
+- **Health Monitoring**: Alerts when sync issues occur
+
+## Requirements
+
+- Kiket Platform v1.0+
+- [Microsoft OAuth Extension](https://github.com/kiket-dev/kiket-ext-microsoft-oauth) (installed automatically as dependency)
+- Microsoft 365 or Outlook.com account
+
+## Installation
+
+1. Install the extension from the Kiket Marketplace or via CLI:
+   ```bash
+   kiket extensions install microsoft-calendar
+   ```
+
+2. The Microsoft OAuth extension will be installed automatically if not present
+
+3. Connect your Microsoft account when prompted
+
+## Setup
+
+### 1. Connect Microsoft Account
+
+If you haven't already connected your Microsoft account:
+
+1. Go to **Settings > Connected Accounts**
+2. Click **Connect** next to Microsoft
+3. Authorize calendar access in the popup
+
+### 2. Select Calendars to Sync
+
+1. Go to **Capacity > External Calendars**
+2. Click **Add Calendar > Microsoft Calendar**
+3. Select which calendars to sync
+4. Configure sync settings
+
+## Configuration Options
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `default_sync_interval` | 60 min | How often to sync calendar events |
+| `sync_window_days` | 180 days | How far ahead to sync events |
+| `include_private_events` | false | Sync private events (title only) |
+| `include_tentative` | true | Include tentatively accepted events |
+
+### Event Type Mapping
+
+Events are automatically categorized based on keywords in the title or Outlook categories:
+
+| Event Type | Keywords |
+|------------|----------|
+| Holiday | "holiday", "bank holiday" |
+| PTO | "vacation", "pto", "out of office", "ooo", "time off" |
+| Travel | "travel", "flight", "trip" |
+| Focus | "focus", "deep work", "heads down", "focus time" |
+| Training | "training", "learning", "workshop" |
+
+You can customize the mapping in extension settings.
+
+## Usage
+
+### Automatic Sync
+
+Once configured, the extension automatically syncs on the configured interval. Events appear in:
+- **Capacity Calendar**: Visual calendar view
+- **User Availability**: Affects capacity calculations
+- **AI Recommendations**: Considered in load balancing
+
+### Manual Sync
+
+Trigger a manual sync via:
+- **Command Palette**: Search for "Sync Outlook Calendar"
+- **Capacity UI**: Click the refresh button on your calendar feed
+
+### Commands
+
+| Command | Description |
+|---------|-------------|
+| `microsoftCalendar.sync` | Manually trigger calendar sync |
+| `microsoftCalendar.listCalendars` | View available Outlook Calendars |
+
+## Required Scopes
+
+This extension requires the following Microsoft Graph scopes:
+
+| Scope | Purpose |
+|-------|---------|
+| `Calendars.Read` | List calendars and read events |
+
+These scopes are automatically requested when you connect your Microsoft account.
+
+## Capacity Integration
+
+Synced events affect capacity planning:
+
+- **Blocking Events**: Reduce available hours (show as "Busy")
+- **All-Day Events**: Mark entire day as unavailable
+- **Tentative Events**: Optionally reduce capacity
+- **Recurring Events**: Each occurrence synced separately
+- **Free/Busy Status**: Respects Outlook's availability settings
+
+## Outlook-Specific Features
+
+### Show As Status
+
+The extension respects Outlook's "Show As" status:
+- **Busy**: Blocks capacity
+- **Out of Office**: Blocks capacity, maps to PTO
+- **Tentative**: Optionally blocks (configurable)
+- **Free**: Does not block capacity
+- **Working Elsewhere**: Does not block capacity
+
+### Categories
+
+Outlook categories can be mapped to Kiket event types for automatic classification.
+
+## Troubleshooting
+
+### Events not syncing
+1. Check connection status in **Settings > Connected Accounts**
+2. Verify the calendar is selected in **Capacity > External Calendars**
+3. Check feed health status for errors
+
+### "Insufficient privileges" error
+- Ensure `Calendars.Read` permission is granted
+- Ask your admin to consent if using organizational account
+
+### Wrong timezone
+1. Verify your Kiket timezone in **Settings > Preferences**
+2. Check calendar timezone in Outlook settings
+
+### Missing events
+- Check if the event is within the sync window (default: 180 days)
+- Private events require `include_private_events` enabled
+
+### "Calendar feed unhealthy" warning
+- The extension monitors sync health
+- Alerts are sent after 12+ hours of failures
+- Check Microsoft account connection and re-authorize if needed
+
+## Health Monitoring
+
+The extension includes health monitoring:
+- Tracks consecutive sync failures
+- Status: Healthy → Degraded (3 failures) → Unhealthy (12+ hours)
+- Sends notifications when feeds become unhealthy
+
+## Security
+
+- Calendar data is read-only (no write access requested)
+- Events are stored encrypted in Kiket's database
+- OAuth tokens managed by Microsoft OAuth extension
+- Private event details excluded by default (only title synced if enabled)
+- Works with Azure AD conditional access policies
+
+## Related Extensions
+
+- [Microsoft OAuth](https://github.com/kiket-dev/kiket-ext-microsoft-oauth) - Required for authentication
+- [Microsoft Teams](https://github.com/kiket-dev/kiket-ext-teams) - Teams integration (can share OAuth connection)
+- [Google Calendar](https://github.com/kiket-dev/kiket-ext-google-calendar) - Alternative for Google users
+
+## Support
+
+- [Documentation](https://docs.kiket.dev/integrations/microsoft-calendar)
+- [GitHub Issues](https://github.com/kiket-dev/kiket-ext-microsoft-calendar/issues)
+
+## License
+
+Apache License 2.0 - see [LICENSE](LICENSE) for details.

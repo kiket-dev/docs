@@ -1,0 +1,124 @@
+---
+title: Google Oauth
+description: Google Oauth integration for Kiket.
+---
+
+{/* AUTO-SYNCED from the upstream submodule README. Do not edit here — edit the source repo. */}
+
+Shared OAuth 2.0 provider for Google services. Enables single sign-on for Google Calendar, Google Drive, and other Google integrations in Kiket.
+
+## Features
+
+- **Single Sign-On**: Connect your Google account once, use it across all Google-based extensions
+- **Scope Aggregation**: Automatically manages OAuth scopes required by consumer extensions
+- **Token Management**: Handles token refresh and expiration automatically
+- **Multi-Extension Support**: Provides authentication for Google Calendar, Google Drive, and future Google integrations
+
+## Requirements
+
+- Kiket Platform v1.0+
+- Google Cloud Console account with OAuth 2.0 credentials
+
+## Installation
+
+1. Install the extension from the Kiket Marketplace or via CLI:
+   ```bash
+   kiket extensions install google-oauth
+   ```
+
+2. Configure OAuth credentials (see Setup section below)
+
+## Setup
+
+### 1. Create Google OAuth Credentials
+
+1. Go to [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
+2. Create a new project or select an existing one
+3. Navigate to **APIs & Services > Credentials**
+4. Click **Create Credentials > OAuth client ID**
+5. Select **Web application** as the application type
+6. Add authorized redirect URI:
+   ```
+   https://your-kiket-domain.com/oauth/google/callback
+   ```
+7. Copy the **Client ID** and **Client Secret**
+
+### 2. Configure the Extension
+
+Via CLI:
+```bash
+kiket extensions secrets set google-oauth CLIENT_ID "your-client-id"
+kiket extensions secrets set google-oauth CLIENT_SECRET "your-client-secret"
+```
+
+Or via the Kiket UI:
+1. Go to **Settings > Extensions > Google OAuth**
+2. Enter your Client ID and Client Secret
+3. Save the configuration
+
+### 3. Enable Required Google APIs
+
+In Google Cloud Console, enable the APIs for services you plan to use:
+- **Google Calendar API** - for calendar integration
+- **Google Drive API** - for drive integration
+
+## Available Scopes
+
+| Scope | Description | Used By |
+|-------|-------------|---------|
+| `openid` | OpenID Connect | Default |
+| `email` | View email address | Default |
+| `profile` | View basic profile | Default |
+| `calendar.readonly` | View calendars | Google Calendar |
+| `calendar.events.readonly` | View calendar events | Google Calendar |
+| `calendar.events` | Manage calendar events | Google Calendar |
+| `drive.readonly` | View Drive files | Google Drive |
+| `drive.file` | Access app-created files | Google Drive |
+
+## Usage
+
+Once configured, the extension provides OAuth connectivity for consumer extensions. Users connect their Google account via:
+
+- **Command Palette**: Search for "Connect Google Account"
+- **Settings UI**: Go to **Settings > Connected Accounts > Google**
+- **Extension Prompt**: When installing a Google-based extension
+
+## Commands
+
+| Command | Description |
+|---------|-------------|
+| `google.connect` | Connect Google Account |
+| `google.disconnect` | Disconnect Google Account |
+
+## Troubleshooting
+
+### "Invalid client" error
+- Verify Client ID and Client Secret are correct
+- Ensure the redirect URI matches exactly
+
+### "Access blocked" error
+- Check that required APIs are enabled in Google Cloud Console
+- Verify your OAuth consent screen is configured
+
+### Token refresh failures
+- The extension automatically retries failed refreshes
+- Check the health status in **Settings > Connected Accounts**
+
+## Security
+
+- OAuth tokens are encrypted at rest using Rails encrypted attributes
+- Client secrets are stored in Google Secret Manager
+- Tokens can be revoked at any time via the UI or CLI
+
+## Related Extensions
+
+- [Google Calendar](https://github.com/kiket-dev/kiket-ext-google-calendar) - Sync Google Calendar events
+
+## Support
+
+- [Documentation](https://docs.kiket.dev/integrations/google)
+- [GitHub Issues](https://github.com/kiket-dev/kiket-ext-google-oauth/issues)
+
+## License
+
+Apache License 2.0 - see [LICENSE](LICENSE) for details.

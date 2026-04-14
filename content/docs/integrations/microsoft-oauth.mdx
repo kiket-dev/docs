@@ -1,0 +1,158 @@
+---
+title: Microsoft Oauth
+description: Microsoft Oauth integration for Kiket.
+---
+
+{/* AUTO-SYNCED from the upstream submodule README. Do not edit here — edit the source repo. */}
+
+Shared OAuth 2.0 provider for Microsoft services. Enables single sign-on for Outlook Calendar, Microsoft Teams, OneDrive, and other Microsoft 365 integrations in Kiket.
+
+## Features
+
+- **Single Sign-On**: Connect your Microsoft account once, use it across all Microsoft-based extensions
+- **Multi-Tenant Support**: Works with personal accounts, work accounts, and specific Azure AD tenants
+- **Scope Aggregation**: Automatically manages OAuth scopes required by consumer extensions
+- **Token Management**: Handles token refresh and expiration automatically
+- **Grant Type Support**: Supports authorization_code, client_credentials, and refresh_token flows
+
+## Requirements
+
+- Kiket Platform v1.0+
+- Azure Portal account with App Registration
+
+## Installation
+
+1. Install the extension from the Kiket Marketplace or via CLI:
+   ```bash
+   kiket extensions install microsoft-oauth
+   ```
+
+2. Configure OAuth credentials (see Setup section below)
+
+## Setup
+
+### 1. Create Azure AD App Registration
+
+1. Go to [Azure Portal](https://portal.azure.com/#blade/Microsoft_AAD_RegisteredApps/ApplicationsListBlade)
+2. Click **New registration**
+3. Configure:
+   - **Name**: Kiket Integration
+   - **Supported account types**: Choose based on your needs:
+     - *Accounts in any organizational directory and personal Microsoft accounts* (recommended)
+     - *Single tenant* (if restricting to your organization)
+   - **Redirect URI**: Web - `https://your-kiket-domain.com/oauth/microsoft/callback`
+4. Click **Register**
+5. Copy the **Application (client) ID**
+
+### 2. Create Client Secret
+
+1. In your App Registration, go to **Certificates & secrets**
+2. Click **New client secret**
+3. Add a description and choose expiration
+4. Copy the **Value** immediately (it won't be shown again)
+
+### 3. Configure API Permissions
+
+1. Go to **API permissions**
+2. Add permissions for the services you'll use:
+   - **Microsoft Graph > Delegated**:
+     - `openid`, `email`, `profile`, `offline_access` (required)
+     - `Calendars.Read` (for calendar integration)
+     - `Chat.ReadWrite`, `ChannelMessage.Send` (for Teams integration)
+3. Click **Grant admin consent** if required by your organization
+
+### 4. Configure the Extension
+
+Via CLI:
+```bash
+kiket extensions secrets set microsoft-oauth CLIENT_ID "your-app-id"
+kiket extensions secrets set microsoft-oauth CLIENT_SECRET "your-client-secret"
+# Optional: Set specific tenant
+kiket extensions config set microsoft-oauth TENANT_ID "your-tenant-id"
+```
+
+Or via the Kiket UI:
+1. Go to **Settings > Extensions > Microsoft OAuth**
+2. Enter your Application ID and Client Secret
+3. Optionally set Tenant ID (leave blank for multi-tenant)
+4. Save the configuration
+
+## Available Scopes
+
+| Scope | Description | Used By |
+|-------|-------------|---------|
+| `openid` | Sign you in | Default |
+| `email` | View email address | Default |
+| `profile` | View basic profile | Default |
+| `offline_access` | Maintain data access | Default |
+| `User.Read` | Read user profile | Default |
+| `Calendars.Read` | Read calendars | Microsoft Calendar |
+| `Calendars.ReadWrite` | Read/write calendars | Microsoft Calendar |
+| `Chat.ReadWrite` | Read/write Teams chats | Microsoft Teams |
+| `ChannelMessage.Send` | Send channel messages | Microsoft Teams |
+| `Team.ReadBasic.All` | Read team info | Microsoft Teams |
+| `Files.Read.All` | Read OneDrive files | Microsoft OneDrive |
+
+## Tenant Configuration
+
+| TENANT_ID Value | Behavior |
+|-----------------|----------|
+| `common` (default) | Any Microsoft account (personal or work) |
+| `organizations` | Work/school accounts only |
+| `consumers` | Personal Microsoft accounts only |
+| `{tenant-id}` | Specific Azure AD tenant only |
+
+## Usage
+
+Once configured, the extension provides OAuth connectivity for consumer extensions. Users connect their Microsoft account via:
+
+- **Command Palette**: Search for "Connect Microsoft Account"
+- **Settings UI**: Go to **Settings > Connected Accounts > Microsoft**
+- **Extension Prompt**: When installing a Microsoft-based extension
+
+## Commands
+
+| Command | Description |
+|---------|-------------|
+| `microsoft.connect` | Connect Microsoft Account |
+| `microsoft.disconnect` | Disconnect Microsoft Account |
+
+## Troubleshooting
+
+### "AADSTS50011" - Reply URL mismatch
+- Verify the redirect URI in Azure Portal matches exactly
+- Check for trailing slashes
+
+### "AADSTS65001" - Admin consent required
+- Ask your Azure AD admin to grant consent for the app
+- Or configure the app for user consent
+
+### "AADSTS7000218" - Client secret expired
+- Generate a new client secret in Azure Portal
+- Update the extension configuration
+
+### Token refresh failures
+- Check if the user needs to re-authenticate
+- Verify `offline_access` scope is granted
+
+## Security
+
+- OAuth tokens are encrypted at rest using Rails encrypted attributes
+- Client secrets are stored in Google Secret Manager
+- Supports client_credentials flow for app-only access
+- Tokens can be revoked at any time via the UI or CLI
+
+## Related Extensions
+
+- [Microsoft Calendar](https://github.com/kiket-dev/kiket-ext-microsoft-calendar) - Sync Outlook Calendar events
+- [Microsoft Teams](https://github.com/kiket-dev/kiket-ext-teams) - Teams integration
+
+## Support
+
+- [Documentation](https://docs.kiket.dev/integrations/microsoft)
+- [GitHub Issues](https://github.com/kiket-dev/kiket-ext-microsoft-oauth/issues)
+- [Microsoft Identity Documentation](https://docs.microsoft.com/en-us/azure/active-directory/develop/)
+
+## License
+
+Apache License 2.0 - see [LICENSE](LICENSE) for details.
