@@ -9,7 +9,7 @@ export const baseOptions: BaseLayoutProps = {
   nav: {
     title: (
       <span className="inline-flex items-center gap-2 font-semibold tracking-tight">
-        <span className="inline-block h-5 w-5 rounded bg-gradient-to-br from-indigo-600 to-fuchsia-500" aria-hidden="true" />
+        <img src="/kiket-icon.svg" alt="" className="h-5 w-5" />
         Kiket docs
       </span>
     ),

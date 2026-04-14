@@ -10,6 +10,7 @@ export const metadata = {
   },
   description:
     "Documentation for Kiket — the compliance-first workflow automation platform.",
+  icons: { icon: '/favicon.svg' },
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
