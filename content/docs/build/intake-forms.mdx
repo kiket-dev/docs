@@ -5,6 +5,16 @@ description: Let non-members submit structured requests that become issues in yo
 
 Intake forms are the front door to your workflows. Someone who doesn't have a Kiket seat — a customer, a vendor, an internal requester — fills out a form; it becomes a new issue in a workflow's initial state. No seat required on the submitter side.
 
+## Creating an intake
+
+From the **Intakes** page:
+
+1. Click **New intake**. Pick a name and the target workflow the submission should land in.
+2. The app creates a starter YAML (two fields — Summary + Details) and drops you into the editor so you can shape the schema.
+3. Save to commit the file to your workspace repo. The intake's public URL is live immediately.
+
+Each card on the Intakes page exposes **Edit** (re-opens the YAML in the editor), **Share / embed** (public URL + iframe snippet + React component snippet), **History** (commit log for this file), and **Delete** (removes the YAML and the DB record; existing submissions are retained).
+
 ## File location
 
 `.kiket/intakes/*.yaml`. One file per intake form. Each form is addressable at a stable URL: `https://app.kiket.dev/intake/<project-key>/<form-key>`.

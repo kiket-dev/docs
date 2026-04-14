@@ -5,6 +5,16 @@ description: Fire actions on workflow events — notifications, webhooks, AI cal
 
 Automations are **triggers** + **actions**. When something happens (state change, SLA breach, comment added, AI decision), run one or more actions. Every automation is declared in YAML and lives with the workflow it belongs to.
 
+## Creating a recipe
+
+From the **Automations** page:
+
+1. Click **New recipe**. Pick a name, trigger (`issue.created`, `sla.breach`, etc.), and a primary action (`notify`, `webhook`, `assign`, `transition`, `add_comment`).
+2. Save. The recipe is active by default — toggle the enable pill on the card to pause it.
+3. Fine-tune the action payload (channel, webhook URL, predicate) by opening the recipe's YAML in the project editor.
+
+Cards expose **Edit** (re-opens the name/trigger/action dropdowns), **Delete** (stops firing immediately; audit log retained), and an enable/disable pill for quick pauses.
+
 ## Where automations live
 
 Two places:

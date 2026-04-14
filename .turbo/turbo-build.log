@@ -1,0 +1,62 @@
+
+> @kiket/docs@0.1.0 prebuild /home/adam/source/repos/kiket2/docs-site
+> node scripts/sync-submodule-readmes.mjs && fumadocs-mdx
+
+  ✓ kiket-dev/kiket-ext-slack → content/docs/integrations/slack.mdx
+  ✓ kiket-dev/kiket-ext-teams → content/docs/integrations/teams.mdx
+  ✓ kiket-dev/kiket-ext-zoom → content/docs/integrations/zoom.mdx
+  ✓ kiket-dev/kiket-ext-twilio → content/docs/integrations/twilio.mdx
+  ✓ kiket-dev/kiket-ext-github → content/docs/integrations/github.mdx
+  ✗ kiket-dev/kiket-ext-gitlab — fetch failed
+  ✗ kiket-dev/kiket-ext-bitbucket — fetch failed
+  ✓ kiket-dev/kiket-ext-jira → content/docs/integrations/jira.mdx
+  ✓ kiket-dev/kiket-ext-google-oauth → content/docs/integrations/google-oauth.mdx
+  ✓ kiket-dev/kiket-ext-microsoft-oauth → content/docs/integrations/microsoft-oauth.mdx
+  ✓ kiket-dev/kiket-ext-google-calendar → content/docs/integrations/google-calendar.mdx
+  ✓ kiket-dev/kiket-ext-microsoft-calendar → content/docs/integrations/microsoft-calendar.mdx
+  ✓ kiket-dev/kiket-ext-mailjet-inbound → content/docs/integrations/mailjet-inbound.mdx
+  ✓ kiket-dev/kiket-ext-time-tracking → content/docs/integrations/time-tracking.mdx
+  ✓ kiket-dev/kiket-ext-email → content/docs/integrations/email.mdx
+  ✓ kiket-dev/kiket-ext-make-ai → content/docs/integrations/make-ai.mdx
+  ✓ kiket-dev/kiket-nodejs-sdk → content/docs/api/sdk/nodejs.mdx
+  ✓ kiket-dev/kiket-python-sdk → content/docs/api/sdk/python.mdx
+  ✓ kiket-dev/kiket-ruby-sdk → content/docs/api/sdk/ruby.mdx
+  ✓ kiket-dev/kiket-java-sdk → content/docs/api/sdk/java.mdx
+  ✓ kiket-dev/kiket-dotnet-sdk → content/docs/api/sdk/dotnet.mdx
+  ✗ kiket-dev/kiket-definitions-healthcare — fetch failed
+  ✓ kiket-dev/kiket-go-sdk → content/docs/api/sdk/go.mdx
+  ✓ kiket-dev/kiket-cli → content/docs/api/cli.mdx
+  ✓ kiket-dev/kiket-mcp → content/docs/api/mcp.mdx
+  ✓ kiket-dev/kiket-definitions-kanban → content/docs/build/templates/kanban.mdx
+  ✓ kiket-dev/kiket-definitions-scrum → content/docs/build/templates/scrum.mdx
+  ✓ kiket-dev/kiket-definitions-finance → content/docs/build/templates/finance.mdx
+  ✓ kiket-dev/kiket-definitions-legal → content/docs/build/templates/legal.mdx
+  ✓ kiket-dev/kiket-definitions-engineering → content/docs/build/templates/engineering.mdx
+  ✓ kiket-dev/kiket-definitions-sales → content/docs/build/templates/sales.mdx
+  ✓ kiket-dev/kiket-definitions-marketing → content/docs/build/templates/marketing.mdx
+  ✓ kiket-dev/kiket-definitions-marketing_ops → content/docs/build/templates/marketing_ops.mdx
+  ✓ kiket-dev/kiket-definitions-support → content/docs/build/templates/support.mdx
+  ✓ kiket-dev/kiket-definitions-product → content/docs/build/templates/product.mdx
+  ✓ kiket-dev/kiket-definitions-partners → content/docs/build/templates/partners.mdx
+  ✓ kiket-dev/kiket-definitions-business-ops → content/docs/build/templates/business-ops.mdx
+  ✓ kiket-dev/kiket-definitions-ecommerce → content/docs/build/templates/ecommerce.mdx
+  ✓ kiket-dev/kiket-definitions-release-mgmt → content/docs/build/templates/release-mgmt.mdx
+
+Synced 36 READMEs. 3 missing.
+[MDX] types generated
+
+> @kiket/docs@0.1.0 build /home/adam/source/repos/kiket2/docs-site
+> next build
+
+ ⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
+ We detected multiple lockfiles and selected the directory of /home/adam/package-lock.json as the root directory.
+ To silence this warning, set `outputFileTracingRoot` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/output#caveats for more information.
+ Detected additional lockfiles: 
+   * /home/adam/source/repos/kiket2/pnpm-lock.yaml
+
+[MDX] updated map file in 196.13422599999967ms
+   ▲ Next.js 15.5.15
+
+   Creating an optimized production build ...
+ ELIFECYCLE  Command failed with exit code 130.
