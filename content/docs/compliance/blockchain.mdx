@@ -1,0 +1,85 @@
+---
+title: Blockchain Anchoring
+description: Cryptographically anchor your audit trail to Polygon for tamper-evident evidence.
+---
+
+Every audit entry Kiket records — workflow transitions, approvals, field
+edits, comments — is hashed and batched into a Merkle tree. That tree's
+root is published to Polygon roughly once an hour. The result: auditors
+can prove what happened, **and** prove nothing was changed after the
+fact, without trusting Kiket or your database.
+
+## Why it matters
+
+Regulated frameworks (GDPR Art. 30, SOC 2 CC7, HIPAA §164.312(b), ISO
+27001 A.12.4) require audit trails that are both complete and resistant
+to tampering. Traditional logs satisfy "complete" but not "tamper
+evident" — an admin with DB access can rewrite history. A Merkle-root
+commitment published on a public chain makes silent rewrites
+mathematically detectable.
+
+## How it works
+
+1. **Hash each entry.** Every row in `audit_logs` is deterministically
+   hashed (SHA-256 of the canonical JSON representation).
+2. **Batch into a Merkle tree.** A batch (default 100 entries, but any
+   size) is folded into a binary Merkle tree.
+3. **Publish the root.** The root hash is submitted as a transaction on
+   Polygon. Only the 32-byte root hits the chain — your data never
+   leaves your database.
+4. **Verify anytime.** Given the stored entries and the on-chain root,
+   any party can re-compute the tree and confirm it matches.
+
+## UI surfaces
+
+| Location | What you see |
+| --- | --- |
+| **Compliance → Overview** | One-glance "anchored" badge with relative time. Click to open the chain view. |
+| **Compliance → Blockchain tab** | Full table of anchors with per-row verify buttons. |
+| **Compliance → Chain** (`/compliance/chain`) | Timeline view with expandable entries, Polygonscan links, and re-verify controls. |
+
+The `AnchorBadge` primitive — shown inline on each anchor — communicates
+state in four colors:
+
+- **Anchored** (green, anchor icon) — batch is on-chain.
+- **Verified** (green, checkmark) — you re-ran the Merkle proof and it matched.
+- **Pending** (gray, clock) — the batch is local-only; next scheduled anchor will include it.
+- **Failed** (red, warning) — verification found a tree/root mismatch. **Investigate immediately.**
+
+## Triggering an anchor
+
+Anchors run automatically every hour via a BullMQ scheduler. To force
+one now:
+
+1. Open **Compliance → Blockchain** or **Compliance → Chain**.
+2. Click **Anchor Now**.
+3. Wait a few seconds — the new row appears at the top with its tx
+   hash. Clicking the tx hash opens the transaction on Polygonscan.
+
+You can also trigger from the API:
+
+```bash
+curl -X POST https://api.kiket.dev/v1/blockchain/anchor \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"organizationId":"YOUR_ORG_ID"}'
+```
+
+## Verification
+
+To prove the chain is intact at any point in the future:
+
+1. Open **Compliance → Chain** and click **Verify** on any row.
+2. Kiket re-computes the Merkle tree from the stored entries, compares
+   the root against the on-chain transaction, and shows
+   `N/N leaves verified`.
+3. Export the evidence via **Compliance → Chain → Export** (PDF,
+   Excel, or CSV) — auditors typically want the full list with tx
+   hashes and entry counts.
+
+## Cost
+
+Polygon transactions cost fractions of a cent. A hundred anchors a
+month is under $1 at typical gas prices. If you want to disable
+on-chain publishing and keep only the local Merkle commitments, set
+`BLOCKCHAIN_ANCHORING_ENABLED=false` in your API env.
