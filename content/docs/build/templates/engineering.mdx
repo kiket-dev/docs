@@ -1,0 +1,71 @@
+---
+title: Engineering
+description: Engineering template for Kiket.
+---
+
+{/* AUTO-SYNCED from the upstream README. Edit the source repo, not this file. */}
+
+
+Bug tracking and incident response workflows for Kiket.
+
+## Overview
+
+This definition provides engineering operations workflows including:
+
+- **Workflows**: Bug tracking and incident response lifecycles
+- **AI Agents**: Bug categorization, duplicate detection, severity assessment, log analysis, runbook suggestions
+- **Intake Form**: Internal bug reporting
+- **Boards**: Bug board and incident response board
+- **Dashboard**: Bug metrics, incident MTTR, SLA compliance
+- **Analytics**: Bug resolution trends, incident frequency, deployment velocity, backlog aging
+- **Automations**: Bug triage, critical alerts, incident commander assignment
+
+## Structure
+
+```
+.kiket/
+├── project.yaml           # Definition metadata
+├── issue_types.yaml       # Bug and incident issue types
+├── workflows/
+│   ├── bug.yaml           # Bug tracking workflow
+│   └── incident.yaml      # Incident response workflow
+├── agents/
+│   ├── engineering_bug_categorizer.yaml
+│   ├── engineering_duplicate_finder.yaml
+│   ├── engineering_assignee_suggester.yaml
+│   ├── engineering_severity_assessor.yaml
+│   ├── engineering_log_analyzer.yaml
+│   └── engineering_runbook_suggester.yaml
+├── intakes/
+│   └── bug_report.yaml
+├── boards/
+│   ├── engineering.yaml
+│   └── incidents.yaml
+├── dashboards/
+│   └── engineering_dashboard.yaml
+├── analytics/
+│   └── dashboards/
+│       └── engineering_health.yaml
+└── automations/
+    └── engineering_automations.yaml
+```
+
+## Installation
+
+Install via Kiket marketplace or include in your project configuration:
+
+```yaml
+definitions:
+  - id: engineering
+    version: ">=1.0.0"
+```
+
+## Required Extensions
+
+- `github` - GitHub integration for PR/commit linking
+
+## Optional Extensions
+
+- `slack` - Team notifications
+- `pagerduty` - On-call integration
+- `jira` - Jira sync

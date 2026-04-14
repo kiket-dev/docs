@@ -1,0 +1,118 @@
+---
+title: Business Ops
+description: Business Ops template for Kiket.
+---
+
+{/* AUTO-SYNCED from the upstream README. Edit the source repo, not this file. */}
+
+Complete business operations suite for running your company on Kiket. This bundle packages 8 operational workflows that cover the full spectrum of business functions.
+
+## What's Included
+
+| Operation | Project Key | Description |
+|-----------|-------------|-------------|
+| **Customer Support** | `SUPPORT` | Ticket intake, AI triage, SLA tracking, CSAT surveys |
+| **Sales Pipeline** | `SALES` | Lead capture, qualification, demos, proposals, deal tracking |
+| **Marketing Operations** | `MARKETING` | Campaign management, content production, performance analysis |
+| **Partner Management** | `PARTNERS` | Partner applications, onboarding, certification workflows |
+| **Product Development** | `PRODUCT` | Feature lifecycle, roadmap planning, sprint management |
+| **Finance & Admin** | `FINANCE` | Expense approval, invoice processing, budget requests |
+| **Legal & Compliance** | `LEGAL` | GDPR requests, contract review, compliance tracking |
+| **Engineering Operations** | `ENG` | Bug tracking, incident response, release management |
+
+## Installation
+
+### Via CLI
+
+```bash
+kiket bundle install business-operations
+```
+
+### Via Web UI
+
+1. Navigate to **Marketplace → Bundles**
+2. Search for "Business Operations"
+3. Click **Install**
+4. Configure Email integration (Slack optional)
+5. Optionally import sample data
+
+## Requirements
+
+- **Minimum Plan:** Starter
+- **Required Extensions:** Email
+- **Optional Extensions:** Slack, GitHub, Teams, Time Tracking, Calendar, Zoom
+
+## Features
+
+### AI-Powered Automation
+
+Each workflow includes AI agents for:
+- **Support:** Ticket categorization, duplicate detection, resolution suggestions
+- **Sales:** Lead scoring, company research, deal coaching
+- **Marketing:** Brief analysis, channel recommendations, copy generation
+- **Engineering:** Bug categorization, severity assessment, log analysis
+
+### SLA Tracking
+
+Built-in SLA definitions for:
+- Support tickets (4h warning, 8h breach)
+- GDPR requests (7d warning, 30d breach - legal requirement)
+- Incident response (P1: 15m, P2: 1h, P3: 4h)
+
+### Approval Workflows
+
+Multi-level approval chains for:
+- Expense approvals (amount-based routing)
+- Contract reviews (legal sign-off)
+- Release deployments (QA approval)
+- Partner certifications
+
+### Intake Forms
+
+Public-facing forms for:
+- Support ticket submission
+- Lead capture
+- Partner applications
+- GDPR data requests
+- Bug reports
+
+## Customization
+
+After installation, you can customize:
+
+1. **Workflows** — Modify states, transitions, and approval rules in `.kiket/workflows/`
+2. **Intake Forms** — Add/remove fields, change validation in `.kiket/intakes/`
+3. **Automations** — Adjust triggers and actions in `.kiket/automations/`
+4. **Dashboards** — Create custom views in `.kiket/dashboards/`
+5. **AI Agents** — Tune prompts and behaviors in `.kiket/agents/`
+
+All customizations are stored in your project's workflow repository, allowing for bundle updates without losing changes.
+
+## Individual Definitions
+
+Each operation is also available as a standalone definition:
+
+- [`kiket-definitions-support`](https://github.com/kiket-dev/kiket-definitions-support)
+- [`kiket-definitions-sales`](https://github.com/kiket-dev/kiket-definitions-sales)
+- [`kiket-definitions-marketing`](https://github.com/kiket-dev/kiket-definitions-marketing)
+- [`kiket-definitions-partners`](https://github.com/kiket-dev/kiket-definitions-partners)
+- [`kiket-definitions-product`](https://github.com/kiket-dev/kiket-definitions-product)
+- [`kiket-definitions-finance`](https://github.com/kiket-dev/kiket-definitions-finance)
+- [`kiket-definitions-legal`](https://github.com/kiket-dev/kiket-definitions-legal)
+- [`kiket-definitions-engineering`](https://github.com/kiket-dev/kiket-definitions-engineering)
+
+## Documentation
+
+- [Full Documentation](https://docs.kiket.dev/bundles/business-ops)
+- [Customization Guide](https://docs.kiket.dev/bundles/business-ops/customization)
+- [AI Agent Configuration](https://docs.kiket.dev/bundles/business-ops/agents)
+
+## Support
+
+- **Issues:** [GitHub Issues](https://github.com/kiket-dev/kiket-definitions-business-ops/issues)
+- **Community:** [Kiket Community](https://community.kiket.dev)
+- **Email:** support@kiket.dev
+
+## License
+
+MIT License - see [LICENSE](LICENSE) for details.

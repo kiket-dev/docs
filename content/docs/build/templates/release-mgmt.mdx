@@ -1,0 +1,142 @@
+---
+title: Release Mgmt
+description: Release Mgmt template for Kiket.
+---
+
+{/* AUTO-SYNCED from the upstream README. Edit the source repo, not this file. */}
+
+
+Production release management workflow template for Kiket with multi-level approval chains, escalation policies, and rollback capabilities.
+
+## Features
+
+This template showcases Kiket's advanced workflow approval system:
+
+### Multi-Level Approval Chains
+
+The production deployment transition includes a comprehensive approval chain:
+
+1. **Level 1 - QA Verification**: Any QA lead can approve (4h timeout)
+2. **Level 2 - Technical Approval**: Parallel approval from Engineering AND SRE teams (8h timeout)
+3. **Level 3 - Manager Sign-off**: Required for critical releases or breaking changes (24h timeout)
+4. **Level 4 - Director Approval**: Required for major version releases (48h timeout)
+
+### Escalation Policies
+
+Automatic escalation when approvals timeout:
+
+- **2 hours**: Reminder notification to current approvers
+- **4 hours**: Escalate to engineering manager
+- **8 hours**: Notify director
+- **48 hours**: Auto-approve with audit trail
+
+### Parallel Approval Groups
+
+Level 2 demonstrates parallel approvals where both engineering AND SRE teams must sign off before proceeding.
+
+### Conditional Approval Levels
+
+Levels 3 and 4 are conditionally triggered based on:
+- Priority (critical releases require manager approval)
+- Labels (breaking-change label triggers manager approval)
+- Release type (major versions require director approval)
+
+## Workflow States
+
+```
+development → staging → pending_approval → production → completed
+                ↓              ↓                ↓
+             (rework)     (rejected)      → rollback → failed
+```
+
+- **Development**: Feature development in progress
+- **Staging**: Deployed to staging environment for testing
+- **Pending Approval**: Awaiting production approval chain
+- **Production**: Deployed to production
+- **Rollback**: Production rollback initiated
+- **Completed**: Release successfully deployed and verified
+- **Failed**: Release failed or rolled back
+
+## Issue Types
+
+| Type | Description |
+|------|-------------|
+| Release | Standard software release with version tag and changelog |
+| Hotfix | Emergency fix for production issues |
+| FeatureFlag | Feature flag rollout management |
+| Postmortem | Post-incident analysis document |
+| ChangeRequest | Infrastructure or configuration change |
+
+## Automation Recipes
+
+### Production Approval Escalation
+Escalates production approvals blocking releases beyond the 4-hour SLA.
+
+### Stale Release Follow-up
+Notifies assignees when releases remain in development (7+ days) or staging (3+ days).
+
+### Hotfix Fast Track
+Expedites critical hotfixes by:
+- Skipping manager/director approval levels
+- Reducing approval timeouts to 1 hour
+- Adding on-call SRE to approvers
+- Triggering PagerDuty alerts
+
+### Rollback Incident Management
+Automatically triggered when a release enters rollback state:
+- Creates incident in PagerDuty
+- Notifies Slack incident response channel
+- Creates postmortem issue
+- Requires SRE confirmation to complete rollback
+
+## Analytics
+
+The `deployment_health` dashboard tracks:
+
+- **Release Velocity**: Deployments to production over time
+- **Approval Time**: Average time spent waiting for approvals by level
+- **Rollback Rate**: Percentage of releases requiring rollback
+- **Lead Time Distribution**: Time from development to production
+- **Approval Bottlenecks**: Wait times by approver role
+
+### Alerts
+
+- High rollback rate (>10%)
+- Stale pending approvals (>8 hours)
+- Approval SLA breach (>24 hours)
+
+## Installation
+
+1. Install the template in your Kiket project:
+   ```bash
+   kiket definitions install release-mgmt
+   ```
+
+2. Configure roles in your project settings:
+   - `qa_lead` - QA team leads
+   - `engineering_lead` - Engineering team leads
+   - `sre` - Site Reliability Engineers
+   - `engineering_manager` - Engineering managers
+   - `director` - Engineering directors
+   - `sre_oncall` - On-call SRE rotation
+
+3. Configure notification channels:
+   - Slack: `#release-approvals`, `#incident-response`
+   - PagerDuty integration for critical alerts
+   - Email notifications for escalations
+
+4. Customize approval timeouts and thresholds in the workflow YAML as needed.
+
+## Best Practices
+
+- **Start with shorter timeouts** for hotfixes and urgent releases
+- **Use labels** to trigger conditional approval levels
+- **Review rollback postmortems** to improve release quality
+- **Monitor approval bottlenecks** to identify process improvements
+- **Set up delegation** for approvers during vacation/OOO
+
+## Related Documentation
+
+- [Workflow Approvals Guide](https://docs.kiket.dev/guides/workflow-approvals)
+- [Automation Recipes Guide](https://docs.kiket.dev/guides/automation-recipes)
+- [AI Agents Guide](https://docs.kiket.dev/platform/ai-agents)

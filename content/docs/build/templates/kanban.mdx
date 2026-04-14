@@ -1,0 +1,20 @@
+---
+title: Kanban
+description: Kanban template for Kiket.
+---
+
+{/* AUTO-SYNCED from the upstream README. Edit the source repo, not this file. */}
+
+Standard Kanban definitions for Kiket.
+
+## Analytics assets
+
+This template now ships dbt-powered analytics assets:
+
+- `.kiket/analytics/dashboards/` – Flow health dashboards consumed by the app.
+- `analytics/dbt/exposures/` – dbt exposure metadata referencing the shared marts so docs builds include the dashboard.
+
+- `flow_health.yaml` – flow efficiency dashboard with cycle-time/throughput trends and usage activity table.
+- Additional dashboards can be added alongside these files to extend the analytics surface for new projects.
+
+Dashboards load automatically after a configuration sync. Ensure the analytics dbt pipeline has run so the tenant schemas (`analytics_org_*`) are populated before reviewing charts. Include the exposure folder when running `dbt docs generate` from this repo to publish dashboard metadata.

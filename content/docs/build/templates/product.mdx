@@ -1,0 +1,55 @@
+---
+title: Product
+description: Product template for Kiket.
+---
+
+{/* AUTO-SYNCED from the upstream README. Edit the source repo, not this file. */}
+
+
+Product development and roadmap workflows for Kiket.
+
+## Overview
+
+This definition provides product management workflows including:
+
+- **Workflow**: Feature lifecycle from idea to release
+- **AI Agents**: Effort estimation, similar feature detection, release notes generation
+- **Intake Form**: Public feature request submission
+- **Board**: Product roadmap board with effort swimlanes
+- **Analytics**: Backlog health, feature requests by theme, release velocity, feedback sentiment
+
+## Structure
+
+```
+.kiket/
+├── project.yaml           # Definition metadata
+├── issue_types.yaml       # Feature issue type
+├── workflows/
+│   └── product.yaml       # Feature lifecycle workflow
+├── agents/
+│   ├── product_effort_estimator.yaml
+│   ├── product_similar_finder.yaml
+│   └── product_release_notes.yaml
+├── intakes/
+│   └── feature_request.yaml
+├── boards/
+│   └── product.yaml
+└── analytics/
+    └── dashboards/
+        └── product_health.yaml
+```
+
+## Installation
+
+Install via Kiket marketplace or include in your project configuration:
+
+```yaml
+definitions:
+  - id: product
+    version: ">=1.0.0"
+```
+
+## Optional Extensions
+
+- `slack` - Team notifications
+- `github` - Development integration

@@ -1,0 +1,323 @@
+---
+title: Make Ai
+description: Make Ai integration for Kiket.
+---
+
+{/* AUTO-SYNCED from the upstream README. Edit the source repo, not this file. */}
+
+Workflow automation extension that integrates Kiket with Make.com (formerly Integromat).
+
+## Overview
+
+The Make extension enables bidirectional integration between Kiket and Make.com, allowing users to:
+- Trigger Make scenarios from Kiket issue transitions
+- Create/update Kiket issues from Make scenarios
+- Analyze workflows and suggest automation opportunities
+- Monitor automation execution and handle failures
+
+## Features
+
+### Core Integration
+- **Webhook Handlers**: Receive events from Kiket (issue transitions, assignments, comments)
+- **Make API Client**: Trigger Make scenarios, check execution status
+- **Error Recovery**: Automatic retry logic with exponential backoff
+- **Secret Management**: Secure storage of Make API keys and webhook URLs
+
+### Automation Capabilities
+- **Workflow Suggestions**: Analyze Kiket workflows and suggest Make automation opportunities
+- **Scenario Templates**: Pre-built Make scenarios for common Kiket patterns
+- **Automation Health**: Monitor scenario execution and alert on failures
+- **Smart Routing**: Keyword-based scenario matching for conditional workflow branching
+
+## Architecture
+
+```
+Kiket → Webhook → Extension → Make.com API
+                    ↓
+                Secret Store
+                    ↓
+                Scenario Matcher (keyword-based)
+```
+
+## Installation
+
+### Prerequisites
+- Ruby 3.2+
+- Make.com account with API access
+- Kiket workspace with extension permissions
+
+### Setup
+
+1. Clone the repository:
+```bash
+git clone git@github.com:kiket-dev/kiket-ext-make-ai.git
+cd kiket-ext-make-ai
+```
+
+The repository follows the same `.kiket/` layout as workspace definitions:
+
+```
+.kiket/
+  manifest.yaml                  # extension manifest consumed by Kiket
+  modules/
+    automation_records/
+      schema.yml                 # custom data module definition
+```
+
+2. Install dependencies:
+```bash
+bundle install
+```
+
+3. Configure secrets in Kiket Settings → Extensions:
+```yaml
+MAKE_API_KEY: your_make_api_key
+MAKE_WEBHOOK_URL: https://hook.make.com/...
+KIKET_WEBHOOK_SECRET: auto_generated_by_kiket
+```
+
+4. Deploy to Cloud Run (optional local/preview deployment — the marketplace installer provisions managed Cloud Run services automatically from the manifest `deployment` block):
+
+```bash
+gcloud run deploy kiket-make-extension \
+  --source . \
+  --region europe-west1 \
+  --allow-unauthenticated
+```
+
+> The `.kiket/manifest.yaml` file already captures the runtime, image, region, scaling, VPC, and secret requirements. When you publish/install the extension through Kiket, the platform turns that block into a Terraform plan and provisions the per-tenant Cloud Run service for you—no custom IaC bundles required.
+
+5. Register the extension in Kiket Marketplace
+
+## Usage
+
+### Triggering Make Scenarios from Kiket
+
+When an issue transitions to "Ready for Automation":
+1. Extension receives webhook from Kiket
+2. Scenario matcher analyzes issue context using keyword matching
+3. Extension triggers Make scenario with issue data
+4. Make executes workflow (e.g., create customer record, send notification)
+5. Results synced back to Kiket as comment
+
+### Creating Issues from Make
+
+Use the Make HTTP module to call extension endpoints:
+```
+POST /api/issues
+{
+  "project_key": "PROJ",
+  "title": "Customer onboarding request",
+  "description": "Auto-created from Make scenario",
+  "labels": ["automation", "make"],
+  "custom_fields": {
+    "source_scenario_id": "12345"
+  }
+}
+```
+
+## Configuration
+
+### Extension Manifest (`.kiket/manifest.yaml`)
+
+```yaml
+manifestVersion: "1.1"
+extension:
+  id: com.kiket.ext.make-ai
+  name: Make.com Integration
+  version: 1.0.0
+  description: Automation bridge between Kiket and Make.com
+  permissions:
+    - read:issues
+    - write:issues
+    - write:comments
+    - read:workflows
+  delivery:
+    type: http
+    callback:
+      url: ${EXTENSION_BASE_URL}
+      secret: env:KIKET_WEBHOOK_SECRET
+  custom_data:
+    permissions:
+      - module: com.kiket.ext.make-ai.automation
+        operations: [read, write]
+
+deployment:
+  runtime: cloud_run
+  region: ${KIKET_REGION:-europe-west1}
+  image: ${MAKE_AI_IMAGE:-gcr.io/YOUR_PROJECT/make-ai-extension:latest}
+  resources:
+    cpu: "1"
+    memory: "512Mi"
+    concurrency: 20
+  min_instances: 0
+  max_instances: 5
+  vpc:
+    connector: ${KIKET_VPC_CONNECTOR:-projects/YOUR_PROJECT/locations/europe-west1/connectors/kiket-managed}
+    egress: private-ranges-only
+  secret_keys:
+    - KIKET_WEBHOOK_SECRET
+    - KIKET_WORKSPACE_TOKEN
+    - MAKE_API_KEY
+    - MAKE_WEBHOOK_URL
+  env:
+    RACK_ENV: production
+
+secrets:
+  - key: KIKET_WEBHOOK_SECRET
+    description: Secret used to verify Kiket webhooks
+  - key: KIKET_WORKSPACE_TOKEN
+    description: Token used by the extension to call the Kiket API
+  - key: MAKE_API_KEY
+    description: Make.com API key
+  - key: MAKE_WEBHOOK_URL
+    description: Base Make.com webhook URL
+```
+
+### Custom Data Module (`.kiket/modules/automation_records/schema.yml`)
+
+```yaml
+module:
+  id: com.kiket.ext.make-ai.automation
+  name: "Make Automation Records"
+  scope: project
+  tables:
+    - name: automation_runs
+      columns:
+        - name: issue_key
+          type: string
+          null: false
+        - name: scenario_id
+          type: string
+          null: false
+        - name: occurred_at
+          type: datetime
+          null: false
+```
+
+settings:
+  AUTO_TRIGGER_ENABLED:
+    type: boolean
+    default: "true"
+  MAX_RETRIES:
+    type: integer
+    default: "3"
+```
+
+## API Reference
+
+### Webhook Endpoints
+
+**POST /webhooks/issue.transitioned**
+Handles Kiket issue transitions.
+
+Request:
+```json
+{
+  "event": "issue.transitioned",
+  "issue": {
+    "key": "PROJ-123",
+    "title": "Customer setup",
+    "transition": {
+      "from": "backlog",
+      "to": "ready_for_automation"
+    }
+  }
+}
+```
+
+Response:
+```json
+{
+  "ok": true,
+  "scenario_triggered": "12345",
+  "execution_id": "abc-def-123"
+}
+```
+
+### REST Endpoints
+
+**POST /api/issues**
+Create a new issue in Kiket.
+
+**GET /api/scenarios**
+List configured Make scenarios.
+
+**POST /api/analyze**
+Analyze a Kiket workflow and suggest Make automations.
+
+## Development
+
+### Running Locally
+
+```bash
+# Start the extension server
+bundle exec ruby app.rb
+
+# In another terminal, send test webhooks
+curl -X POST http://localhost:8080/webhooks/issue.transitioned \
+  -H "Content-Type: application/json" \
+  -H "X-Kiket-Signature: $(ruby -e 'require \"openssl\"; puts OpenSSL::HMAC.hexdigest(\"SHA256\", \"test_secret\", File.read(\"test_payload.json\"))')" \
+  -d @test_payload.json
+```
+
+### Testing
+
+```bash
+bundle exec rspec
+```
+
+### Deployment
+
+The extension uses Cloud Run with automatic scaling:
+- Min instances: 0
+- Max instances: 10
+- Memory: 512MB
+- Timeout: 60s
+
+## Monitoring
+
+### Metrics
+- Scenario trigger success rate
+- Average execution time
+- Failed scenario count
+- Scenario suggestion acceptance rate
+
+### Logging
+All requests logged to Cloud Logging with structured JSON:
+```json
+{
+  "severity": "INFO",
+  "event": "scenario_triggered",
+  "issue_key": "PROJ-123",
+  "scenario_id": "12345",
+  "duration_ms": 234
+}
+```
+
+## Troubleshooting
+
+### Scenario not triggering
+1. Check Make API key is valid
+2. Verify webhook URL is correct
+3. Check extension logs for errors
+4. Ensure issue transition matches trigger condition
+
+### Scenario suggestions not matching
+1. Review scenario template keywords in lib/scenario_matcher.rb
+2. Check issue title/description for expected keywords
+3. Adjust confidence thresholds if needed
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development guidelines.
+
+## License
+
+MIT License - see [LICENSE](LICENSE)
+
+## Support
+
+- Documentation: https://docs.kiket.dev/extensions/make
+- Issues: https://github.com/kiket-dev/kiket-ext-make-ai/issues
+- Community: https://community.kiket.dev

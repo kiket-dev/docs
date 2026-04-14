@@ -1,0 +1,69 @@
+---
+title: Legal
+description: Legal template for Kiket.
+---
+
+{/* AUTO-SYNCED from the upstream README. Edit the source repo, not this file. */}
+
+
+Legal and compliance workflows for Kiket.
+
+## Overview
+
+This definition provides legal operations workflows including:
+
+- **Workflows**: GDPR data subject requests and contract lifecycle
+- **AI Agents**: GDPR classification, identity verification, contract analysis
+- **Intake Forms**: Public GDPR request, internal contract request
+- **Board**: Legal requests board
+- **Analytics**: Contract turnaround, GDPR SLA compliance, renewal pipeline, risk scoring
+- **Automations**: GDPR classification, SLA alerts, compliance audit trails
+
+## Structure
+
+```
+.kiket/
+├── project.yaml           # Definition metadata
+├── issue_types.yaml       # GDPR request and contract issue types
+├── workflows/
+│   ├── gdpr.yaml          # GDPR request workflow
+│   └── contract.yaml      # Contract lifecycle workflow
+├── agents/
+│   ├── legal_gdpr_classifier.yaml
+│   ├── legal_identity_verifier.yaml
+│   └── legal_contract_analyzer.yaml
+├── intakes/
+│   ├── gdpr_request.yaml
+│   └── contract_request.yaml
+├── boards/
+│   └── legal.yaml
+├── analytics/
+│   └── dashboards/
+│       └── legal_health.yaml
+└── automations/
+    └── gdpr_automations.yaml
+```
+
+## Features
+
+- **GDPR Compliance**: 30-day SLA tracking, identity verification, blockchain audit trails
+- **Contract Management**: Multi-stage approval, signature tracking, expiration management
+
+## Installation
+
+Install via Kiket marketplace or include in your project configuration:
+
+```yaml
+definitions:
+  - id: legal
+    version: ">=1.0.0"
+```
+
+## Required Extensions
+
+- `email` - Email notifications
+
+## Optional Extensions
+
+- `slack` - Team notifications
+- `docusign` - E-signature integration

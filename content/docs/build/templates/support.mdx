@@ -1,0 +1,65 @@
+---
+title: Support
+description: Support template for Kiket.
+---
+
+{/* AUTO-SYNCED from the upstream README. Edit the source repo, not this file. */}
+
+
+Customer support ticketing and management workflows for Kiket.
+
+## Overview
+
+This definition provides a complete customer support system including:
+
+- **Workflow**: Support ticket lifecycle from submission to resolution
+- **AI Agents**: Automatic categorization, duplicate detection, resolution suggestions
+- **Intake Form**: Public support ticket submission
+- **Board**: Kanban board with priority swimlanes and SLA tracking
+- **Dashboard**: Support metrics, SLA compliance, team performance
+- **Analytics**: Resolution time trends, CSAT scores, agent workload, ticket aging
+- **Automations**: Auto-assignment, SLA warnings, escalation rules
+
+## Structure
+
+```
+.kiket/
+├── project.yaml           # Definition metadata
+├── issue_types.yaml       # Support ticket issue type
+├── workflows/
+│   └── support.yaml       # Ticket lifecycle workflow
+├── agents/
+│   ├── support_categorize.yaml
+│   ├── support_detect_duplicates.yaml
+│   └── support_suggest_resolution.yaml
+├── intakes/
+│   └── support_ticket.yaml
+├── boards/
+│   └── support.yaml
+├── dashboards/
+│   └── support_dashboard.yaml
+├── analytics/
+│   └── dashboards/
+│       └── support_health.yaml
+└── automations/
+    └── support_automations.yaml
+```
+
+## Installation
+
+Install via Kiket marketplace or include in your project configuration:
+
+```yaml
+definitions:
+  - id: support
+    version: ">=1.0.0"
+```
+
+## Required Extensions
+
+- `email` - Email notifications
+
+## Optional Extensions
+
+- `slack` - Team notifications
+- `teams` - Microsoft Teams integration
