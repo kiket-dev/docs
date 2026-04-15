@@ -16,6 +16,14 @@ export const metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* Plausible Analytics — self-hosted, no cookies, no banner needed. */}
+        <script
+          defer
+          data-domain="docs.kiket.dev"
+          src="https://plausible.kiket.dev/js/script.js"
+        />
+      </head>
       <body className="font-sans antialiased">
         <RootProvider>{children}</RootProvider>
       </body>
