@@ -1,0 +1,60 @@
+---
+title: Marketplace bundles
+description: One-click install of a workflow template plus the extensions it needs to work end-to-end.
+---
+
+A **bundle** is a curated pack: one project template plus the extensions
+that make it useful on day one. Instead of configuring GitHub, Slack,
+email, time-tracking, and a workflow one by one, you install a bundle
+and the pieces show up together, pre-wired.
+
+## Built-in bundles
+
+| Bundle | What's in the box | Best for |
+| --- | --- | --- |
+| **DevOps Starter** | Kanban workflow · GitHub · Slack | Engineering teams shipping continuously |
+| **Developer Toolkit** | Scrum workflow · GitHub · Slack · (opt.) Jira, Time Tracking | Sprint-based product teams |
+| **GDPR Compliance Pack** | GDPR Request workflow · Email · Time Tracking · (opt.) Slack | Data-protection officers, privacy teams |
+| **Enterprise Security** | Contract review · Jira · Teams · Microsoft OAuth · (opt.) Email | Security-minded enterprises |
+| **Business Operations Suite** | Business-ops + Support + Sales + Engineering workflows · Email, Slack, GitHub · (opt.) Marketing, Partners, Product, Finance, Legal | Running a whole SaaS company |
+| **Customer Support** | E-commerce support workflow · Email · Slack · Teams · Twilio · (opt.) Mailjet Inbound | Multi-channel customer support |
+| **Marketing Suite** | Marketing-ops + Campaigns workflows · Email · Slack · Make.com · (opt.) Google Calendar | Campaign and content ops |
+
+## How install works
+
+1. **Pick a bundle** on the Marketplace page.
+2. **Review what's included.** Required items are pre-checked; optional
+   items appear under "Recommended" for you to opt in or skip.
+3. **Choose a target project.** Either create a fresh project (we'll
+   scaffold it from the bundle's suggested template) or pick an
+   existing one.
+4. **Install.** A progress panel shows per-step status: project created
+   → template applied → each extension installed. If any step fails,
+   the whole install rolls back — no half-configured state left behind.
+5. **Configure.** Some extensions need credentials (Slack tokens, SMTP
+   hosts, …). Install completes even without credentials — fill them
+   in from Settings → Extensions when you're ready.
+
+## Atomic rollback
+
+Bundle installs run inside a database transaction. If, for example,
+the Twilio extension fails to install, the transaction aborts and no
+new rows are written — the target project's extension list is
+identical to what it was before you clicked "Install." Retry once the
+underlying issue (credentials, network) is fixed.
+
+## Optional items
+
+Every bundle has a "Recommended" list that the wizard surfaces
+separately. They are *not* installed automatically — you opt in.
+Examples: Time Tracking in the DevOps Starter (useful if you bill
+hours), Mailjet Inbound in Customer Support (useful if you want to
+turn support emails directly into tickets).
+
+## Can I make my own bundle?
+
+Not yet — user-created bundles are on the roadmap. Today, bundles are
+Kiket-curated. The architecture is ready for it: a bundle is just a
+marketplace record with an `items` array, each item carrying a
+`required` flag. When self-service bundles land, you'll be able to
+export your current project's configuration as a sharable bundle.
