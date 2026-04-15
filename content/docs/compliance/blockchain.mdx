@@ -14,9 +14,21 @@ fact, without trusting Kiket or your database.
 Regulated frameworks (GDPR Art. 30, SOC 2 CC7, HIPAA §164.312(b), ISO
 27001 A.12.4) require audit trails that are both complete and resistant
 to tampering. Traditional logs satisfy "complete" but not "tamper
-evident" — an admin with DB access can rewrite history. A Merkle-root
-commitment published on a public chain makes silent rewrites
-mathematically detectable.
+evident" — an admin with DB access can rewrite history unnoticed.
+Anchoring each batch's Merkle root to a public blockchain makes
+post-anchor edits to those entries **mathematically detectable** by any
+party holding the entries and the chain.
+
+Two honest caveats:
+
+- **Entries pending their next hourly anchor remain regular DB rows.**
+  Until a batch is anchored, tampering with it is not detectable by the
+  chain alone. Keep anchor cadence short for the events you care most
+  about.
+- **Blockchain anchoring proves what was written wasn't changed; it
+  does not prove what was *never* written.** Completeness still comes
+  from the append-only discipline of the audit logger, not from the
+  chain.
 
 ## How it works
 
