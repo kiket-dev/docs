@@ -8,8 +8,7 @@ export const metadata = {
     default: 'Kiket Docs',
     template: '%s · Kiket Docs',
   },
-  description:
-    "Documentation for Kiket — the compliance-first workflow automation platform.",
+  description: 'Documentation for Kiket — the compliance-first workflow automation platform.',
   icons: { icon: '/favicon.svg' },
 };
 
@@ -18,11 +17,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html lang="en" suppressHydrationWarning>
       <head>
         {/* Plausible Analytics — self-hosted, no cookies, no banner needed. */}
-        <script
-          defer
-          data-domain="docs.kiket.dev"
-          src="https://plausible.kiket.dev/js/script.js"
-        />
+        <script defer data-domain="docs.kiket.dev" src="https://plausible.kiket.dev/js/script.js" />
       </head>
       <body className="font-sans antialiased">
         <RootProvider>{children}</RootProvider>

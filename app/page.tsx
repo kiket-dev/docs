@@ -1,5 +1,5 @@
-import Link from 'next/link';
 import { ArrowRight, BookOpen, Code2, Compass, ShieldCheck } from 'lucide-react';
+import Link from 'next/link';
 
 const LANDING_LINKS = [
   {
@@ -39,8 +39,8 @@ export default function HomePage() {
           Kiket, explained.
         </h1>
         <p className="mt-4 text-lg text-gray-600 dark:text-gray-400">
-          The platform that produces audit-grade evidence as a side effect of doing the work. Start with the
-          quickstart, then dive into whichever pillar fits your role.
+          The platform that produces audit-grade evidence as a side effect of doing the work. Start with the quickstart,
+          then dive into whichever pillar fits your role.
         </p>
       </div>
 

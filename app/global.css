@@ -2,9 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
-@import '@fontsource-variable/geist';
-@import '@fontsource-variable/geist-mono';
+@import "@fontsource-variable/geist";
+@import "@fontsource-variable/geist-mono";
 
 :root {
-  font-feature-settings: 'cv11', 'ss01';
+  font-feature-settings: "cv11", "ss01";
 }

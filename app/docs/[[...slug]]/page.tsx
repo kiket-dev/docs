@@ -1,10 +1,10 @@
-import { DocsPage, DocsBody, DocsTitle, DocsDescription } from 'fumadocs-ui/page';
-import { notFound } from 'next/navigation';
-import { source } from '@/lib/source';
-import defaultMdxComponents from 'fumadocs-ui/mdx';
+import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
 import { Step, Steps } from 'fumadocs-ui/components/steps';
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
-import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
+import defaultMdxComponents from 'fumadocs-ui/mdx';
+import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/page';
+import { notFound } from 'next/navigation';
+import { source } from '@/lib/source';
 
 interface PageProps {
   params: Promise<{ slug?: string[] }>;
