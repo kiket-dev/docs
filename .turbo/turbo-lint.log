@@ -1,5 +1,0 @@
-
-> @kiket/docs@0.1.0 lint /home/adam/source/repos/kiket2/docs-site
-> biome check app/ lib/ scripts/ --diagnostic-level=error
-
-Checked 8 files in 3ms. No fixes applied.
