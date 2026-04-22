@@ -147,6 +147,13 @@ function stripH1(md) {
   return md.replace(/^#\s+[^\n]*\n+/, '');
 }
 
+function sanitizeLegacyContent(md) {
+  return md
+    .replaceAll(/Kiket Platform v1\.0\+/g, 'Kiket Platform')
+    .replaceAll(/Rails encrypted attributes/gi, 'encrypted at rest in the Kiket API')
+    .replaceAll(/Rails-era snake_case/gi, 'legacy snake_case');
+}
+
 async function main() {
   const results = await Promise.allSettled(
     SOURCES.map(async (src) => {
@@ -159,7 +166,7 @@ async function main() {
         '---',
         '',
         BANNER,
-        stripH1(content),
+        sanitizeLegacyContent(stripH1(content)),
       ].join('\n');
       const out = join(DOCS_ROOT, src.output);
       await mkdir(dirname(out), { recursive: true });

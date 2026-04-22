@@ -5,6 +5,7 @@ description: Google Oauth integration for Kiket.
 
 {/* AUTO-SYNCED from the upstream README. Edit the source repo, not this file. */}
 
+
 Shared OAuth 2.0 provider for Google services. Enables single sign-on for Google Calendar, Google Drive, and other Google integrations in Kiket.
 
 ## Features
@@ -16,7 +17,7 @@ Shared OAuth 2.0 provider for Google services. Enables single sign-on for Google
 
 ## Requirements
 
-- Kiket Platform v1.0+
+- Kiket Platform
 - Google Cloud Console account with OAuth 2.0 credentials
 
 ## Installation
@@ -106,7 +107,7 @@ Once configured, the extension provides OAuth connectivity for consumer extensio
 
 ## Security
 
-- OAuth tokens are encrypted at rest using Rails encrypted attributes
+- OAuth tokens are encrypted at rest using encrypted at rest in the Kiket API
 - Client secrets are stored in Google Secret Manager
 - Tokens can be revoked at any time via the UI or CLI
 

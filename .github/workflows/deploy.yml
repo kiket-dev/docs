@@ -1,23 +1,20 @@
-name: Deploy docs to GitHub Pages
+name: Deploy docs to Cloudflare Pages
 
 on:
   push:
     branches: [main]
   workflow_dispatch:
 
-# Required permissions for the deploy-pages action.
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 # Serialize concurrent runs so a later push doesn't leapfrog an earlier one.
 concurrency:
-  group: pages
-  cancel-in-progress: false
+  group: docs-pages-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -42,23 +39,12 @@ jobs:
         env:
           NODE_ENV: production
 
-      - name: Ensure CNAME is in output
-        # The Next.js `output: 'export'` step drops built assets in ./out.
-        # GitHub Pages looks for a CNAME file there for the custom domain.
-        run: cp public/CNAME out/CNAME
-
-      - uses: actions/configure-pages@v5
-
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: ./out
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Deploy to Cloudflare Pages
+        run: >
+          pnpm dlx wrangler pages deploy ./out
+          --project-name "${{ vars.CLOUDFLARE_PAGES_DOCS_PROJECT || 'kiket-docs' }}"
+          --branch "${{ github.ref_name }}"
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          NODE_ENV: production

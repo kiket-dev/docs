@@ -5,6 +5,7 @@ description: Microsoft Oauth integration for Kiket.
 
 {/* AUTO-SYNCED from the upstream README. Edit the source repo, not this file. */}
 
+
 Shared OAuth 2.0 provider for Microsoft services. Enables single sign-on for Outlook Calendar, Microsoft Teams, OneDrive, and other Microsoft 365 integrations in Kiket.
 
 ## Features
@@ -17,7 +18,7 @@ Shared OAuth 2.0 provider for Microsoft services. Enables single sign-on for Out
 
 ## Requirements
 
-- Kiket Platform v1.0+
+- Kiket Platform
 - Azure Portal account with App Registration
 
 ## Installation
@@ -137,7 +138,7 @@ Once configured, the extension provides OAuth connectivity for consumer extensio
 
 ## Security
 
-- OAuth tokens are encrypted at rest using Rails encrypted attributes
+- OAuth tokens are encrypted at rest using encrypted at rest in the Kiket API
 - Client secrets are stored in Google Secret Manager
 - Supports client_credentials flow for app-only access
 - Tokens can be revoked at any time via the UI or CLI
