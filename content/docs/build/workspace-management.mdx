@@ -1,0 +1,65 @@
+---
+title: Workspace management
+description: Manage projects, repositories, sync policies, and activity from one Settings hub.
+---
+
+Kiket consolidates operational management under **Settings** so teams do not have to jump between scattered dialogs.
+
+## Canonical sections
+
+Use these routes as the source of truth for management workflows:
+
+- **Projects**: `/settings/projects`
+- **Repositories**: `/settings/repositories`
+- **Sync Policies**: `/settings/sync`
+- **History & Activity**: `/settings/history`
+
+## Projects (`/settings/projects`)
+
+Use this section for full project lifecycle operations:
+
+- create new projects
+- edit project name/description
+- delete projects (with confirmation)
+- view linked repository context
+
+Project creation uses the same source model as onboarding:
+
+- **Copy from Template**
+- **Use Existing Repo**
+- **Create New Repo**
+
+## Repositories (`/settings/repositories`)
+
+Repository management covers:
+
+- connected repo inventory
+- project-to-repo linking
+- branch visibility and repository metadata
+- connect/disconnect actions
+
+## Sync Policies (`/settings/sync`)
+
+Sync controls are centralized here:
+
+- `syncMode`: `webhook` / `scheduled` / `manual`
+- `syncIntervalMinutes` for scheduled repositories
+- branch updates
+- manual sync trigger with status feedback
+
+## History & Activity (`/settings/history`)
+
+The timeline combines management events from multiple systems:
+
+- audit log events (project/repository mutations and other settings actions)
+- repository sync execution history
+- filters by action/resource/status and text search
+- export actions for compliance and reporting
+
+## Recommended team workflow
+
+1. Create or connect workspaces in **Projects** and **Repositories**.
+2. Define sync behavior in **Sync Policies**.
+3. Verify outcomes and incidents in **History & Activity**.
+
+This keeps day-2 operations predictable and makes ownership clear across admins, operators, and engineering leads.

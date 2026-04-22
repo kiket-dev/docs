@@ -35,7 +35,7 @@ Template pages above are auto-synced from the upstream template repos — the RE
 
 ### Pick it at project creation
 
-In the **New project** wizard, click **From template** and browse the gallery. Each card shows a preview of the states, issue types, and integrations the template uses.
+In the **New project** wizard, click **Copy from Template** and browse the gallery. Each card shows a preview of the states, issue types, and integrations the template uses.
 
 </Step>
 
@@ -60,6 +60,18 @@ Kiket creates a workspace repo from the template (via GitHub's template-repo API
 ### Customize in place
 
 The template is just a starting point. Edit the YAML in your IDE or the canvas in the app — both write to your repo. You're never locked to the upstream template.
+
+</Step>
+
+<Step>
+
+### Install templates later from Marketplace
+
+You can also install templates after project creation from `/marketplace`.
+
+- Installing a template adds it to your org library.
+- If a project is selected, Kiket writes the workflow into that workspace under `.kiket/workflows/<workflow-id>.yaml`.
+- The success toast includes **Open editor** to jump straight into editing.
 
 </Step>
 

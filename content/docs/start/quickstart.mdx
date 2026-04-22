@@ -12,9 +12,9 @@ A workspace is a private git repository where your workflow configuration lives 
 ## Pick your path
 
 <Cards>
-  <Card title="From a template" description="Start with a proven workflow (Kanban, Scrum, Contract Review…). Takes ~2 minutes. Recommended for first-timers." />
-  <Card title="From an existing repo" description="You already have a repo with a `.kiket/` config. Connect it and the app discovers everything." />
-  <Card title="Start fresh" description="We create a workspace repo for you and scaffold a simple Kanban workflow. Tweak from there." />
+  <Card title="Copy from Template" description="Start with a proven workflow (Kanban, Scrum, Contract Review...). Takes ~2 minutes. Recommended for first-timers." />
+  <Card title="Use Existing Repo" description="You already have a repo with a `.kiket/` config. Connect it and the app discovers everything." />
+  <Card title="Create New Repo" description="We create a workspace repo for you and scaffold a simple Kanban workflow. Tweak from there." />
 </Cards>
 
 ## Walkthrough
@@ -35,9 +35,9 @@ Visit [app.kiket.dev](https://app.kiket.dev/register) and sign up with email or 
 
 On the **New project** screen, choose one of the three source cards:
 
-- **From a template** — browse the gallery (16 industry templates), pick one, click *Use this template*.
-- **From GitHub** — connect an existing repo that has a `.kiket/` directory; the app discovers workflows, boards, and issue types automatically.
-- **Start Fresh** — we create a new repo for you and scaffold a minimal Kanban workflow.
+- **Copy from Template** — browse the gallery, pick one, click *Use this template*.
+- **Use Existing Repo** — connect an existing repo that has a `.kiket/` directory; the app discovers workflows, boards, and issue types automatically.
+- **Create New Repo** — we create a new repo for you and scaffold a minimal Kanban workflow.
 
 <Callout title="Why a repo?">
 Kiket commits every change (workflow edit, board tweak, approval rule) as a file in your repo. The commit history *is* your audit trail. You don't have to touch git to work — but it's there if you ever need to roll back.
@@ -70,6 +70,19 @@ The whole thing takes 10–30 seconds.
 
 <Step>
 
+### Open management settings
+
+After your first project is live, use **Settings** as the management hub:
+
+- `/settings/projects` for project CRUD
+- `/settings/repositories` for connected repositories
+- `/settings/sync` for sync mode/interval and manual sync controls
+- `/settings/history` for audit + sync activity
+
+</Step>
+
+<Step>
+
 ### Create your first issue
 
 On the board, click **New issue**. Give it a title, pick an issue type (Task, Bug, Feature), and save. Drag it between columns to transition through states. Every transition emits an event; the **Audit** sidebar shows them.
@@ -93,5 +106,7 @@ Open the issue detail view and scroll to **Activity**. Every state change, comme
 <Cards>
   <Card title="Core concepts" href="/docs/start/core-concepts" description="Workflows, states, transitions, SLAs, approvals — the vocabulary." />
   <Card title="Build your first workflow" href="/docs/start/first-workflow" description="Walk through authoring a two-state workflow on the canvas." />
+  <Card title="Workspace management" href="/docs/build/workspace-management" description="Run project, repo, sync, and activity operations from Settings." />
+  <Card title="Status and support" href="/docs/start/status-and-support" description="Check status.kiket.dev and find the right support channel." />
   <Card title="Install an extension" href="/docs/start/first-extension" description="Connect Slack so the board notifies your team." />
 </Cards>

@@ -1,4 +1,4 @@
 {
   "title": "Build",
-  "pages": ["workflows", "boards", "intake-forms", "automations", "dashboards", "issue-types", "templates", "bundles"]
+  "pages": ["workflows", "boards", "intake-forms", "automations", "dashboards", "issue-types", "templates", "workspace-management", "bundles"]
 }
