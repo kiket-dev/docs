@@ -1,20 +1,20 @@
 ---
 title: Quickstart
-description: From zero to a running workflow in under 10 minutes. Pick one of three paths.
+description: From zero to the first monitored process, evidence source, scan, finding, and report.
 ---
 
-You'll create an organization, connect (or create) a **workspace repository**, activate a workflow template, and transition your first issue end-to-end — all in the browser. No credit card, no credentials to configure.
+You'll create an organization, choose a **monitored process** template, connect or seed an **evidence source**, run a first scan, review findings, and generate an audit-ready snapshot. No credit card is required.
 
 <Callout type="info">
-A workspace is a private git repository where your workflow configuration lives as YAML. You never need to know git to use Kiket — the app writes the commits for you. But everything is versioned, diffable, and revertible.
+A workspace is the tenant-local home for process configuration and runtime evidence. The configuration remains file-backed under `.kiket/`, so changes are versioned and reviewable, but the app guides the setup without asking first-time users to understand git.
 </Callout>
 
 ## Pick your path
 
 <Cards>
-  <Card title="Copy from Template" description="Start with a proven workflow (Kanban, Scrum, Contract Review...). Takes ~2 minutes. Recommended for first-timers." />
-  <Card title="Use Existing Repo" description="You already have a repo with a `.kiket/` config. Connect it and the app discovers everything." />
-  <Card title="Create New Repo" description="We create a workspace repo for you and scaffold a simple Kanban workflow. Tweak from there." />
+  <Card title="Explore Sample Data" description="Use the seeded operational twin to see cases, evidence, findings, remediation, and reports immediately." />
+  <Card title="Start from Template" description="Pick a compliance process such as vendor review, incident response, contract approval, privacy request, or production change." />
+  <Card title="Connect Existing Config" description="Connect a repository that already contains `.kiket/` process configuration and evidence-source settings." />
 </Cards>
 
 ## Walkthrough
@@ -31,93 +31,80 @@ Visit [app.kiket.dev](https://app.kiket.dev/register) and sign up with email or 
 
 <Step>
 
-### Pick a setup path
+### Pick the first outcome
 
-On the **New project** screen, choose one of the three source cards:
+In onboarding, choose the outcome you want to monitor first. Kiket shows what the template creates before you commit:
 
-- **Copy from Template** — browse the gallery, pick one, click *Use this template*.
-- **Use Existing Repo** — connect an existing repo that has a `.kiket/` directory; the app discovers workflows, boards, and issue types automatically.
-- **Create New Repo** — we create a new repo for you and scaffold a minimal Kanban workflow.
+- process states and case types
+- expected evidence
+- likely scanner findings
+- evidence sources to connect
+- report output
 
-<Callout title="Why a repo?">
-Kiket commits every change (workflow edit, board tweak, approval rule) as a file in your repo. The commit history *is* your audit trail. You don't have to touch git to work — but it's there if you ever need to roll back.
-</Callout>
-
-</Step>
-
-<Step>
-
-### Pick your role profile
-
-After project setup completes, the wizard asks what role best matches your day-to-day work. For vertical templates (healthcare, finance, legal, and others), role labels can adapt to template metadata so they feel domain-native.
-
-- This role is used for UI personalization (for example default landing area and advanced mode defaults).
-- It does **not** grant or remove permissions.
+For the fastest path, choose **Explore sample data** or a template with a built-in evidence path such as production change approval.
 
 </Step>
 
 <Step>
 
-### Name your project
+### Create your workspace
 
-Enter a project name and 2–10 character key (like `LEGAL` or `ACME`). Invite a teammate if you want company for the first workflow — optional, skippable.
+Create the organization and workspace that will own the monitored process, cases, evidence, findings, remediation, and reports. You can rename both later.
 
-</Step>
-
-<Step>
-
-### Watch the progress screen
-
-The wizard will:
-
-1. Create the workspace repository (if you picked template or fresh).
-2. Load the configuration — workflows, boards, issue types, intakes.
-3. Set up your default board.
-4. Ask for your role profile and personalize your default landing area.
-
-The whole thing takes 10–30 seconds.
+The setup flow writes the selected process configuration into `.kiket/`, creates the workspace record, and opens the product around the first-value checklist.
 
 </Step>
 
 <Step>
 
-### Open management settings
+### Connect an evidence source
 
-After your first project is live, use **Settings** as the management hub:
+Open **Settings → Evidence Sources** and connect the source that can prove the process happened. Typical first sources are:
 
-- `/settings/projects` for project CRUD
-- `/settings/repositories` for connected repositories
-- `/settings/sync` for sync mode/interval and manual sync controls
-- `/settings/history` for audit + sync activity
+- GitHub for pull requests, reviews, commits, and deployment evidence
+- Jira or Linear for work item status and ownership
+- Slack or Teams for approval and incident context
+- webhook/API ingestion for internal systems
 
-</Step>
-
-<Step>
-
-### Create your first issue
-
-On the board, click **New issue**. Give it a title, pick an issue type (Task, Bug, Feature), and save. Drag it between columns to transition through states. Every transition emits an event; the **Audit** sidebar shows them.
+Each source produces raw events, normalized operational events, evidence records, and scanner context.
 
 </Step>
 
 <Step>
 
-### See the audit trail
+### Run the first scan
 
-Open the issue detail view and scroll to **Activity**. Every state change, comment, and assignment is logged with actor, timestamp, and hash. When batched (roughly once an hour), these entries are anchored on the Polygon blockchain — at that point they become *externally verifiable*.
+After one case and at least one evidence record exist, run or wait for the first scanner pass. The scanner compares the process model with observed reality and creates findings such as:
 
-<img src="/diagrams/audit-trail.svg" alt="Four steps: action happens, hash computed, anchored on-chain, auditor verifies" />
+- missing approval evidence
+- evidence source disconnected
+- stale access review
+- SLA risk or breach
 
 </Step>
+
+<Step>
+
+### Resolve one finding
+
+Open **Findings** or **Remediation**, attach missing evidence or assign an owner, and close the loop. Kiket keeps the finding explanation, source event, evidence, remediation action, and audit history together.
+
+### Generate the audit snapshot
+
+Open **Audit Room** and generate a report for the monitored process. The report pulls from the same graph: process model, cases, evidence, findings, remediation, scanner runs, and optional integrity proofs.
+
+</Step>
+
+<Step>
 
 </Steps>
 
 ## What's next?
 
 <Cards>
-  <Card title="Core concepts" href="/docs/start/core-concepts" description="Workflows, states, transitions, SLAs, approvals — the vocabulary." />
-  <Card title="Build your first workflow" href="/docs/start/first-workflow" description="Walk through authoring a two-state workflow on the canvas." />
-  <Card title="Workspace management" href="/docs/build/workspace-management" description="Run project, repo, sync, and activity operations from Settings." />
+  <Card title="Core concepts" href="/docs/start/core-concepts" description="Processes, cases, evidence, findings, remediation, reports, and integrity proofs." />
+  <Card title="Build your first process" href="/docs/start/first-workflow" description="Walk through authoring a monitored process model on the canvas." />
+  <Card title="Workspace management" href="/docs/build/workspace-management" description="Manage workspaces, repositories, sync, and activity operations from Settings." />
   <Card title="Status and support" href="/docs/start/status-and-support" description="Check status.kiket.dev and find the right support channel." />
-  <Card title="Install an extension" href="/docs/start/first-extension" description="Connect Slack so the board notifies your team." />
+  <Card title="Connect an evidence source" href="/docs/start/first-extension" description="Connect a tool that emits operational evidence into the twin." />
 </Cards>

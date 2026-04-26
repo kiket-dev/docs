@@ -1,49 +1,51 @@
 ---
 title: Integrations
-description: Connect the tools your team already uses — signed, audit-logged, revocable extensions.
+description: Connect evidence sources that feed the operational compliance twin.
 ---
 
-Integrations are **extensions** — signed webhook-based adapters that run outside the core platform. Every extension declares its scopes, Kiket signs every callback, and you see a live activity log of what it does. No mystery OAuth scopes, no shadow automation.
+Integrations are **evidence-source extensions**. They ingest operational events from the tools your team already uses, normalize them into the event log, attach evidence to cases, and give scanners the context they need to produce explainable findings.
+
+Every extension declares its scopes, Kiket signs callbacks, and admins can revoke access at any time. No mystery OAuth scopes, no hidden mutation path.
 
 ## Install one in under a minute
 
 <Steps>
-<Step>From any project, open Settings → Integrations → Marketplace.</Step>
-<Step>Click Install on the extension you want. Grant the OAuth scopes it requests.</Step>
-<Step>Pick defaults (a channel, a calendar, a repo). You can override per-workflow later.</Step>
-<Step>Use the extension from any workflow's automations. Every new action it exposes shows up in the dropdown.</Step>
+<Step>Open Settings → Evidence Sources.</Step>
+<Step>Choose the source that proves your first monitored process, such as GitHub for pull requests or Jira for work item status.</Step>
+<Step>Grant the minimum scopes requested by the source.</Step>
+<Step>Confirm that source events appear as evidence, scanner input, and report context.</Step>
 </Steps>
 
 ## Catalog
 
 <Cards>
-  <Card title="Slack" href="/docs/integrations/slack" description="Approvals, notifications, SLA breaches to channels." />
-  <Card title="Microsoft Teams" href="/docs/integrations/teams" description="Adaptive Card approvals, notifications." />
-  <Card title="Zoom" href="/docs/integrations/zoom" description="Auto-create meetings for approval gates." />
+  <Card title="Slack" href="/docs/integrations/slack" description="Approval messages, incident channels, and remediation evidence." />
+  <Card title="Microsoft Teams" href="/docs/integrations/teams" description="Adaptive Card approvals and incident response evidence." />
+  <Card title="Zoom" href="/docs/integrations/zoom" description="Meeting evidence for approval gates and incident reviews." />
   <Card title="Twilio" href="/docs/integrations/twilio" description="SMS for critical escalations." />
   <Card title="Email (SMTP)" href="/docs/integrations/email" description="Outbound SMTP, templated." />
   <Card title="Mailjet (inbound)" href="/docs/integrations/mailjet-inbound" description="Inbound email → workflow event." />
-  <Card title="GitHub" href="/docs/integrations/github" description="PRs, commits drive transitions." />
-  <Card title="Jira" href="/docs/integrations/jira" description="Two-way sync." />
+  <Card title="GitHub" href="/docs/integrations/github" description="Pull requests, reviews, commits, and deployment evidence." />
+  <Card title="Jira" href="/docs/integrations/jira" description="Work item status, ownership, and remediation evidence." />
   <Card title="Google OAuth" href="/docs/integrations/google-oauth" description="Sign in with Google Workspace." />
   <Card title="Microsoft OAuth" href="/docs/integrations/microsoft-oauth" description="Sign in with Azure AD." />
   <Card title="Google Calendar" href="/docs/integrations/google-calendar" description="SLA deadlines on calendars." />
   <Card title="Microsoft Calendar" href="/docs/integrations/microsoft-calendar" description="Outlook + Exchange." />
   <Card title="Make AI" href="/docs/integrations/make-ai" description="Bring your own model." />
-  <Card title="Time tracking" href="/docs/integrations/time-tracking" description="Per-issue timers, billable flags." />
+  <Card title="Time tracking" href="/docs/integrations/time-tracking" description="Elapsed work evidence for SLA and control checks." />
 </Cards>
 
 ## How extensions work
 
-1. **Manifest.** Every extension ships an `extension.yaml` declaring scopes, events it wants, actions it exposes.
+1. **Manifest.** Every extension ships an `extension.yaml` declaring scopes, events it receives, and evidence it can emit.
 2. **Install = OAuth.** Installing creates an org-level grant; an admin can revoke at any time.
-3. **Webhook calls.** When a workflow triggers the extension, Kiket POSTs a signed payload to the extension's endpoint.
-4. **Signed response.** The extension verifies the HMAC, does its work, returns a signed response.
-5. **Audit entry.** Both request and response are logged to your audit trail.
+3. **Event ingestion.** The extension receives or pulls source events and submits them to the raw event inbox.
+4. **Normalization.** Kiket creates operational events and evidence records linked to workspaces, processes, and cases.
+5. **Scanner output.** Findings, remediation actions, reports, and optional integrity proofs reference the same evidence graph.
 
 ## Can't find your tool?
 
-Build a custom extension — webhook in any language, manifest declaring scopes, 1-line install for anyone in your org. See **[Your first extension](/docs/start/first-extension)**.
+Build a custom evidence source: webhook in any language, manifest declaring scopes and event types, one-line install for anyone in your org. See **[Your first extension](/docs/start/first-extension)**.
 
 ## Security
 
