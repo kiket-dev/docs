@@ -13,8 +13,20 @@ Every extension declares its scopes, Kiket signs callbacks, and admins can revok
 <Step>Open Settings → Evidence Sources.</Step>
 <Step>Choose the source that proves your first monitored process, such as GitHub for pull requests or Jira for work item status.</Step>
 <Step>Grant the minimum scopes requested by the source.</Step>
-<Step>Confirm that source events appear as evidence, scanner input, and report context.</Step>
+<Step>Confirm that source events appear as evidence, scanner input, findings context, and report context.</Step>
 </Steps>
+
+## What to verify after install
+
+After connecting an evidence source, use the Process Twin dashboard and Findings Inbox to confirm it is creating value:
+
+- the first-value checklist advances past **Connect an evidence source**
+- operational events or evidence records appear for the monitored process
+- the scanner can explain at least one finding or confirm no gaps
+- each finding shows linked case context, evidence count, and a recommended next action
+- generated reports include the source evidence and scanner explanations
+
+If a source connects successfully but no evidence appears, check the source scopes, webhook delivery logs, and ingestion failure visibility before trusting the scanner result.
 
 ## Catalog
 

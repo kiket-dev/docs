@@ -57,6 +57,23 @@ The setup flow writes the selected process configuration into `.kiket/`, creates
 
 <Step>
 
+### Follow the first-value checklist
+
+The Process Twin dashboard shows the shortest path to a useful twin. Each step deep-links to the next product action and names the output it should create:
+
+- a process model and workspace context
+- raw events and normalized evidence
+- the first monitored operational case
+- a scanner run with explainable output
+- a remediation trail or resolved gap
+- an audit snapshot with integrity proof context
+
+If you are evaluating Kiket, use this checklist as the acceptance path for the first five minutes: every completed item should leave visible evidence in the product.
+
+</Step>
+
+<Step>
+
 ### Connect an evidence source
 
 Open **Settings → Evidence Sources** and connect the source that can prove the process happened. Typical first sources are:
@@ -87,7 +104,7 @@ After one case and at least one evidence record exist, run or wait for the first
 
 ### Resolve one finding
 
-Open **Findings** or **Remediation**, attach missing evidence or assign an owner, and close the loop. Kiket keeps the finding explanation, source event, evidence, remediation action, and audit history together.
+Open **Findings** to triage the scanner output. The inbox groups actionable findings by severity, shows the linked case and evidence count, explains why the finding exists, and recommends the next remediation action. From there, open the case, preview evidence, or start remediation.
 
 ### Generate the audit snapshot
 
