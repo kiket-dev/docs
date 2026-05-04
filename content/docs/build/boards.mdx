@@ -3,11 +3,11 @@ title: Boards
 description: Kanban-style views of a workflow — columns, swimlanes, WIP limits, card templates.
 ---
 
-Boards visualize a workflow as columns you can drag issues between. Each column is backed by one or more workflow states. Boards don't *own* data — they're pure view config — but they shape how your team sees and moves work.
+Boards visualize a workflow as columns you can drag cases between. Each column is backed by one or more workflow states. Boards don't *own* data — they're pure view config — but they shape how your team sees and moves work.
 
 ## File location
 
-`.kiket/boards/*.yaml`. One file per board. A project can have several (e.g. *Engineering sprint*, *Compliance tracker*, *Support triage*).
+`.kiket/boards/*.yaml`. One file per board. A workspace can have several (e.g. *Engineering sprint*, *Compliance tracker*, *Support triage*).
 
 ## Minimum board
 
@@ -29,11 +29,11 @@ columns:
     states: [done]
 ```
 
-Every column maps to *one or more* workflow states. Moving an issue between columns fires a transition; if multiple transitions could apply, the board picks the first declared.
+Every column maps to *one or more* workflow states. Moving a case between columns fires a transition; if multiple transitions could apply, the board picks the first declared.
 
 ## Swimlanes
 
-Group rows by a field — assignee, priority, label, issue type:
+Group rows by a field — assignee, priority, label, **case type**:
 
 ```yaml
 swimlanes:
@@ -69,19 +69,19 @@ card:
     {{assigneeName}}
   badges:
     - sla_status
-    - issue_type
+    - case_type
 ```
 
-The built-in `sla_status` badge is green/amber/red; `issue_type` shows the configured icon.
+The built-in `sla_status` badge is green/amber/red; `case_type` shows the configured icon for the case kind.
 
 ## Filters
 
-Restrict which issues show on a board:
+Restrict which cases show on a board:
 
 ```yaml
 filters:
   labels: [customer-facing]
-  issueTypes: [bug, feature]
+  case_types: [bug, feature]
   assignee: "@me"
 ```
 
@@ -98,7 +98,7 @@ The visual board editor lets you drag columns, configure swimlanes, and wire fil
 ## What's next?
 
 <Cards>
-  <Card title="Issue types" href="/docs/build/issue-types" description="Define what kinds of work live on a board." />
+  <Card title="Case types" href="/docs/build/case-types" description="Define what kinds of work live on a board." />
   <Card title="Dashboards" href="/docs/build/dashboards" description="Go beyond boards — metrics, throughput, cycle time." />
   <Card title="Templates" href="/docs/build/templates" description="Start from a pre-built board matching your industry." />
 </Cards>

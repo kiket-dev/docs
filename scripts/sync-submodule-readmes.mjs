@@ -2,6 +2,7 @@
 import { access, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { sanitizeLegacyContent } from './readme-sanitize.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DOCS_ROOT = resolve(__dirname, '..');
@@ -145,13 +146,6 @@ async function readReadme(src) {
 
 function stripH1(md) {
   return md.replace(/^#\s+[^\n]*\n+/, '');
-}
-
-function sanitizeLegacyContent(md) {
-  return md
-    .replaceAll(/Kiket Platform v1\.0\+/g, 'Kiket Platform')
-    .replaceAll(/Rails encrypted attributes/gi, 'encrypted at rest in the Kiket API')
-    .replaceAll(/Rails-era snake_case/gi, 'legacy snake_case');
 }
 
 async function main() {

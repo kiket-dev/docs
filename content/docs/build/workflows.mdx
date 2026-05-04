@@ -3,7 +3,7 @@ title: Workflows
 description: The core building block — finite state machines with SLAs, approvals, and automations.
 ---
 
-Workflows are the backbone of Kiket. Every issue lives inside exactly one workflow and moves through its states via declared transitions. This page is the reference for everything a workflow file can contain.
+Workflows are the backbone of Kiket. Every **case** lives inside exactly one workflow and moves through its states via declared transitions. This page is the reference for everything a workflow file can contain.
 
 <img src="/diagrams/workflow-lifecycle.svg" alt="Example workflow lifecycle with SLA badge" />
 
@@ -102,9 +102,9 @@ State keys are YAML identifiers (`snake_case`). Labels are human-facing strings 
 
 | Category | Meaning |
 |----------|---------|
-| `initial` | Where new issues land. A workflow must have exactly one initial state. |
+| `initial` | Where new cases land. A workflow must have exactly one initial state. |
 | `active` | Work is happening. Most states are active. |
-| `final` | Terminal; issues cannot leave this state. A workflow can have multiple finals. |
+| `final` | Terminal; cases cannot leave this state. A workflow can have multiple finals. |
 
 ### `sla`
 
@@ -120,7 +120,7 @@ sla:
 
 ### `required_documents`
 
-Block transitions out of this state until the named documents are attached. Document keys are defined in `.kiket/issue_types.yaml`.
+Block transitions out of this state until the named documents are attached. Keys should line up with **`evidence`** and document requirements on the workflow and any per-type rules in `.kiket/case_types.yaml`.
 
 ### `approval`
 
@@ -149,7 +149,7 @@ Lists of automation actions that fire on the named event. See [Automations](/doc
 A transition declares `from`, `to`, `name`. Everything else is optional:
 
 - `approval_required` — gate on the source state's approval chain.
-- `requires.fields` / `requires.predicate` — gate on issue data.
+- `requires.fields` / `requires.predicate` — gate on case data.
 - `comment_required` — force the user to explain the transition.
 
 ## Editing surfaces
@@ -168,12 +168,12 @@ A transition declares `from`, `to`, `name`. Everything else is optional:
 
 ## Versioning
 
-Every commit to `.kiket/workflows/*.yaml` is a new workflow version. Existing issues stay on the version that was current when they were created; new issues pick up the latest. Force a migration with `POST /workflows/:key/migrate`.
+Every commit to `.kiket/workflows/*.yaml` is a new workflow version. Existing cases stay on the version that was current when they were created; new cases pick up the latest. Force a migration with `POST /workflows/:key/migrate`.
 
 ## What's next?
 
 <Cards>
   <Card title="Boards" href="/docs/build/boards" description="Visualize a workflow as columns." />
   <Card title="Automations" href="/docs/build/automations" description="Fire actions on state changes, SLAs, and more." />
-  <Card title="Issue types" href="/docs/build/issue-types" description="Define the fields, documents, and constraints each type of work has." />
+  <Card title="Case types" href="/docs/build/case-types" description="Define fields, icons, and hierarchy rules for each kind of case." />
 </Cards>

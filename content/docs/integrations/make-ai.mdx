@@ -209,13 +209,13 @@ settings:
 
 ### Webhook Endpoints
 
-**POST /webhooks/issue.transitioned**
+**POST /webhooks/case.transitioned**
 Handles Kiket issue transitions.
 
 Request:
 ```json
 {
-  "event": "issue.transitioned",
+  "event": "case.transitioned",
   "issue": {
     "key": "PROJ-123",
     "title": "Customer setup",
@@ -256,7 +256,7 @@ Analyze a Kiket workflow and suggest Make automations.
 bundle exec ruby app.rb
 
 # In another terminal, send test webhooks
-curl -X POST http://localhost:8080/webhooks/issue.transitioned \
+curl -X POST http://localhost:8080/webhooks/case.transitioned \
   -H "Content-Type: application/json" \
   -H "X-Kiket-Signature: $(ruby -e 'require \"openssl\"; puts OpenSSL::HMAC.hexdigest(\"SHA256\", \"test_secret\", File.read(\"test_payload.json\"))')" \
   -d @test_payload.json

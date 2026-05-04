@@ -268,7 +268,7 @@ Response: CSV file with columns:
 
 ### Webhooks
 
-**POST /webhooks/issue.transitioned**
+**POST /webhooks/case.transitioned**
 
 Automatically handles issue transitions. When an issue is closed, all active timers for that issue are stopped and tagged with "auto-stopped".
 
@@ -537,7 +537,7 @@ The extension uses role-based access control:
 
 ### Timer not auto-stopping
 
-- Check webhook is configured for `issue.transitioned` event
+- Check webhook is configured for `case.transitioned` event
 - Verify webhook payload includes `issue_id` and `to_status`
 - Check application logs for webhook processing errors
 

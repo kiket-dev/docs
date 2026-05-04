@@ -27,9 +27,9 @@ The server is designed around a simple rule: only expose MCP tools for real, sta
 
 - context and orgs: `get_current_user`, `get_current_context`, `list_organizations`, `get_organization`
 - projects: `list_projects`, `get_project`, `create_project`
-- issues: `list_issues`, `get_issue`, `create_issue`, `get_issue_reachable_transitions`, `check_issue_transition`, `transition_issue`, `get_issue_history`
+- **Cases** (MCP tools may still use legacy `*_issue*` identifiers until the MCP package aligns names with the REST contract): `list_issues`, `get_issue`, `create_issue`, `get_issue_reachable_transitions`, `check_issue_transition`, `transition_issue`, `get_issue_history`
 - comments: `list_issue_comments`, `add_issue_comment`
-- planning metadata: `list_milestones`, `list_issue_types`
+- planning metadata: `list_milestones`, `list_issue_types` (**case-type** listing; legacy tool identifier)
 - workflows: `list_workflows`, `get_workflow`, `get_workflow_yaml`, `validate_workflow`
 - search and knowledge: `search`, `semantic_search`, `list_knowledge_documents`, `get_knowledge_document`
 - compliance and audit: `list_audit_logs`, `get_audit_log`, `get_compliance_report`

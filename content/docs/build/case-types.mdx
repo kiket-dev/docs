@@ -1,0 +1,90 @@
+---
+title: Case types
+description: Workspace-level taxonomy for cases — keys, labels, hierarchy rules, optional fields on each kind of work.
+---
+
+A **case type** is the shape of a piece of work: which icon and color appear on the board, whether it allows child cases, and any extra typed fields collectors must fill in. Definitions live in a **singleton** YAML file checked into the workspace repo:
+
+- `.kiket/case_types.yaml` — one top-level `case_types:` array; you can optionally set `model_version` for your own bookkeeping.
+
+Everything under `.kiket/` is file-backed truth: the modeling cockpit edits the same YAML your IDE commits.
+
+## Minimum file
+
+```yaml
+case_types:
+  - key: control_review
+    label: Control review
+    allow_children: false
+    icon: shield-check
+    color: indigo
+    position: 0
+    active: true
+  - key: evidence_gap
+    label: Evidence gap
+    allow_children: false
+    icon: file-warning
+    color: amber
+    position: 1
+    active: true
+```
+
+Use **snake_case** field names (`allow_children`, `parent_types`) so the file stays consistent with scaffolded repos and upstream templates.
+
+## Custom fields per type
+
+Each entry can optionally declare typed fields stored on cases of that kind (keys mirror [intake form field vocabulary](/docs/build/intake-forms#field-types) where overlaps exist):
+
+```yaml
+case_types:
+  - key: contract
+    label: Contract review
+    allow_children: false
+    position: 0
+    active: true
+    fields:
+      - key: counterparty
+        label: Counterparty
+        type: text
+        required: true
+      - key: total_value_usd
+        label: Total value (USD)
+        type: number
+```
+
+## Parent / child rules
+
+Hierarchy is controlled with `allow_children` and `parent_types`:
+
+```yaml
+case_types:
+  - key: epic
+    label: Epic
+    allow_children: true
+    position: 0
+    active: true
+
+  - key: story
+    label: Story
+    allow_children: false
+    parent_types: [epic]
+    position: 1
+    active: true
+```
+
+The platform enforces these relationships when creating or linking cases.
+
+## Icon + color
+
+Icons reference the [Lucide](https://lucide.dev) set. Color values are typically tone tokens from your template (for example `danger`, `primary`, `info`) that the board and cards map to theme styles.
+
+## Editing surfaces
+
+Open `.kiket/case_types.yaml` in the **Project editor** modeling tree to use the visual case-type editor, or edit the YAML directly — both write the same file.
+
+## What's next?
+
+<Cards>
+  <Card title="Workflows" href="/docs/build/workflows" description="Wire evidence, checks, and transitions to how cases move." />
+  <Card title="Intake forms" href="/docs/build/intake-forms" description="Collect context that becomes cases and evidence." />
+</Cards>

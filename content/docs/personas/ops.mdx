@@ -19,7 +19,7 @@ Every Kiket project is backed by a GitHub repo. When your PM creates the project
 git clone git@github.com:your-org/your-workspace.git
 cd your-workspace
 ls .kiket/
-# workflows/  boards/  intakes/  automations/  dashboards/  issue_types.yaml
+# workflows/  boards/  intakes/  automations/  dashboards/  case_types.yaml
 ```
 
 </Step>
@@ -93,7 +93,7 @@ approval:
 
 ```yaml
 trigger:
-  event: issue.transitioned
+  event: case.transitioned
   when: "to == 'approved' && workflow == 'contract_review'"
 actions:
   - create_issue:
@@ -116,7 +116,7 @@ actions:
 ## You won't touch
 
 - The visual canvas, most days. It's there when you want it; everything you do in YAML shows up on it.
-- Git for the actual project content. Workspace = config only. Issues, comments, time entries live in the DB.
+- Git for the actual project content. Workspace = config only. Cases, comments, time entries live in the DB.
 
 ## Related pages
 
