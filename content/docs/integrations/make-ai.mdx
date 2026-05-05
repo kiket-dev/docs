@@ -210,22 +210,24 @@ settings:
 ### Webhook Endpoints
 
 **POST /webhooks/case.transitioned**
-Handles Kiket issue transitions.
+Handles Kiket operational case transitions.
 
 Request:
 ```json
 {
   "event": "case.transitioned",
-  "issue": {
+  "case": {
     "key": "PROJ-123",
-    "title": "Customer setup",
-    "transition": {
-      "from": "backlog",
-      "to": "ready_for_automation"
-    }
+    "title": "Customer setup"
+  },
+  "transition": {
+    "from": "backlog",
+    "to": "ready_for_automation"
   }
 }
 ```
+
+Legacy payloads may use `"issue"` instead of `"case"`; the extension accepts both.
 
 Response:
 ```json

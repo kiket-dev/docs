@@ -15,10 +15,10 @@ Self-hosted deployments use their own domain.
 
 ## Auth
 
-Two kinds of credentials:
+Two ways to act on behalf of a **human** in the product, and one for **machines**:
 
-- **Access token** (short-lived, refresh-based) — what the web app and mobile clients use.
-- **API token** (long-lived, scoped) — what SDKs, CLI, and webhook receivers use.
+- **Interactive session** — Email/password or **Google** / **GitHub** OAuth on the web app; short-lived access tokens with refresh (see [Sign-in and accounts](/docs/start/sign-in-and-accounts)).
+- **API token** (long-lived, scoped) — what SDKs, CLI, and webhook receivers use when there is no browser.
 
 Create an API token in **Settings → API tokens**. Pass it as a Bearer header:
 

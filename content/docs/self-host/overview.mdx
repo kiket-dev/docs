@@ -14,7 +14,7 @@ Enterprise customers can run Kiket alongside managed SaaS or replace it entirely
 - Managed PostgreSQL via [CloudNativePG](https://cloudnative-pg.io/) with pgvector.
 - Valkey/Redis for jobs + sessions.
 - Your choice of blockchain anchor (Polygon, a private Ethereum chain, or skip anchoring).
-- Identity via OAuth (Google/Microsoft/GitHub) or SAML (SCIM on the enterprise roadmap).
+- Interactive sign-in via **OAuth** (Google and GitHub). **SAML** and SCIM on the enterprise roadmap.
 
 ## Requirements
 
@@ -69,6 +69,11 @@ For air-gapped: bring-your-own cluster; we provide a values-only path.
 ### Configure secrets
 
 - JWT signing key (we generate on first boot if unset)
+- **Platform OAuth** (optional): Google and/or GitHub for user sign-in.
+  - Register redirect URIs `https://<api-host>/api/v1/auth/oauth/google/callback` and `https://<api-host>/api/v1/auth/oauth/github/callback` on each provider.
+  - Set **`APP_URL`** (web app origin), **`PUBLIC_API_URL`** or **`API_URL`** (public API base), **`GOOGLE_AUTH_LOGIN_CLIENT_ID`** / **`GOOGLE_AUTH_LOGIN_CLIENT_SECRET`** (or **`GOOGLE_OAUTH_CLIENT_ID`** / **`GOOGLE_OAUTH_CLIENT_SECRET`**), and optionally dedicated **`GITHUB_AUTH_LOGIN_*`** (otherwise **`GITHUB_CLIENT_*`** can be reused with an extra callback URL on the same GitHub OAuth app).
+  - Kubernetes: **`deploy/k8s/overlays/production/secrets.yaml.template`** and **Platform OAuth login** in **`deploy/README.md`** in the source tree; local API dev: **`apps/api/.env`**.
+  - OAuth login **`state`** is API memory–backed — with multiple API replicas and no sticky sessions, use one replica for authorize/callback or shared session/state storage.
 - Database URL
 - Redis URL
 - Object storage credentials

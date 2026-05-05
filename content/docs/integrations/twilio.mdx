@@ -239,8 +239,8 @@ workflow:
       actions:
         - extension: twilio-notifications.send_sms
           params:
-            to: "{{ case.assigned_user.phone }}"
-            message: "ALERT: {{ case.title }} - {{ case.description }}"
+            to: "{{ issue.assigned_user.phone }}"
+            message: "ALERT: {{ issue.title }} - {{ issue.description }}"
 ```
 
 ### Voice Call Example

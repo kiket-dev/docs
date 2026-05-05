@@ -270,16 +270,19 @@ Response: CSV file with columns:
 
 **POST /webhooks/case.transitioned**
 
-Automatically handles issue transitions. When an issue is closed, all active timers for that issue are stopped and tagged with "auto-stopped".
+Automatically handles operational case transitions. When a case moves to `closed` or `done`, all active timers linked to that case id are stopped and tagged with `"auto-stopped"`.
+
+Handlers are also registered under the legacy webhook name `time_tracking.webhooks.issue_transitioned`.
 
 Request:
 ```json
 {
-  "issue_id": "ISSUE-456",
-  "from_status": "In Progress",
-  "to_status": "Closed"
+  "case": { "id": "ISSUE-456" },
+  "transition": { "from": "in_progress", "to": "closed" }
 }
 ```
+
+Legacy payloads may nest the id under `issue` instead of `case`; both are accepted.
 
 ## Custom Data Schema
 
@@ -537,8 +540,8 @@ The extension uses role-based access control:
 
 ### Timer not auto-stopping
 
-- Check webhook is configured for `case.transitioned` event
-- Verify webhook payload includes `issue_id` and `to_status`
+- Check webhook is configured for `case.transitioned` (legacy: `issue.transitioned`) when using platform event synonyms
+- Verify webhook payload includes `transition.to` (`closed` or `done`) and `case.id` or `issue.id`
 - Check application logs for webhook processing errors
 
 ### Missing entries in reports

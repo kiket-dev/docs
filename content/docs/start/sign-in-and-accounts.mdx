@@ -1,0 +1,42 @@
+---
+title: Sign-in and accounts
+description: Email and password, Google and GitHub OAuth, account linking, and how this differs from integration OAuth.
+---
+
+The web app signs you in with **email and password** or with **Google** or **GitHub** as an identity provider. API automation uses **API tokens** (see [API & SDKs](/docs/api)).
+
+<Callout type="info">
+Platform sign-in is separate from **integration** OAuth: connecting GitHub to clone repos uses different OAuth scopes and callbacks than “Sign in with GitHub.” The [Google OAuth extension](/docs/integrations/google-oauth) is for Calendar, Drive, and other Google APIs — not for logging into Kiket.
+</Callout>
+
+## Email and password
+
+Create an account with your email, name, and password. Passwords are hashed with Argon2id on the server.
+
+## Google and GitHub (platform OAuth)
+
+On the sign-in screen, use **Continue with Google** or **Continue with GitHub**. The platform requests only what it needs to identify you (for example OpenID `email` / `profile` for Google, and `read:user` / `user:email` for GitHub). After you approve the provider, the app finishes sign-in in the browser and stores session tokens the same way as for password login.
+
+If your user belongs to more than one organization, you will see the same **organization picker** as with email login.
+
+## Linking providers to an existing account
+
+If you already have a Kiket account with a given email address and you sign in with Google or GitHub using an email the provider marks as **verified**, that OAuth identity is **linked** to your existing user. You will not get a duplicate account.
+
+If the provider does not confirm the email as verified, automatic linking is blocked and you will see an explanatory error — use your password, or ensure the provider account uses a verified email.
+
+Accounts that only use OAuth **do not have a password**. Use **Continue with Google/GitHub**, or set a password through your product’s password-reset flow if available.
+
+## Private and self-managed deployments
+
+If your organization runs Kiket in its **own environment**, your **administrators** enable Google or GitHub sign-in in the platform configuration. You use the same **Continue with Google** and **Continue with GitHub** buttons as in the hosted product; end users do not register OAuth apps or manage credentials.
+
+Deployment, callbacks, and secrets are covered in the [Self-host](/docs/self-host) guide for operators.
+
+## What’s next?
+
+<Cards>
+  <Card title="Quickstart" href="/docs/start/quickstart" description="First workspace and operational twin setup." />
+  <Card title="API auth" href="/docs/api" description="Access tokens, API keys, and automation." />
+  <Card title="Self-host" href="/docs/self-host" description="Kubernetes, secrets, and ingress." />
+</Cards>

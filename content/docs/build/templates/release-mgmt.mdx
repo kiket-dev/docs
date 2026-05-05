@@ -57,12 +57,12 @@ development → staging → pending_approval → production → completed
 - **Completed**: Release successfully deployed and verified
 - **Failed**: Release failed or rolled back
 
-## Case types
+## Issue Types
 
 | Type | Description |
 |------|-------------|
 | Release | Standard software release with version tag and changelog |
-| Hotfix | Emergency fix for production incidents |
+| Hotfix | Emergency fix for production issues |
 | FeatureFlag | Feature flag rollout management |
 | Postmortem | Post-incident analysis document |
 | ChangeRequest | Infrastructure or configuration change |
@@ -86,7 +86,7 @@ Expedites critical hotfixes by:
 Automatically triggered when a release enters rollback state:
 - Creates incident in PagerDuty
 - Notifies Slack incident response channel
-- Creates postmortem case
+- Creates postmortem issue
 - Requires SRE confirmation to complete rollback
 
 ## Analytics

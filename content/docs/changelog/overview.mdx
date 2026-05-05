@@ -9,6 +9,12 @@ The headline changelog — what's worth telling the whole team about when a rele
 The full commit log is available on the public GitHub repos. This page is the curated, reader-friendly version: if it's here, it affects how you use Kiket.
 </Callout>
 
+## 2026-05-05 — Platform sign-in with Google and GitHub
+
+- **OAuth login** on the web app: Continue with Google / Continue with GitHub, distinct from GitHub repository connection and from the Google Calendar/Drive extension OAuth.
+- **Verified-email linking** when an OAuth identity matches an existing account email.
+- **OpenAPI / SDKs** — new `/auth/oauth/*` operations; regenerate clients after upgrade (`pnpm sdk:generate` with the API serving `openapi.json`).
+
 ## 2026-04-14 — Background job architecture
 
 - **BullMQ workers** for SLA timers, webhook retries, notifications, blockchain anchoring, and Stripe usage sync.
