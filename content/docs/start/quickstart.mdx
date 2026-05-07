@@ -49,9 +49,11 @@ For the fastest path, choose **Explore sample data** or a template with a built-
 
 ### Create your workspace and first process
 
-The **same guided flow** creates the organization (if needed), the workspace, and the first monitored process—template, new config repository, or existing `.kiket/` connection. You can rename the organization and workspace later.
+The **same guided flow** creates the organization (if needed), the workspace, a **GitHub configuration repository** (from a template, a new repo, or an existing `.kiket/` connection), and your first **monitored process**. You can rename the organization and workspace later.
 
-When you finish, Kiket records a **process** linked to that workspace. That completes **foundation** setup; you are not asked to “pick a template again” on the dashboard unless the product has a workspace but no process yet (then **Processes** is the right next step, not full onboarding).
+If a **workspace already exists** but has **no GitHub configuration repository** yet (for example you created the workspace without connecting git), the app sends you through the **same wizard** again to attach or create a repo for that workspace. It does **not** create a second workspace.
+
+When you finish, Kiket records a **process** linked to that workspace. That completes **foundation** setup; you are not asked to run full setup again on the dashboard unless you still need a config repository or a process model (the checklist deep-links to the right screen for each gap).
 
 </Step>
 
@@ -62,7 +64,8 @@ When you finish, Kiket records a **process** linked to that workspace. That comp
 After foundation is in place, the Process Twin dashboard shows an **activation** checklist—not a second onboarding wizard. Headings change by state:
 
 - **Get started** — no workspace yet; the primary action points back to full setup.
-- **Finish modeling** — workspace exists without a monitored process; the UI sends you to **Processes**.
+- **Connect GitHub configuration** — workspace exists but no configuration repository is linked (or no org-wide repo) yet; the primary action opens guided setup for **that** workspace so `.kiket/` can live in GitHub.
+- **Finish modeling** — configuration repository is in place but no monitored process yet; the UI sends you to **Processes**.
 - **Activate your operational twin** — workspace and process exist; the checklist focuses on evidence, cases, scans, findings, and audit output.
 
 Each step still deep-links to the right screen and names the output it should create:
