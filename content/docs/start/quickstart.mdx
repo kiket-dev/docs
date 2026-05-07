@@ -47,28 +47,33 @@ For the fastest path, choose **Explore sample data** or a template with a built-
 
 <Step>
 
-### Create your workspace
+### Create your workspace and first process
 
-Create the organization and workspace that will own the monitored process, cases, evidence, findings, remediation, and reports. You can rename both later.
+The **same guided flow** creates the organization (if needed), the workspace, and the first monitored process—template, new config repository, or existing `.kiket/` connection. You can rename the organization and workspace later.
 
-The setup flow writes the selected process configuration into `.kiket/`, creates the workspace record, and opens the product around the first-value checklist.
+When you finish, Kiket records a **process** linked to that workspace. That completes **foundation** setup; you are not asked to “pick a template again” on the dashboard unless the product has a workspace but no process yet (then **Processes** is the right next step, not full onboarding).
 
 </Step>
 
 <Step>
 
-### Follow the first-value checklist
+### Activation checklist on Process Twin
 
-The Process Twin dashboard shows the shortest path to a useful twin. Each step deep-links to the next product action and names the output it should create:
+After foundation is in place, the Process Twin dashboard shows an **activation** checklist—not a second onboarding wizard. Headings change by state:
 
-- a process model and workspace context
+- **Get started** — no workspace yet; the primary action points back to full setup.
+- **Finish modeling** — workspace exists without a monitored process; the UI sends you to **Processes**.
+- **Activate your operational twin** — workspace and process exist; the checklist focuses on evidence, cases, scans, findings, and audit output.
+
+Each step still deep-links to the right screen and names the output it should create:
+
 - raw events and normalized evidence
 - the first monitored operational case
 - a scanner run with explainable output
 - a remediation trail or resolved gap
 - an audit snapshot with integrity proof context
 
-If you are evaluating Kiket, use this checklist as the acceptance path for the first five minutes: every completed item should leave visible evidence in the product.
+If you are evaluating Kiket, use this checklist as the acceptance path after setup: every completed item should leave visible evidence in the product.
 
 </Step>
 
