@@ -1,6 +1,6 @@
 ---
 title: Self-host
-description: Run Kiket in your own Kubernetes cluster or air-gapped environment.
+description: Run Kiket in your own environment or air-gapped deployment.
 ---
 
 Enterprise customers can run Kiket alongside managed SaaS or replace it entirely. Same product, your data, your network, your compliance boundary.
@@ -9,21 +9,21 @@ Enterprise customers can run Kiket alongside managed SaaS or replace it entirely
 
 ## What you get
 
-- The full platform (API, web, workers, scheduler).
+- The full platform (API, web app, background workers, scheduler).
 - Every integration extension as an optional deployable.
-- Managed PostgreSQL via [CloudNativePG](https://cloudnative-pg.io/) with pgvector.
-- Valkey/Redis for jobs + sessions.
-- Your choice of blockchain anchor (Polygon, a private Ethereum chain, or skip anchoring).
+- A production-grade primary datastore with the search extensions the platform expects.
+- A durable queue and cache tier for jobs and sessions.
+- Your choice of blockchain anchor (public network, a private chain, or skip anchoring).
 - Interactive sign-in via **OAuth** (Google and GitHub). **SAML** and SCIM on the enterprise roadmap.
 
 ## Requirements
 
-- Kubernetes 1.28+ (managed or self-operated)
-- PostgreSQL 17+ with pgvector (recommended: CloudNativePG inside the cluster)
-- Redis or Valkey 7+
-- Object storage (S3-compatible): attachments, evidence exports, bundled backups
-- Cert-manager + an ACME issuer (Let's Encrypt or a private CA)
-- Ingress controller (we test with NGINX; any will work)
+- A **container platform** you operate (managed or self-run) meeting the chart’s supported version window.
+- A **supported relational database** with vector-search extensions enabled, sized for your tenant count.
+- A **supported cache and job-queue service** (minimum version in the operator guide) for jobs and session backing where required.
+- **Object storage** (S3-compatible): attachments, evidence exports, bundled backups.
+- **TLS**: automated certificates from a public CA or your internal PKI.
+- **Ingress / load balancing** in front of the app and API (any controller you already standardize on).
 
 Minimum resources per node:
 
@@ -32,10 +32,10 @@ Minimum resources per node:
 | API (2 replicas) | 500m | 512Mi |
 | Workers (2 replicas) | 500m | 1Gi |
 | Web (2 replicas) | 200m | 256Mi |
-| PostgreSQL | 2 vCPU | 4Gi |
-| Redis/Valkey | 200m | 512Mi |
+| Primary database | 2 vCPU | 4Gi |
+| Cache / queue | 200m | 512Mi |
 
-A b2-7-class node (Hetzner, OVH, DigitalOcean droplets) handles a team of ~200 users comfortably.
+A mid-size cloud VM profile handles a team of ~200 users comfortably when sized as above.
 
 ## Deploy flow
 
@@ -43,9 +43,9 @@ A b2-7-class node (Hetzner, OVH, DigitalOcean droplets) handles a team of ~200 u
 
 <Step>
 
-### Get the Helm chart
+### Get the install bundle
 
-Private OCI registry; contact sales for access. The chart ships with a production-grade `values.yaml` covering secrets, ingress, storage, and the blockchain anchor.
+Private OCI registry; contact sales for access. The bundle ships with a production-grade `values.yaml` covering secrets, ingress, storage, and the blockchain anchor.
 
 </Step>
 
@@ -53,14 +53,14 @@ Private OCI registry; contact sales for access. The chart ships with a productio
 
 ### Provision infra
 
-Kiket ships OpenTofu modules for OVHcloud + AWS + GCP. Each module stands up:
+Kiket ships OpenTofu modules for common cloud providers. Each module stands up:
 
-- Managed K8s cluster
+- A managed **container cluster**
 - Object storage bucket
 - DNS records for the app, API, and webhook subdomains
-- TLS certs (via cert-manager)
+- TLS certificates (via your platform’s cert automation)
 
-For air-gapped: bring-your-own cluster; we provide a values-only path.
+For air-gapped: bring your own cluster; we provide a values-only path.
 
 </Step>
 
@@ -68,19 +68,19 @@ For air-gapped: bring-your-own cluster; we provide a values-only path.
 
 ### Configure secrets
 
-- JWT signing key (we generate on first boot if unset)
+- API signing key (generated on first boot if unset)
 - **Platform OAuth** (optional): Google and/or GitHub for user sign-in.
   - Register redirect URIs `https://<api-host>/api/v1/auth/oauth/google/callback` and `https://<api-host>/api/v1/auth/oauth/github/callback` on each provider.
   - Set **`APP_URL`** (web app origin), **`PUBLIC_API_URL`** or **`API_URL`** (public API base), **`GOOGLE_AUTH_LOGIN_CLIENT_ID`** / **`GOOGLE_AUTH_LOGIN_CLIENT_SECRET`** (or **`GOOGLE_OAUTH_CLIENT_ID`** / **`GOOGLE_OAUTH_CLIENT_SECRET`**), and optionally dedicated **`GITHUB_AUTH_LOGIN_*`** (otherwise **`GITHUB_CLIENT_*`** can be reused with an extra callback URL on the same GitHub OAuth app).
-  - Kubernetes: **`deploy/k8s/overlays/production/secrets.yaml.template`** and **Platform OAuth login** in **`deploy/README.md`** in the source tree; local API dev: **`apps/api/.env`**.
+  - See **Platform OAuth login** in the **`deploy/README.md`** supplied with your bundle, and the production secrets template in the deploy tree; local API development uses **`apps/api/.env`** in the source repo.
   - OAuth login **`state`** is API memory–backed — with multiple API replicas and no sticky sessions, use one replica for authorize/callback or shared session/state storage.
-- Database URL
-- Redis URL
+- Primary database URL
+- Cache / queue URL
 - Object storage credentials
 - Blockchain anchor private key (or leave blank to skip)
 - SMTP or SendGrid creds for email notifications
 
-Use [SOPS](https://github.com/getsops/sops) or your Kubernetes-native secrets manager. The chart doesn't prescribe one.
+Use [SOPS](https://github.com/getsops/sops) or your platform’s native secret store. The chart doesn’t prescribe one.
 
 </Step>
 
@@ -94,7 +94,7 @@ One-time:
 helm upgrade kiket ./chart -f values.yaml --set migrate.run=true
 ```
 
-The migrate pod runs `drizzle-kit push` against the DB, then exits.
+The migrate job applies the current schema to your database, then exits.
 
 </Step>
 
@@ -110,29 +110,28 @@ Visit the app hostname. First-user-wins creates the org; invite your team from t
 
 ## Backups
 
-- CloudNativePG continuously streams WAL to object storage (Barman).
-- Point-in-time recovery is default; tested on every release.
+- The reference data stack streams write-ahead logs to object storage for point-in-time recovery; this is tested on every release.
 - Optional: periodic evidence-export jobs for long-term regulatory retention.
 
 ## Upgrades
 
 Monthly stable releases. Rolling upgrade procedure:
 
-1. `helm upgrade` with the new chart version.
-2. Wait for migrate pod to finish (backward-compatible migrations are the rule).
-3. API rolls; old pods drain 30s gracefully.
+1. Upgrade the install bundle to the new chart version.
+2. Wait for the migrate job to finish (backward-compatible migrations are the rule).
+3. API rolls; old instances drain gracefully.
 
 Breaking releases ship a version-jump runbook in the release notes — rare.
 
 ## Air-gapped mode
 
-- Disable the blockchain anchor (or anchor to a private EVM chain inside your network).
+- Disable the blockchain anchor (or anchor to a private chain inside your network).
 - Disable outbound extension callbacks if the extensions would cross the boundary.
 - Kiket itself needs no outbound calls to function.
 
 ## Cost
 
-On OVHcloud managed Kubernetes with CloudNativePG and a b2-7 node, total cost for ~200 users is typically under €80/month before extension/external-service usage. See the deploy module README for current numbers.
+On a typical small managed cluster plus the database and cache sizes above, total cost for ~200 users is usually modest before extension and external-service usage. See the deploy module README for current numbers.
 
 ## What's next?
 

@@ -21,12 +21,12 @@ Every:
 
 ## How the anchor works
 
-1. Events are hashed individually as they happen (SHA-256 over canonical JSON).
-2. A batch job runs hourly (configurable to real-time for enterprise) and builds a Merkle tree over the batch.
-3. The Merkle root is written in a single transaction to the **Polygon** blockchain (low fees, EVM-compatible, public).
-4. The anchoring transaction ID + Merkle branch are stored alongside the event.
+1. Events are fingerprinted individually as they happen from a canonical representation.
+2. A **scheduled batch job** (cadence is configurable) builds a tamper-evident tree over each batch.
+3. The batch root is written in a single transaction to the **Polygon** blockchain (low fees, EVM-compatible, public).
+4. The anchoring transaction ID and verification material are stored alongside the event.
 
-Result: given any event, anyone can verify against Polygon that it existed at or before the block timestamp and hasn't been altered since — without trusting us.
+Result: given any event, anyone can verify against Polygon that it existed at or before the block timestamp and hasn't been altered since — without trusting us alone.
 
 ## Frameworks we're built for
 
@@ -81,7 +81,7 @@ PDF (human-readable), JSON (machine-readable), YAML (config-friendly).
 
 ### Download
 
-The file includes event data, Merkle proofs, and a `verify.sh` script your auditor can run against Polygon.
+The file includes event data, cryptographic proof bundles, and a `verify.sh` script your auditor can run against Polygon.
 
 </Step>
 
@@ -89,7 +89,7 @@ The file includes event data, Merkle proofs, and a `verify.sh` script your audit
 
 ## Data residency
 
-- Default hosting is EU (OVHcloud, Gravelines).
+- Default hosting is in the **EU** (specific regions are listed in order documentation and the trust page).
 - Customer data never leaves the EU on the default plan.
 - Enterprise customers can deploy to their own VPC or on-prem — see **[Self-host](/docs/self-host)**.
 

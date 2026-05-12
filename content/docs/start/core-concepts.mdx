@@ -52,7 +52,7 @@ Issues are the *things* flowing through your workflow — contracts, tickets, in
 - **Comments**, **attachments**, **time entries**, **linked issues**.
 - An **SLA status** computed from the current state's rules.
 
-Issues are the only thing that lives in the database, not in your git repo. The config (what workflows exist, what states they have) is git-backed; the *runtime data* is a PostgreSQL row.
+Issues are the only thing that lives in the platform datastore, not in your git repo. The config (what workflows exist, what states they have) is git-backed; the *runtime data* is tenant-scoped platform storage.
 
 ## SLA
 
@@ -84,9 +84,9 @@ Sequential chains require each approver in order. Parallel chains need all appro
 
 ## Audit trail
 
-Every significant action — transitions, approvals, AI suggestions, comments on approvals — is recorded as an immutable event. Events are hashed individually, batched periodically into a Merkle tree, and the root is submitted to the Polygon blockchain.
+Every significant action — transitions, approvals, AI suggestions, comments on approvals — is recorded as an immutable event. Events are hashed individually, batched periodically into tamper-evident proofs, and roots are anchored on the Polygon network when anchoring is enabled.
 
-An auditor can verify your history without talking to us or touching our database. See **[Compliance & audit](/docs/compliance)** for the full details.
+An auditor can verify your history without talking to us or trusting our storage alone. See **[Compliance & audit](/docs/compliance)** for the full details.
 
 ## Project, organization, workspace
 

@@ -32,8 +32,8 @@ Every entry has: actor, timestamp, action, before/after state, and a content has
 
 Open any issue → **Activity** tab. Each event shows a short hash prefix. Click it to see:
 
-- The full SHA-256
-- The Merkle branch proving it's in the anchored root
+- The full content fingerprint
+- The verification path into the anchored root
 - The Polygon transaction ID of the batch
 - A direct Polygonscan link so anyone can verify
 
@@ -51,7 +51,7 @@ Settings → Compliance → **Export evidence**. Pick:
 - **Framework** — the output is mapped against a specific framework's controls (see below).
 - **Format** — PDF report, JSON, or YAML (machine-readable).
 
-The export includes every matching event + Merkle proofs + a verification script your auditor can run against Polygon directly.
+The export includes every matching event, proof bundles, and a verification script your auditor can run against Polygon directly.
 
 </Step>
 

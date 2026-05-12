@@ -296,7 +296,7 @@ By default, the extension requires recipients to opt-in before receiving notific
 
 1. **Enable/Disable**: Set `REQUIRE_OPT_IN=false` to disable
 2. **Storage**: Currently uses in-memory storage (lost on restart)
-3. **Production**: Implement database or Redis storage for persistence
+3. **Production**: Persist opt-in state in a durable store your extension controls (not in-memory)
 
 To manage opt-ins:
 
