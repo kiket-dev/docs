@@ -90,29 +90,6 @@ const SOURCES = [
     label: 'MCP server',
     description: 'Model Context Protocol server for Kiket.',
   },
-
-  ...[
-    'kanban',
-    'scrum',
-    'finance',
-    'legal',
-    'healthcare',
-    'engineering',
-    'sales',
-    'marketing',
-    'marketing_ops',
-    'support',
-    'product',
-    'partners',
-    'business-ops',
-    'ecommerce',
-    'release-mgmt',
-  ].map((slug) => ({
-    localPath: `definitions/${slug}`,
-    repo: `kiket-dev/kiket-definitions-${slug}`,
-    output: `content/docs/build/templates/${slug}.mdx`,
-    description: `${titleCase(slug)} template for Kiket.`,
-  })),
 ];
 
 function titleCase(s) {

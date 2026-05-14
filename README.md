@@ -23,4 +23,4 @@ Sidebar order comes from `meta.json` in each folder — list pages in the order 
 
 ## Auto-synced pages
 
-Integration, SDK, CLI, MCP, and industry-template pages are generated from their upstream READMEs during `prebuild`. Edit the upstream repo, not the generated MDX. To add a new source, extend `SOURCES` in `scripts/sync-submodule-readmes.mjs`.
+Integration, SDK, CLI, and MCP pages are generated from their upstream READMEs during `prebuild`. Edit the upstream repo, not the generated MDX. To add a new source, extend `SOURCES` in `scripts/sync-submodule-readmes.mjs`.

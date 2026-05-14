@@ -1,0 +1,60 @@
+---
+title: GitHub webhook ingestion (platform)
+description: First-party path for GitHub events — signed webhooks into the raw event inbox, normalization, operational events, and evidence.
+---
+
+This page documents the **Kiket 2.0 platform** GitHub ingress. It complements the legacy [`GitHub` extension README](/docs/integrations/github) (synced from the Ruby extension repo) and should be your primary reference for **ingestion + evidence**.
+
+## Endpoint
+
+`POST /api/v1/integrations/github/webhook`
+
+- **Auth:** none (public endpoint; trust comes from org/source binding + optional HMAC).
+- **Rate limiting:** ingestion limiter applies to this path.
+
+## Headers GitHub sends
+
+| Header | Required | Purpose |
+|--------|----------|---------|
+| `X-GitHub-Event` | Recommended | Event type (e.g. `pull_request`, `push`). |
+| `X-GitHub-Delivery` | Recommended | Idempotency / replay key per delivery. |
+| `X-Hub-Signature-256` | When secret configured | `sha256=<hex>` HMAC of the raw body. |
+
+## Headers Kiket requires
+
+| Header | Purpose |
+|--------|---------|
+| `X-Kiket-Organization-Id` | Tenant that owns the event source. |
+| `X-Kiket-Event-Source-Key` | Identifies the pre-registered event source (query `sourceKey` is also accepted). |
+
+If either is missing, the API returns **400** with a clear message.
+
+## Signature verification
+
+When the event source configuration includes a `webhookSecret` (stored sealed) **or** `GITHUB_WEBHOOK_SECRET` is set in the API environment, the handler requires a valid `X-Hub-Signature-256` using **HMAC-SHA256** over the **raw request body**, prefixed with `sha256=` (GitHub’s usual format).
+
+- Valid signature → raw event stored; normalization queued or processed inline.
+- Invalid signature → raw event marked **quarantined**; ingestion may be marked degraded; still returns **202** with `quarantined: true` so GitHub does not infinite-retry blindly.
+
+## Processing pipeline
+
+1. **Ingest** — payload persisted as a raw event with metadata (`adapter: github-webhook`, delivery id, payload hash, signature result).
+2. **Normalize** — async job (or inline when workers are off, e.g. tests) produces operational events and **evidence** links for cases/processes where applicable.
+3. **Scanner / findings** — downstream jobs consume the same evidence graph (see platform routes for findings and scanner runs).
+
+## Configure GitHub
+
+1. In Kiket, register an **event source** for the workspace with a unique **source key** and optional webhook secret (mirrors what the UI calls an evidence source).
+2. In GitHub’s webhook settings, point to your API base + `/api/v1/integrations/github/webhook`.
+3. Add custom headers (or use a proxy) to send `X-Kiket-Organization-Id` and `X-Kiket-Event-Source-Key` (or append `?sourceKey=...` if headers are not available — prefer headers).
+
+## Tests as specification
+
+Integration coverage lives in the API repo (`github.test.ts`): signed **`pull_request`** merge payloads flow through ingestion and normalization; invalid signatures land in **quarantine**.
+
+## See also
+
+<Cards>
+  <Card title="GitHub (extension docs)" href="/docs/integrations/github" description="Legacy extension README — Ruby app, OAuth, and 1.x-oriented details." />
+  <Card title="Integrations overview" href="/docs/integrations/overview" description="Evidence sources and what to verify after install." />
+</Cards>

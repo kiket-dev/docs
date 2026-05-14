@@ -1,0 +1,41 @@
+---
+title: Definition packs
+description: Flagship operational compliance workflows with evidence, checks, simulations, and audit reports — curated in-repo, not catalog padding.
+---
+
+Definition **packs** are full `.kiket/` trees aimed at the **operational compliance twin**: normalized events become evidence; scanners produce explainable findings; remediation and reports close the loop.
+
+The [`kiket2` repository](https://github.com/kiket-dev/kiket2) ships four **flagship** packs under `definitions/` (this monorepo, not quantity-driven marketplace tiles):
+
+<Cards>
+  <Card title="Vendor onboarding" href="https://github.com/kiket-dev/kiket2/tree/main/definitions/vendor-onboarding" description="DPA, security questionnaire, approvals, anchor-ready evidence." />
+  <Card title="Contract review" href="https://github.com/kiket-dev/kiket2/tree/main/definitions/contract-review" description="Legal → business → signature gate with contract evidence." />
+  <Card title="Privacy / DSAR" href="https://github.com/kiket-dev/kiket2/tree/main/definitions/privacy-request" description="Identity proof, SLAs, response export before closure." />
+  <Card title="Security incident" href="https://github.com/kiket-dev/kiket2/tree/main/definitions/security-incident-response" description="Containment SLA, RCA, executive closure approval." />
+</Cards>
+
+Each pack has a **README** (scenario, integrations, expected findings, one-session demo). See [`definitions/README`](https://github.com/kiket-dev/kiket2/blob/main/definitions/README.md) in **kiket2** for the pack index.
+
+## Evidence sources
+
+To light up **events → evidence** in production, connect an evidence source. The reference path is **GitHub** webhooks:
+
+<Cards>
+  <Card title="GitHub webhook ingestion" href="/docs/integrations/github-webhook-ingestion" description="Signatures, headers, and how merges hit the raw inbox and evidence pipeline." />
+</Cards>
+
+## Quality bar
+
+A flagship pack should include:
+
+- explicit **evidence** definitions tied to `normalized_event` (or generated) sources,
+- **checks** and **remediation** IDs the scanner and UI can surface,
+- at least one **simulation** block that proves a finding fires when evidence is missing,
+- a **report** definition under `.kiket/reports/` for audit exports.
+
+## What's next?
+
+<Cards>
+  <Card title="Templates" href="/docs/build/templates" description="Start from a GitHub template or copy `.kiket/` from the flagship packs." />
+  <Card title="Workflows" href="/docs/build/workflows" description="Model primitives for processes and gates." />
+</Cards>
