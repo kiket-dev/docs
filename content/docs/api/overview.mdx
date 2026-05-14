@@ -58,6 +58,11 @@ An OpenAPI spec lives at **[api.kiket.dev/api/v1/docs](https://api.kiket.dev/api
   <Card title=".NET" href="/docs/api/sdk/dotnet" description=".NET 8+, NuGet." />
 </Cards>
 
+## Assistive AI
+
+- **`POST /api/v1/ai/chat`** — multi-turn assistive chat used by the web app (command palette and AI panel). Responses are shaped as `{ data: { reply, suggestions? } }`. Requires a configured provider (`MISTRAL_API_KEY` _or_ `OPENAI_API_KEY`); otherwise the API returns `503` with `AI_NOT_CONFIGURED`.
+- **`GET /api/v1/search/semantic`** — semantic (embedding) search across indexed **cases**, **knowledge** documents, **evidence**, **findings**, and **audit reports** when the database and embeddings provider are available.
+
 ## Rate limits
 
 - Default: **1,200 requests/min** per API token.
