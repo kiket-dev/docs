@@ -1,0 +1,22 @@
+---
+title: AI assistance
+description: How Kiket uses models assistively — bounded, reviewable, and subordinate to engine and evidence.
+---
+
+Kiket may surface **assistive** AI (chat, classification hints, summaries) to speed up triage and authoring. This is **not** compliance truth by itself.
+
+## What “assistive only” means
+
+- **Engine, scanners, rules, and evidence** define what happened and what is required.
+- Model output is a **draft or suggestion** until a person or system records an accepted outcome in the platform (case fields, evidence, findings workflow, reports).
+- When you **attach** an AI reply to a case, Kiket stores a **real artifact** (case context note or evidence record) so the text is traceable—not orphan chat.
+
+## Configuration
+
+Assistive features call the platform AI provider (`MISTRAL_API_KEY` or `OPENAI_API_KEY` in the API environment). If the provider is not configured, the API returns a clear **unconfigured** error instead of fabricated answers.
+
+## Privacy and support
+
+Requests are correlated with **request IDs** for support. Operators should not paste raw customer data into logs; use scoped resource IDs (case, finding, process) when opening tickets.
+
+For developers, the technical source of truth in this repository is `docs/AI.md` (design-time reference, not shipped to end users as product help).
