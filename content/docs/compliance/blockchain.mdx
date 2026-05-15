@@ -1,96 +1,59 @@
 ---
-title: Blockchain Anchoring
-description: Cryptographically anchor your audit trail to Polygon for tamper-evident evidence.
+title: Audit anchor proofs
+description: Optional cryptographic integrity proofs for finalized reports and evidence — local verification first, public-chain submission on higher tiers.
 ---
 
-Every audit entry Kiket records — workflow transitions, approvals, field
-edits, comments — is hashed and batched into a tamper-evident tree. That tree's
-root is published to Polygon on a configured schedule (often about once an hour in hosted deployments). The result: auditors
-can prove what happened, **and** prove nothing was changed after the
-fact, without trusting Kiket's operators alone.
+Kiket treats **anchor proofs** as an integrity layer on top of PostgreSQL and file-backed configuration. They do not gate workflow execution, finding lifecycle, or report export.
 
-## Why it matters
+## What a proof verifies
 
-Regulated frameworks (GDPR Art. 30, SOC 2 CC7, HIPAA §164.312(b), ISO
-27001 A.12.4) require audit trails that are both complete and resistant
-to tampering. Traditional logs satisfy "complete" but not "tamper
-evident" — privileged access to back-end storage can rewrite history unnoticed.
-Anchoring each batch's root to a public blockchain makes
-post-anchor edits to those entries **cryptographically detectable** by any
-party holding the entries and the chain.
+1. **Canonical hash** — Kiket fingerprints the subject (report snapshot, evidence record, or finding) with a stable JSON canonicalization and SHA-256.
+2. **Local Merkle proof** — Each proof stores a Merkle root and leaf proof so verifiers can confirm the subject hash was included without calling a blockchain.
+3. **Optional chain submission** — On Professional and Enterprise plans, pending proofs are submitted asynchronously to Polygon when `POLYGON_RPC_URL` and `POLYGON_PRIVATE_KEY` are configured. Failures are recorded and retried; they never block cases or scans.
 
-Two honest caveats:
+**Unanchored data is still valid.** Customers who only need in-product audit trails and exports can verify hashes locally without ever submitting to a chain.
 
-- **Entries pending their next scheduled anchor remain ordinary stored records.**
-  Until a batch is anchored, tampering with it is not detectable by the
-  chain alone. Keep anchor cadence short for the events you care most
-  about.
-- **Blockchain anchoring proves what was written wasn't changed; it
-  does not prove what was *never* written.** Completeness still comes
-  from the append-only discipline of the audit logger, not from the
-  chain.
+## Product surfaces
 
-## How it works
-
-1. **Fingerprint each entry.** Every audit entry is deterministically
-   fingerprinted from a canonical representation.
-2. **Batch into a hash tree.** A batch (default 100 entries, but any
-   size) is folded into a binary Merkle tree — the standard structure for batch proofs on-chain.
-3. **Publish the root.** The root hash is submitted as a transaction on
-   Polygon. Only the 32-byte root hits the chain — entry payloads stay in your Kiket environment.
-4. **Verify anytime.** Given the stored entries and the on-chain root,
-   any party can re-compute the tree and confirm it matches.
-
-## UI surfaces
-
-| Location | What you see |
+| Surface | What you see |
 | --- | --- |
-| **Compliance → Overview** | One-glance "anchored" badge with relative time. Click to open the chain view. |
-| **Compliance → Blockchain tab** | Full table of anchors with per-row verify buttons. |
-| **Compliance → Chain** (`/compliance/chain`) | Timeline view with expandable entries, Polygonscan links, and re-verify controls. |
+| **Audit Room** | Explainer for unanchored vs local vs chain states; per-report verify and create-proof actions |
+| **Cases / findings / evidence** | Status chips (`Unanchored`, `Local proof`, `Chain pending`, `Chain anchored`) |
+| **Platform API** | `POST /platform/anchors`, `GET /platform/anchors/{id}/verify` |
+| **CLI / MCP / SDK** | Same contract via `kiket anchor` patterns and `kiket_create_anchor_proof` / `kiket_verify_anchor` tools |
 
-The `AnchorBadge` primitive — shown inline on each anchor — communicates
-state in four colors:
+Legacy `/blockchain/*` batch endpoints were removed in Kiket 2.0 — use platform anchor proofs only.
 
-- **Anchored** (green, anchor icon) — batch is on-chain.
-- **Verified** (green, checkmark) — you re-ran the verification and it matched.
-- **Pending** (gray, clock) — the batch is local-only; the next scheduled anchor will include it.
-- **Failed** (red, warning) — verification found a tree/root mismatch. **Investigate immediately.**
-
-## Triggering an anchor
-
-Anchors run automatically on the platform schedule (hourly in typical hosted setups). To force
-one now:
-
-1. Open **Compliance → Blockchain** or **Compliance → Chain**.
-2. Click **Anchor Now**.
-3. Wait a few seconds — the new row appears at the top with its tx
-   hash. Clicking the tx hash opens the transaction on Polygonscan.
-
-You can also trigger from the API:
+## Create a proof
 
 ```bash
-curl -X POST https://api.kiket.dev/v1/blockchain/anchor \
+curl -X POST https://api.kiket.dev/api/v1/platform/anchors \
   -H "Authorization: Bearer $TOKEN" \
+  -H "X-Organization-Id: $ORG_ID" \
   -H "Content-Type: application/json" \
-  -d '{"organizationId":"YOUR_ORG_ID"}'
+  -d '{
+    "subjectType": "report",
+    "subjectId": "REPORT_UUID",
+    "subjectHash": "SHA256_OF_REPORT_SNAPSHOT",
+    "requestSubmission": true
+  }'
 ```
 
-## Verification
+- **Free / Starter** — `requestSubmission: true` still creates a **local proof** (`local_only`) when the plan does not allow chain submission.
+- **Professional / Enterprise** — eligible proofs enter `pending` until the anchor submission worker records `anchored` with a transaction hash, or `failed` with an error message when chain credentials are missing.
 
-To prove the chain is intact at any point in the future:
+Plan limits apply to `anchor_proofs.retained` per billing period (402 when exceeded).
 
-1. Open **Compliance → Chain** and click **Verify** on any row.
-2. Kiket re-computes the hash tree from the stored entries, compares
-   the root against the on-chain transaction, and shows
-   `N/N leaves verified`.
-3. Export the evidence via **Compliance → Chain → Export** (PDF,
-   Excel, or CSV) — auditors typically want the full list with tx
-   hashes and entry counts.
+## Verify a proof
 
-## Cost
+```bash
+curl https://api.kiket.dev/api/v1/platform/anchors/PROOF_UUID/verify \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "X-Organization-Id: $ORG_ID"
+```
 
-Polygon transactions cost fractions of a cent. A hundred anchors a
-month is under $1 at typical gas prices. If you want to disable
-on-chain publishing and keep only the local tree commitments, set
-`BLOCKCHAIN_ANCHORING_ENABLED=false` in your API environment.
+The API recomputes the live subject hash (report snapshot, evidence, or finding) and checks the stored Merkle proof. Chain verification uses the recorded transaction hash when present.
+
+## Scope (intentionally narrow)
+
+Kiket anchors **finalized report hashes**, **evidence bundle hashes**, and related integrity subjects — not every operational event, not identity, and not workflow state transitions on-chain. NFTs and token mechanics remain out of scope.
