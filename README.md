@@ -1,11 +1,26 @@
-# Kiket docs
+# Kiket docs site
 
-Source for [docs.kiket.dev](https://docs.kiket.dev).
+Source for [docs.kiket.dev](https://docs.kiket.dev) — public product and integration documentation (Fumadocs / Next.js static export).
+
+## Role in the monorepo
+
+Separate app under `docs-site/`. Product-facing guides in `docs/compliance/` sync here via `pnpm sync:compliance-docs`. Submodule READMEs (CLI, MCP, SDK) can be ingested at prebuild — see `scripts/sync-submodule-readmes.mjs` in the docs-site package.
+
+## Layout
+
+```
+docs-site/
+  content/docs/    MDX pages (section folders + meta.json for sidebar order)
+  app/             Next.js app router
+  scripts/         Prebuild sync helpers
+```
+
+## Commands
 
 ```bash
-pnpm install
-pnpm dev        # http://localhost:3001
-pnpm build      # static export to ./out
+pnpm --filter @kiket/docs dev        # http://localhost:3001
+pnpm --filter @kiket/docs build      # static export to ./out
+pnpm sync:compliance-docs            # from repo root — copy docs/compliance/
 ```
 
 ## Writing docs
@@ -19,8 +34,10 @@ description: One-liner shown in search and OG cards.
 ---
 ```
 
-Sidebar order comes from `meta.json` in each folder — list pages in the order they should appear.
+Sidebar order comes from `meta.json` in each folder.
 
-## Auto-synced pages
+## Related docs
 
-Integration, SDK, CLI, and MCP pages are generated from their upstream READMEs during `prebuild`. Edit the upstream repo, not the generated MDX. To add a new source, extend `SOURCES` in `scripts/sync-submodule-readmes.mjs`.
+- [Docs-site operations](../docs/guides/docs-site.md)
+- [Compliance source docs](../docs/compliance/README.md)
+- [Folder README convention](../docs/guides/folder-readmes.md)

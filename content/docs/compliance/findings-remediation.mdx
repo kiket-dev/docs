@@ -102,9 +102,22 @@ Operators can execute the full accountability loop (acknowledge → start → at
 
 OpenAPI and generated SDKs use **finding** and **remediation** vocabulary (not legacy issue terminology).
 
+## Findings inbox triage
+
+The findings queue supports slice filters via the `triage` query param:
+
+| Param    | Meaning                                                                 |
+| -------- | ----------------------------------------------------------------------- |
+| `actionable` | Open / acknowledged / remediating findings                          |
+| `since_last_scan` | Findings observed in the latest **completed** scanner run per process (or for one process when `processId` is set) |
+| `critical` | Actionable findings with critical severity                          |
+| `missing_evidence` | Actionable findings with no linked case/process evidence        |
+| `report_ready` | Resolved, suppressed, or false-positive findings                  |
+
+Example: `/findings?triage=since_last_scan&processId=<processId>`
+
 ## Optional follow-ups (not yet shipped)
 
-- **Since last scan** triage slice
 - Bulk acknowledge / resolve for selected findings
 
 ## Operational Cases queue
