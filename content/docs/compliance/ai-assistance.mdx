@@ -12,13 +12,13 @@ Strategy: [FUTURE-VISION.md](../FUTURE-VISION.md) · Implementation: [AI.md](../
 
 Kiket does not treat model output as compliance truth. It **measures assistive value** against the same operational model as scanner findings and evidence:
 
-| Signal | Meaning |
-| ------ | ------- |
-| **Grounding** | Assistive call tied to a case, finding, evidence record, or process |
-| **Acceptance** | Human attached output as evidence (`sourceSystem: kiket_ai`) |
-| **Dismiss / override** | Human explicitly dismissed or marked output not useful |
+| Signal                  | Meaning                                                                                      |
+| ----------------------- | -------------------------------------------------------------------------------------------- |
+| **Grounding**           | Assistive call tied to a case, finding, evidence record, or process                          |
+| **Acceptance**          | Human attached output as evidence (`sourceSystem: kiket_ai`)                                 |
+| **Dismiss / override**  | Human explicitly dismissed or marked output not useful                                       |
 | **Outcome correlation** | Median time to resolve findings with vs without attached assist (correlation, not causation) |
-| **Cost** | `ai.requests`, `ai.tokens`, and `ai.embeddings` usage for the billing period |
+| **Cost**                | `ai.requests`, `ai.tokens`, and `ai.embeddings` usage for the billing period                 |
 
 ## Accountability loop
 
@@ -79,14 +79,14 @@ Indexing runs on create/update and records **`ai.embeddings`** usage (token esti
 
 ## API (OpenAPI)
 
-| Route | Purpose |
-| ----- | ------- |
-| `POST /ai/generate` | Requires `surface`; returns `interaction_id` |
-| `POST /ai/chat` | Optional `surface` (default `chat`); returns `data.interaction_id` |
-| `GET /search/semantic` | Returns `interaction_id` per search |
-| `PATCH /platform/assistive-interactions/:id` | Record `attached`, `dismissed`, or `overridden` |
-| `GET /platform/assistive-interactions/metrics` | Period metrics for admins and dashboards |
-| `GET/PATCH /organizations/:orgId/ai-policy` | Org governance policy |
+| Route                                          | Purpose                                                            |
+| ---------------------------------------------- | ------------------------------------------------------------------ |
+| `POST /ai/generate`                            | Requires `surface`; returns `interaction_id`                       |
+| `POST /ai/chat`                                | Optional `surface` (default `chat`); returns `data.interaction_id` |
+| `GET /search/semantic`                         | Returns `interaction_id` per search                                |
+| `PATCH /platform/assistive-interactions/:id`   | Record `attached`, `dismissed`, or `overridden`                    |
+| `GET /platform/assistive-interactions/metrics` | Period metrics for admins and dashboards                           |
+| `GET/PATCH /organizations/:orgId/ai-policy`    | Org governance policy                                              |
 
 ## Product surfaces
 

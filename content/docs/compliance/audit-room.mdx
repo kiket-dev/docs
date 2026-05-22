@@ -1,0 +1,75 @@
+---
+title: "Audit Room"
+description: "Master–detail Audit Room, URL-synced readiness filters, integrity stepper, and audit snapshot generation for reviewers."
+---
+
+**Audience:** compliance reviewers, auditors, and operators  
+**Status:** shipped — master–detail Audit Room, URL-synced readiness filters, integrity stepper, and snapshot generation.
+
+Strategy: [FUTURE-VISION.md](../FUTURE-VISION.md) · Architecture: [ARCHITECTURE.md](../ARCHITECTURE.md)
+
+## Audit Room
+
+The **Audit Room** (`/audit-room`) is the review cockpit for audit report snapshots and optional integrity proofs. It uses a **master–detail** layout with the shared operational queue chrome (`q`, `page`, `pageSize`).
+
+| Region              | Purpose                                                                 |
+| ------------------- | ----------------------------------------------------------------------- |
+| **Filter chips**    | Count and filter by unanchored, pending proof, anchored, failed, or open findings |
+| **Queue toolbar**   | Text search (`q`), result range, and pagination                         |
+| **Snapshots queue** | Newest report snapshots; selection drives the detail panel              |
+| **Review & attest** | Snapshot context, integrity stepper, and links to evidence/findings/remediation |
+
+### URL parameters
+
+Shared queue params: `q`, `page`, `pageSize`.
+
+| Param         | Meaning                                              |
+| ------------- | ---------------------------------------------------- |
+| `filter`      | One of `unanchored`, `pending_anchor`, `anchored`, `failed`, `open_findings` |
+| `selected`    | Selected report snapshot id for the detail panel     |
+| `processId`   | Scope snapshots to a monitored process               |
+| `workspaceId` | Scope snapshots to a workspace                       |
+
+Example: `/audit-room?filter=unanchored&selected=<reportId>`
+
+When `selected` is absent or invalid, the room auto-selects the highest-priority snapshot in the filtered list and writes `selected` back to the URL.
+
+## Integrity stepper
+
+From the detail panel, reviewers can close the attestation loop without leaving the Audit Room:
+
+```text
+1. Review snapshot scope   → counts for findings, evidence, and open gaps in process
+2. Verify snapshot hash    → GET /platform/reports/:id/verify
+3. Record integrity proof  → POST /platform/anchors (optional chain submission)
+4. Verify proof            → GET /platform/anchors/:id/verify
+```
+
+Integrity proofs are **optional** — PostgreSQL snapshots and local hash verification remain authoritative for day-to-day operations.
+
+## Generate snapshot
+
+Operators with elevated role can generate a new snapshot from the room header:
+
+```text
+POST /platform/reports
+{ workspaceId, processId, reportKey, title, periodStart, periodEnd }
+```
+
+The room uses the monitored process context to pre-fill report metadata and navigates to the new snapshot after generation.
+
+## API surfaces
+
+| Resource      | Routes                                                          |
+| ------------- | --------------------------------------------------------------- |
+| Reports       | `GET /platform/reports`, `POST /platform/reports`, `GET /platform/reports/:id/verify` |
+| Anchor proofs | `GET /platform/anchor-proofs`, `POST /platform/anchors`, `GET /platform/anchors/:id/verify` |
+| Overview      | `GET /platform/overview` (reports, anchors, findings, evidence for the room) |
+
+OpenAPI and generated SDKs use **report** and **anchor proof** vocabulary.
+
+## Optional follow-ups (not yet shipped)
+
+- Export audit bundle download from the detail panel when `exportStorageKey` is populated
+- Compare two snapshots side-by-side for period-over-period review
+- Bulk anchor submission queue for Enterprise tier

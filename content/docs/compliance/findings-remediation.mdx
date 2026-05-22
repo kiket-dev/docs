@@ -1,0 +1,122 @@
+---
+title: "Findings inbox and remediation"
+description: "Master–detail Findings Inbox, URL-synced triage filters, inline remediation stepper, and Remediation Workbench accountability loop."
+---
+
+**Audience:** operators, compliance reviewers, and integrators  
+**Status:** shipped — master–detail Findings Inbox, URL-synced triage filters, inline remediation stepper, and Remediation Workbench execution cockpit.
+
+Strategy: [FUTURE-VISION.md](../FUTURE-VISION.md) · Architecture: [ARCHITECTURE.md](../ARCHITECTURE.md)
+
+## Operational queue (shared)
+
+Cases (`/cases`), Findings Inbox, Remediation Workbench, and Audit Room share the same **operational queue** chrome:
+
+| Param      | Meaning                                      |
+| ---------- | -------------------------------------------- |
+| `q`        | Client-side text search over the filtered list |
+| `page`     | Page number (default `1`; omitted from URL)  |
+| `pageSize` | Rows per page (default `25`)                 |
+| `sort`     | Surface-specific sort key (cases only today) |
+
+Each surface adds its own slice filter param (`filter` or `triage`), scope params (`processId`, `workspaceId`, `findingId`), and `selected` for the master–detail panel.
+
+Example: `/cases?filter=sla_risk&q=vendor&page=2&selected=<caseId>`
+
+## Findings Inbox
+
+The **Findings Inbox** (`/findings`) is the primary triage surface for scanner output. It uses a **master–detail** layout:
+
+| Region                 | Purpose                                                                              |
+| ---------------------- | ------------------------------------------------------------------------------------ |
+| **Filter chips**       | Count and filter by actionable, critical, missing evidence, or report-ready findings |
+| **Queue toolbar**      | Text search (`q`), result range, and pagination                                      |
+| **Queue**              | Severity-sorted list; selection drives the detail panel                              |
+| **Review & remediate** | Scanner context, recommended action, and remediation stepper                         |
+
+### URL parameters
+
+Query params are the source of truth for inbox state (deep-linkable and shareable). Shared queue params: `q`, `page`, `pageSize` (see **Operational queue** above).
+
+| Param       | Meaning                                                             |
+| ----------- | ------------------------------------------------------------------- |
+| `triage`    | One of `actionable`, `critical`, `missing_evidence`, `report_ready` |
+| `selected`  | Selected finding id for the detail panel                            |
+| `processId` | Scope findings to a monitored process                               |
+
+Example: `/findings?triage=missing_evidence&selected=<findingId>`
+
+When `selected` is absent or invalid, the inbox auto-selects the highest-priority finding in the filtered list and writes `selected` back to the URL.
+
+## Inline remediation stepper
+
+From the detail panel, operators can close the accountability loop without leaving the inbox:
+
+```text
+1. Acknowledge     → POST /platform/findings/:id/transition { status: "acknowledged" }
+2. Start remediation → POST /platform/remediations (+ transition to remediating when applicable)
+3. Attach proof    → navigate to Evidence Center for linked case/process
+4. Complete & resolve → PATCH /platform/remediations/:id { status: "completed", completionEvidenceId }
+                     → POST /platform/findings/:id/transition { status: "resolved" }
+```
+
+Remediation create payloads are derived from finding metadata (`finding.remediation` YAML hints) and scanner context — not from model output.
+
+## Remediation Workbench
+
+**Remediation Workbench** (`/remediation`) is the execution cockpit for open remediation actions. It mirrors the Findings Inbox master–detail pattern:
+
+| Region            | Purpose                                                                 |
+| ----------------- | ----------------------------------------------------------------------- |
+| **Filter chips**  | Count and filter by needs proof, ready to complete, overdue, in progress, or completed |
+| **Queue toolbar** | Text search (`q`), result range, and pagination                         |
+| **Queue**         | Severity- and due-date-sorted list; selection drives the detail panel   |
+| **Execute**       | Scanner context, next-step guidance, and the shared remediation stepper |
+
+### URL parameters
+
+Shared queue params: `q`, `page`, `pageSize` (see **Operational queue** above).
+
+| Param       | Meaning                                              |
+| ----------- | ---------------------------------------------------- |
+| `filter`    | One of `needs_proof`, `ready_to_complete`, `overdue`, `in_progress`, `completed` |
+| `selected`  | Selected remediation id for the detail panel         |
+| `findingId` | Scope remediation to a linked finding                |
+| `processId` | Scope remediation to a monitored process             |
+
+Legacy deep links using `remediationId=` still parse into `selected`.
+
+Example: `/remediation?filter=needs_proof&selected=<remediationId>`
+
+When `selected` is absent or invalid, the workbench auto-selects the highest-priority action in the filtered list and writes `selected` back to the URL. When no `filter` is set, the default queue shows **in progress** actions.
+
+Operators can execute the full accountability loop (acknowledge → start → attach proof → complete/resolve) from the workbench detail panel without returning to the Findings Inbox. Each row still links back to the finding via **View finding in inbox** when cross-surface context is needed.
+
+## API surfaces
+
+| Resource    | Routes                                                                                          |
+| ----------- | ----------------------------------------------------------------------------------------------- |
+| Findings    | `GET /platform/findings`, `POST /platform/findings/:id/transition`                              |
+| Remediation | `GET /platform/remediations`, `POST /platform/remediations`, `PATCH /platform/remediations/:id` |
+| Overview    | `GET /platform/overview` (findings, evidence, remediations for inbox)                           |
+
+OpenAPI and generated SDKs use **finding** and **remediation** vocabulary (not legacy issue terminology).
+
+## Optional follow-ups (not yet shipped)
+
+- **Since last scan** triage slice
+- Bulk acknowledge / resolve for selected findings
+
+## Operational Cases queue
+
+**Operational Cases** (`/cases`) uses the same queue chrome with case-specific slice filters:
+
+| Param         | Meaning                                              |
+| ------------- | ---------------------------------------------------- |
+| `filter`      | One of `open`, `sla_risk`, `has_findings`, `closed`  |
+| `selected`    | Selected case id for the detail panel                |
+| `processId`   | Scope cases to a monitored process                   |
+| `workspaceId` | Scope cases to a workspace                           |
+| `sort`        | One of `updated`, `opened`, `priority`               |
+
+Example: `/cases?filter=has_findings&q=vendor&sort=priority&selected=<caseId>`

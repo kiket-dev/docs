@@ -1,6 +1,8 @@
 {
   "title": "Compliance",
   "pages": [
-    "ai-assistance"
+    "ai-assistance",
+    "findings-remediation",
+    "audit-room"
   ]
 }
