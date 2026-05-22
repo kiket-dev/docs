@@ -1,0 +1,82 @@
+---
+title: "Modeling cockpit UX"
+description: "Phase F guided UX: proposal vs baseline vs live cases, Capture test, and Ship verdict with Fix links."
+---
+
+**Status:** Shipped (2026-05-22)  
+**Related:** [editor-cockpit.md](./editor-cockpit.md), [simulation-cockpit.md](./simulation-cockpit.md)
+
+## North star
+
+**One guided question:** _Is it safe to ship this process change?_
+
+Open **Check change** in the editor toolbar to show the Modeling Cockpit.
+
+### Three visible inputs
+
+| Input                | Source                         | User control                         |
+| -------------------- | ------------------------------ | ------------------------------------ |
+| **Proposal**         | Current editor buffer          | What you edited                      |
+| **Baseline**         | Saved file or `main` branch    | Baseline picker in readiness strip   |
+| **Operational data** | Linked process cases + history | Read-only counts + CTAs when missing |
+
+### Guided flow
+
+```text
+Readiness strip → Impact summary → Detail tabs → Ship verdict
+```
+
+Default landing: **Impact**. **Ship** is the terminal step.
+
+## Tab map
+
+| Tab           | Question                            |
+| ------------- | ----------------------------------- |
+| **Impact**    | What breaks if I ship?              |
+| **Cases**     | Which open cases are guard-blocked? |
+| **History**   | Do historical paths still work?     |
+| **Tests**     | Do regression tests pass?           |
+| **Structure** | Is the graph and schema valid?      |
+| **Ship**      | Safe to save?                       |
+
+## Deep links
+
+Share or bookmark a specific cockpit view with URL query params on the editor:
+
+| Param       | Value   | Meaning                                      |
+| ----------- | ------- | -------------------------------------------- |
+| `simulate`  | `1`     | Open the Modeling Cockpit bottom panel       |
+| `tab`       | see tab map | Active detail tab (`impact`, `cases`, …) |
+
+Example: `/editor?file=.kiket/workflows/vendor-onboarding.yaml&simulate=1&tab=cases`
+
+Tab changes update the URL in place so refresh and share round-trip.
+
+## Shipped UX
+
+- **Readiness strip** — proposal, baseline, operational context, blocker chips
+- **Impact default** — aggregated status rows drill into detail tabs
+- **Capture test** — from Cases rows; toast + highlight; duplicate detection
+- **Add test** / **Edit** — opens Process config regression test editor
+- **Re-run check**, auto-check toggle, baseline picker (saved vs `main`)
+- **Ship** tab — Fix links to detail tabs; Save when ready
+- **Live lens legend** on canvas overlay
+- **URL state** — `?simulate=1&tab=<tab>` deep links; inline package process cockpit retired
+
+## Walkthrough (30 seconds)
+
+1. Open a workflow in the editor and click **Check change**.
+2. Read the **readiness strip**: unsaved proposal, baseline, linked cases, regression tests.
+3. Start on **Impact** — scan status rows; click a row to jump to the failing detail tab.
+4. **Cases** — see guard-blocked open cases; use **Capture test** to seed a regression test.
+5. **Tests** — confirm YAML scenarios pass; **Edit** opens structured scenario fields in Process config.
+6. **Ship** — review blocking checks; use **Fix** to jump back, then **Save** when ready.
+
+## Acceptance criteria
+
+Within 30 seconds of opening the cockpit, a user can answer:
+
+1. What is being checked?
+2. Against what baseline and how many live cases?
+3. What failed?
+4. What is the next action?

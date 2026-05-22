@@ -6,29 +6,29 @@ description: "Master–detail Audit Room, URL-synced readiness filters, integrit
 **Audience:** compliance reviewers, auditors, and operators  
 **Status:** shipped — master–detail Audit Room, URL-synced readiness filters, integrity stepper, and snapshot generation.
 
-Strategy: [FUTURE-VISION.md](../FUTURE-VISION.md) · Architecture: [ARCHITECTURE.md](../ARCHITECTURE.md)
+Strategy: [future-vision.md](../architecture/future-vision.md) · Architecture: [overview.md](../architecture/overview.md)
 
 ## Audit Room
 
 The **Audit Room** (`/audit-room`) is the review cockpit for audit report snapshots and optional integrity proofs. It uses a **master–detail** layout with the shared operational queue chrome (`q`, `page`, `pageSize`).
 
-| Region              | Purpose                                                                 |
-| ------------------- | ----------------------------------------------------------------------- |
+| Region              | Purpose                                                                           |
+| ------------------- | --------------------------------------------------------------------------------- |
 | **Filter chips**    | Count and filter by unanchored, pending proof, anchored, failed, or open findings |
-| **Queue toolbar**   | Text search (`q`), result range, and pagination                         |
-| **Snapshots queue** | Newest report snapshots; selection drives the detail panel              |
-| **Review & attest** | Snapshot context, integrity stepper, and links to evidence/findings/remediation |
+| **Queue toolbar**   | Text search (`q`), result range, and pagination                                   |
+| **Snapshots queue** | Newest report snapshots; selection drives the detail panel                        |
+| **Review & attest** | Snapshot context, integrity stepper, and links to evidence/findings/remediation   |
 
 ### URL parameters
 
 Shared queue params: `q`, `page`, `pageSize`.
 
-| Param         | Meaning                                              |
-| ------------- | ---------------------------------------------------- |
+| Param         | Meaning                                                                      |
+| ------------- | ---------------------------------------------------------------------------- |
 | `filter`      | One of `unanchored`, `pending_anchor`, `anchored`, `failed`, `open_findings` |
-| `selected`    | Selected report snapshot id for the detail panel     |
-| `processId`   | Scope snapshots to a monitored process               |
-| `workspaceId` | Scope snapshots to a workspace                       |
+| `selected`    | Selected report snapshot id for the detail panel                             |
+| `processId`   | Scope snapshots to a monitored process                                       |
+| `workspaceId` | Scope snapshots to a workspace                                               |
 
 Example: `/audit-room?filter=unanchored&selected=<reportId>`
 
@@ -60,11 +60,11 @@ The room uses the monitored process context to pre-fill report metadata and navi
 
 ## API surfaces
 
-| Resource      | Routes                                                          |
-| ------------- | --------------------------------------------------------------- |
-| Reports       | `GET /platform/reports`, `POST /platform/reports`, `GET /platform/reports/:id/verify` |
+| Resource      | Routes                                                                                      |
+| ------------- | ------------------------------------------------------------------------------------------- |
+| Reports       | `GET /platform/reports`, `POST /platform/reports`, `GET /platform/reports/:id/verify`       |
 | Anchor proofs | `GET /platform/anchor-proofs`, `POST /platform/anchors`, `GET /platform/anchors/:id/verify` |
-| Overview      | `GET /platform/overview` (reports, anchors, findings, evidence for the room) |
+| Overview      | `GET /platform/overview` (reports, anchors, findings, evidence for the room)                |
 
 OpenAPI and generated SDKs use **report** and **anchor proof** vocabulary.
 

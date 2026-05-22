@@ -1,0 +1,107 @@
+---
+title: "Editor modeling cockpit"
+description: "Check change panel: readiness strip, Impact / Cases / History / Tests / Structure / Ship tabs for file-backed workflow governance."
+---
+
+**Status:** Phases A–F shipped (2026-05-22)  
+**See also:** [simulation-cockpit.md](./simulation-cockpit.md), [editor-cockpit-ux.md](./editor-cockpit-ux.md)
+
+Historical phase roadmaps live in-repo under `docs/plans/shipped/` (not published on the docs-site).
+
+## Modeling Cockpit tabs (Phase F)
+
+| Tab           | Question                                 |
+| ------------- | ---------------------------------------- |
+| **Impact**    | What breaks if I ship? (default landing) |
+| **Cases**     | Which open cases are guard-blocked?      |
+| **History**   | Do historical paths still work?          |
+| **Tests**     | Do regression tests pass?                |
+| **Structure** | Is the graph and schema valid?           |
+| **Ship**      | Safe to save?                            |
+
+The readiness strip shows proposal (unsaved vs saved), baseline (saved file or `main`), and operational context (linked cases/tests). Empty states include CTAs; **Capture test** on forecast rows adds YAML regression tests with toast feedback.
+
+See [editor-cockpit-ux.md](./editor-cockpit-ux.md) for the full UX plan and acceptance criteria.
+
+Toggle **Live lens** in the cockpit header to overlay open cases, findings, and SLA breaches on the canvas.
+
+## Process context bar
+
+When the Modeling Cockpit is open on a workflow file, the editor shows a context bar with workspace, repo/branch, process name, open case/finding counts, and links to cases and findings.
+
+## Visual process config (Phase B)
+
+In the workflow canvas toolbar, click **Process** to open structured panels for:
+
+- Evidence requirements
+- Compliance checks
+- Remediation mappings
+- Regression scenarios
+
+Legacy v1 workflow files show an **Upgrade to v2.0** banner that runs `migrateWorkflowConfigYaml` and replaces the editor buffer.
+
+## Live operational lens (Phase C)
+
+`simulation-data` returns extended `processContext`:
+
+- Repo name, branch, workflow path
+- `liveLens` — per-state open cases, open findings, SLA breach counts
+
+The cockpit merges forecast impact with live lens metrics on canvas nodes.
+
+## Branch compare & CI (Phase D)
+
+- **Impact tab / baseline picker:** compare current YAML against saved file or `main` (via `GET /repos/:id/file?path=&ref=main`)
+- **Local CLI:** `pnpm kiket:simulate path/to/workflow.yaml [--baseline base.yaml]`
+- **CI:** flagship definition packs run through `kiket:simulate` after package build
+
+## Polish & scale (Phase E)
+
+- **Toolbar:** Tailwind/dark-mode aligned workflow chrome with Layout, Fit, Process config
+- **Auto-layout:** Dagre layout (`Layout` button or `L`); fit view (`F`); auto-layout on open when nodes stack
+- **Template gallery:** New workflow → blank scaffold or flagship definition pack
+- **Keyboard help:** Press `?` on `/editor` for global + editor shortcut sections
+- **Accessibility:** Toolbar `role="toolbar"` and feature badge ARIA labels
+
+Template file API: `GET /templates/catalog/:key/file?path=.kiket/workflows/...`
+
+## Ship verdict
+
+The **Ship** tab aggregates YAML schema, graph validity, reachability warnings, replay failures, scenario failures, and new guard blockers vs the saved definition. Each failed check includes a **Fix** link to the relevant detail tab.
+
+## API extensions
+
+`GET /workflows/:id/simulation-data` — extended `processContext`:
+
+```json
+{
+  "processContext": {
+    "linked": true,
+    "processId": "...",
+    "workspaceName": "Production Operations",
+    "repoId": "...",
+    "repoName": "acme/compliance",
+    "repoBranch": "main",
+    "workflowPath": ".kiket/workflows/production-change.yaml",
+    "openCaseCount": 4,
+    "openFindingCount": 2,
+    "liveLens": {
+      "openCasesByState": { "review": 2 },
+      "openFindingsByState": { "review": 1 },
+      "slaBreachesByState": {}
+    }
+  }
+}
+```
+
+`GET /repos/:id/file?path=...&ref=main` — read file at branch for compare.
+
+## Test plan
+
+| Layer       | Coverage                                                                                      |
+| ----------- | --------------------------------------------------------------------------------------------- |
+| Editor unit | `store.test.ts` — v2 round-trip, `UPDATE_PROCESS_CONFIG`, `APPLY_LAYOUT`                      |
+| Web unit    | `modeling-cockpit.test.ts`, `process-simulation.test.ts`, `workflow-template-gallery.test.ts` |
+| API         | `simulation-forecast.test.ts`, `templates-catalog.test.ts`                                    |
+| E2E         | `simulation-cockpit.spec.ts` — Validate + Commit tabs                                         |
+| CI          | `pnpm kiket:simulate` on privacy-request + contract-review packs                              |

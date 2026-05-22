@@ -1,0 +1,71 @@
+---
+title: "Simulation cockpit"
+description: "Modeling Cockpit: Impact-first checks on guard blockers, history replay, and YAML regression tests before shipping process changes."
+---
+
+**Status:** Shipped (2026-05-22) — unified with [editor-cockpit.md](./editor-cockpit.md) as the **Modeling Cockpit**
+
+## Overview
+
+Simulation answers: _If I merge this process change, which real cases break, which transitions are guard-blocked, and do declarative scenarios still pass?_
+
+Engine and API:
+
+- `forecastTransitionBlockers()` — guard-blocked exits via `canTransition`
+- `runSimulationScenarios()` — YAML `simulations:` runner
+- `GET /workflows/:id/simulation-data` — operational cases as workflow instances + process context + live lens
+- `POST /workflows/:id/simulate` — replay + forecast + scenarios
+
+## Modeling Cockpit tabs (web)
+
+Open the editor toolbar **Check change** panel. Default landing is **Impact**; detail tabs:
+
+| Tab           | Question                            |
+| ------------- | ----------------------------------- |
+| **Impact**    | What breaks if I ship?              |
+| **Cases**     | Which open cases are guard-blocked? |
+| **History**   | Do historical paths still work?     |
+| **Tests**     | Do regression tests pass?           |
+| **Structure** | Is the graph and schema valid?      |
+| **Ship**      | Safe to save?                       |
+
+Deep-link a tab with `?simulate=1&tab=cases` on the editor URL (for example `/editor?file=.kiket/workflows/foo.yaml&simulate=1&tab=ship`).
+
+The **readiness strip** shows what is being checked (proposal vs saved), baseline (saved file or `main`), and operational context (linked cases and tests).
+
+Cases are built from live operational data via `caseToWorkflowInstance` (not legacy `context.workflowData` blobs).
+
+## YAML scenarios
+
+Declare regression tests under `simulations:` (requires `model_version: "2.0"`):
+
+```yaml
+simulations:
+  - id: blocked-without-checklist
+    title: Cannot approve with incomplete checklist
+    initial_state: risk_review
+    events:
+      - type: transition
+        to: approved
+    expect:
+      final_state: risk_review
+```
+
+Supported event types: `created`, `transition`, `evidence_observed`, `approval_recorded`, `checklist_completed`.
+
+Use **Capture test** on a Cases row to seed a regression test from a guard blocker.
+
+## Canvas data lens
+
+Toggle **Live lens** in the cockpit header to merge:
+
+- **Forecast heat** — blocked exits and affected case counts per state
+- **Live operations** — open cases, open findings, and SLA breaches per state
+
+## CLI / CI
+
+- **Local:** `pnpm kiket:simulate path/to/workflow.yaml [--baseline base.yaml]`
+- **CI:** flagship definition packs validated after package build (privacy-request, contract-review)
+- **Ship tab** output matches the CLI report shape (schema, graph, scenarios)
+
+See [editor-cockpit.md](./editor-cockpit.md) and [editor-cockpit-ux.md](./editor-cockpit-ux.md) for branch compare, template gallery, and guided UX.

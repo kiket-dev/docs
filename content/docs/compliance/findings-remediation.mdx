@@ -6,18 +6,18 @@ description: "Master–detail Findings Inbox, URL-synced triage filters, inline 
 **Audience:** operators, compliance reviewers, and integrators  
 **Status:** shipped — master–detail Findings Inbox, URL-synced triage filters, inline remediation stepper, and Remediation Workbench execution cockpit.
 
-Strategy: [FUTURE-VISION.md](../FUTURE-VISION.md) · Architecture: [ARCHITECTURE.md](../ARCHITECTURE.md)
+Strategy: [future-vision.md](../architecture/future-vision.md) · Architecture: [overview.md](../architecture/overview.md)
 
 ## Operational queue (shared)
 
 Cases (`/cases`), Findings Inbox, Remediation Workbench, and Audit Room share the same **operational queue** chrome:
 
-| Param      | Meaning                                      |
-| ---------- | -------------------------------------------- |
+| Param      | Meaning                                        |
+| ---------- | ---------------------------------------------- |
 | `q`        | Client-side text search over the filtered list |
-| `page`     | Page number (default `1`; omitted from URL)  |
-| `pageSize` | Rows per page (default `25`)                 |
-| `sort`     | Surface-specific sort key (cases only today) |
+| `page`     | Page number (default `1`; omitted from URL)    |
+| `pageSize` | Rows per page (default `25`)                   |
+| `sort`     | Surface-specific sort key (cases only today)   |
 
 Each surface adds its own slice filter param (`filter` or `triage`), scope params (`processId`, `workspaceId`, `findingId`), and `selected` for the master–detail panel.
 
@@ -66,23 +66,23 @@ Remediation create payloads are derived from finding metadata (`finding.remediat
 
 **Remediation Workbench** (`/remediation`) is the execution cockpit for open remediation actions. It mirrors the Findings Inbox master–detail pattern:
 
-| Region            | Purpose                                                                 |
-| ----------------- | ----------------------------------------------------------------------- |
+| Region            | Purpose                                                                                |
+| ----------------- | -------------------------------------------------------------------------------------- |
 | **Filter chips**  | Count and filter by needs proof, ready to complete, overdue, in progress, or completed |
-| **Queue toolbar** | Text search (`q`), result range, and pagination                         |
-| **Queue**         | Severity- and due-date-sorted list; selection drives the detail panel   |
-| **Execute**       | Scanner context, next-step guidance, and the shared remediation stepper |
+| **Queue toolbar** | Text search (`q`), result range, and pagination                                        |
+| **Queue**         | Severity- and due-date-sorted list; selection drives the detail panel                  |
+| **Execute**       | Scanner context, next-step guidance, and the shared remediation stepper                |
 
 ### URL parameters
 
 Shared queue params: `q`, `page`, `pageSize` (see **Operational queue** above).
 
-| Param       | Meaning                                              |
-| ----------- | ---------------------------------------------------- |
+| Param       | Meaning                                                                          |
+| ----------- | -------------------------------------------------------------------------------- |
 | `filter`    | One of `needs_proof`, `ready_to_complete`, `overdue`, `in_progress`, `completed` |
-| `selected`  | Selected remediation id for the detail panel         |
-| `findingId` | Scope remediation to a linked finding                |
-| `processId` | Scope remediation to a monitored process             |
+| `selected`  | Selected remediation id for the detail panel                                     |
+| `findingId` | Scope remediation to a linked finding                                            |
+| `processId` | Scope remediation to a monitored process                                         |
 
 Legacy deep links using `remediationId=` still parse into `selected`.
 
@@ -111,12 +111,12 @@ OpenAPI and generated SDKs use **finding** and **remediation** vocabulary (not l
 
 **Operational Cases** (`/cases`) uses the same queue chrome with case-specific slice filters:
 
-| Param         | Meaning                                              |
-| ------------- | ---------------------------------------------------- |
-| `filter`      | One of `open`, `sla_risk`, `has_findings`, `closed`  |
-| `selected`    | Selected case id for the detail panel                |
-| `processId`   | Scope cases to a monitored process                   |
-| `workspaceId` | Scope cases to a workspace                           |
-| `sort`        | One of `updated`, `opened`, `priority`               |
+| Param         | Meaning                                             |
+| ------------- | --------------------------------------------------- |
+| `filter`      | One of `open`, `sla_risk`, `has_findings`, `closed` |
+| `selected`    | Selected case id for the detail panel               |
+| `processId`   | Scope cases to a monitored process                  |
+| `workspaceId` | Scope cases to a workspace                          |
+| `sort`        | One of `updated`, `opened`, `priority`              |
 
 Example: `/cases?filter=has_findings&q=vendor&sort=priority&selected=<caseId>`
