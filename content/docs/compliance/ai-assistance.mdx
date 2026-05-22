@@ -1,22 +1,107 @@
 ---
-title: AI assistance
-description: How Kiket uses models assistively — bounded, reviewable, and subordinate to engine and evidence.
+title: "Assistive AI and accountability"
+description: "How Kiket measures assistive value, records human feedback, and keeps model output subordinate to scanner and evidence truth."
 ---
 
-Kiket may surface **assistive** AI (chat, classification hints, summaries) to speed up triage and authoring. This is **not** compliance truth by itself.
+**Audience:** operators, compliance reviewers, and integrators  
+**Status:** shipped — accountability loop, org AI governance, semantic search indexing, and Process Twin metrics.
 
-## What “assistive only” means
+Strategy: [FUTURE-VISION.md](../FUTURE-VISION.md) · Implementation: [AI.md](../AI.md)
 
-- **Engine, scanners, rules, and evidence** define what happened and what is required.
-- Model output is a **draft or suggestion** until a person or system records an accepted outcome in the platform (case fields, evidence, findings workflow, reports).
-- When you **attach** an AI reply to a case, Kiket stores a **real artifact** (case context note or evidence record) so the text is traceable—not orphan chat.
+## What Kiket measures
+
+Kiket does not treat model output as compliance truth. It **measures assistive value** against the same operational model as scanner findings and evidence:
+
+| Signal | Meaning |
+| ------ | ------- |
+| **Grounding** | Assistive call tied to a case, finding, evidence record, or process |
+| **Acceptance** | Human attached output as evidence (`sourceSystem: kiket_ai`) |
+| **Dismiss / override** | Human explicitly dismissed or marked output not useful |
+| **Outcome correlation** | Median time to resolve findings with vs without attached assist (correlation, not causation) |
+| **Cost** | `ai.requests`, `ai.tokens`, and `ai.embeddings` usage for the billing period |
+
+## Accountability loop
+
+```text
+Assistive surface (tips, summary, chat, semantic search)
+        |
+        v
+POST /ai/* or GET /search/semantic
+  → creates assistive_interactions row (outcome: shown)
+  → returns interaction_id to the UI
+        |
+        v
+Human feedback
+  attach as evidence → PATCH outcome: attached (+ evidenceRecordId)
+  dismiss            → PATCH outcome: dismissed
+  not useful         → PATCH outcome: overridden
+        |
+        v
+GET /platform/overview → assistiveMetrics
+GET /platform/assistive-interactions/metrics
+  → Process Twin “Assistive value” panel
+```
+
+## Org-level AI governance
+
+Owners and admins configure policy under **Settings → AI governance**:
+
+- Master kill switch for all assistive surfaces
+- Surface allowlist and blocklist
+- Model allowlist
+- UTC daily token and request budgets (enforced before subscription plan limits)
+
+API: `GET/PATCH /organizations/:orgId/ai-policy`
+
+## Workflow-defined AI checks
+
+Process YAML can declare `checks[].ai_governance`:
+
+- **`require_reviewer_on_ai_evidence`** — scanner finding when `kiket_ai` evidence lacks human reviewer metadata in the payload
+- **`require_attestation_on_transition`** — scanner finding when assistive output was attached but no human attestation evidence is linked
+
+Attach flows stamp `reviewerId` on assistive evidence when saved from the web app.
+
+## External agent observability
+
+MCP, CLI, extension webhooks, and API-key automation record rows in `assistive_interactions` (`mcp_tool`, `cli_command`, `extension_webhook` surfaces) and increment `mcp.calls`, `cli.calls`, or `extensions.invoked` usage. Pass `X-Kiket-Agent: mcp|cli|extension` on API-key calls for finer attribution.
+
+## Semantic search index
+
+`GET /search/semantic` searches pgvector embeddings across:
+
+- Operational **cases** (title + description)
+- **Findings** (title, explanation, source check, severity)
+- **Evidence** (title, type, source system, payload text including assistive summaries)
+- **Audit report snapshots** (title, report key, finding/evidence titles from snapshot JSON)
+
+Indexing runs on create/update and records **`ai.embeddings`** usage (token estimate from indexed content length). Re-seed or repair with the org search catalog backfill in development seed data.
+
+## API (OpenAPI)
+
+| Route | Purpose |
+| ----- | ------- |
+| `POST /ai/generate` | Requires `surface`; returns `interaction_id` |
+| `POST /ai/chat` | Optional `surface` (default `chat`); returns `data.interaction_id` |
+| `GET /search/semantic` | Returns `interaction_id` per search |
+| `PATCH /platform/assistive-interactions/:id` | Record `attached`, `dismissed`, or `overridden` |
+| `GET /platform/assistive-interactions/metrics` | Period metrics for admins and dashboards |
+| `GET/PATCH /organizations/:orgId/ai-policy` | Org governance policy |
+
+## Product surfaces
+
+Every assistive panel exposes **Dismiss** and **Not useful** after content is shown. Attach-to-evidence flows record **attached** automatically.
+
+- Findings Inbox / case detail — plain-language tips
+- Evidence Center — per-record summarize
+- Editor — YAML validation hints
+- App shell — chat, command palette, semantic search
+- Process Twin — assistive value metrics
+
+Disclosure copy links here: assistive output is a draft until reviewed and optionally attached as evidence.
 
 ## Configuration
 
-Assistive features call the platform AI provider (`MISTRAL_API_KEY` or `OPENAI_API_KEY` in the API environment). If the provider is not configured, the API returns a clear **unconfigured** error instead of fabricated answers.
+Set `MISTRAL_API_KEY` (and related model env vars) on the API service for live model calls and embeddings. Without configuration, routes return `503 AI_NOT_CONFIGURED` — no fabricated assistive text.
 
-## Privacy and support
-
-Requests are correlated with **request IDs** for support. Operators should not paste raw customer data into logs; use scoped resource IDs (case, finding, process) when opening tickets.
-
-For developers, the technical source of truth in this repository is `docs/AI.md` (design-time reference, not shipped to end users as product help).
+Apply database migrations for `assistive_interactions`, `organization_ai_policies`, and the `embeddings` table when using PostgreSQL with pgvector.

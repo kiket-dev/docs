@@ -1,4 +1,6 @@
 {
   "title": "Compliance",
-  "pages": ["overview", "ai-assistance", "blockchain"]
+  "pages": [
+    "ai-assistance"
+  ]
 }
