@@ -9,9 +9,19 @@ Kiket treats **anchor proofs** as an integrity layer on top of PostgreSQL and fi
 
 1. **Canonical hash** — Kiket fingerprints the subject (report snapshot, evidence record, or finding) with a stable JSON canonicalization and SHA-256.
 2. **Local Merkle proof** — Each proof stores a Merkle root and leaf proof so verifiers can confirm the subject hash was included without calling a blockchain.
-3. **Optional chain submission** — On Professional and Enterprise plans, pending proofs are submitted asynchronously to Polygon when `POLYGON_RPC_URL` and `POLYGON_PRIVATE_KEY` are configured. Failures are recorded and retried; they never block cases or scans.
+3. **Optional chain submission** — On Professional and Enterprise plans, pending proofs are submitted asynchronously to Polygon via the **`AuditAnchor` smart contract** (same deployment as Kiket 1.0) when `POLYGON_RPC_URL`, `POLYGON_CONTRACT_ADDRESS`, and a signing key are configured. Failures are recorded and retried; they never block cases or scans.
 
 **Unanchored data is still valid.** Customers who only need in-product audit trails and exports can verify hashes locally without ever submitting to a chain.
+
+## On-chain contract
+
+Kiket calls `submitAnchor(bytes32 merkleRoot, uint256 leafCount, string organizationId)` on the deployed `AuditAnchor` contract:
+
+- `merkleRoot` — SHA-256 subject hash (32 bytes)
+- `leafCount` — `1` for single-subject platform proofs
+- `organizationId` — Kiket organization UUID
+
+Independent verifiers can call `verifyAnchor(merkleRoot)` on the same contract address to read the anchor timestamp. Contract source lives in the monorepo under `contracts/`.
 
 ## Product surfaces
 
@@ -52,7 +62,15 @@ curl https://api.kiket.dev/api/v1/platform/anchors/PROOF_UUID/verify \
   -H "X-Organization-Id: $ORG_ID"
 ```
 
-The API recomputes the live subject hash (report snapshot, evidence, or finding) and checks the stored Merkle proof. Chain verification uses the recorded transaction hash when present.
+The API recomputes the live subject hash (report snapshot, evidence, or finding) and checks the stored Merkle proof. When chain credentials are configured, you can also verify the Merkle root on Polygon by calling `verifyAnchor` on the `AuditAnchor` contract at `POLYGON_CONTRACT_ADDRESS`.
+
+## Environment
+
+| Variable | Required for chain submission |
+| --- | --- |
+| `POLYGON_RPC_URL` | Yes |
+| `POLYGON_CONTRACT_ADDRESS` | Yes — reuse existing Kiket 1.0 deployment |
+| `POLYGON_PRIVATE_KEY` or `POLYGON_WALLET_PRIVATE_KEY` | Yes |
 
 ## Scope (intentionally narrow)
 
