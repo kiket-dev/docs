@@ -131,7 +131,8 @@ Example: `/findings?triage=since_last_scan&processId=<processId>`
 ## Tests
 
 - **Unit:** `apps/web/tests/findings-inbox-filters.test.ts`, `scanner-run-triage.test.ts`, `findings-bulk-selection.test.ts`; `apps/api/tests/services/event-scanner-platform.test.ts` (bulk actions)
-- **Open gaps:** API route test and Playwright E2E for bulk triage — see [docs/TODO.md](../TODO.md#quality--tests-pre-launch)
+- **Route:** `apps/api/tests/routes/platform-findings-bulk.test.ts`
+- **E2E:** `e2e/tests/findings-inbox.spec.ts` (bulk acknowledge)
 
 ## Operational Cases queue
 
