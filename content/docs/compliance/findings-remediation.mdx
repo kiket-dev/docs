@@ -27,26 +27,38 @@ Example: `/cases?filter=sla_risk&q=vendor&page=2&selected=<caseId>`
 
 The **Findings Inbox** (`/findings`) is the primary triage surface for scanner output. It uses a **master–detail** layout:
 
-| Region                 | Purpose                                                                              |
-| ---------------------- | ------------------------------------------------------------------------------------ |
-| **Filter chips**       | Count and filter by actionable, critical, missing evidence, or report-ready findings |
-| **Queue toolbar**      | Text search (`q`), result range, and pagination                                      |
-| **Queue**              | Severity-sorted list; selection drives the detail panel                              |
-| **Review & remediate** | Scanner context, recommended action, and remediation stepper                         |
+| Region                 | Purpose                                                                                    |
+| ---------------------- | ------------------------------------------------------------------------------------------ |
+| **Filter chips**       | Count and filter by actionable, critical, missing evidence, or report-ready findings       |
+| **Queue toolbar**      | Text search (`q`), result range, and pagination                                            |
+| **Queue**              | Severity-sorted list; row checkboxes enable bulk triage; selection drives the detail panel |
+| **Review & remediate** | Scanner context, recommended action, and remediation stepper                               |
 
 ### URL parameters
 
 Query params are the source of truth for inbox state (deep-linkable and shareable). Shared queue params: `q`, `page`, `pageSize` (see **Operational queue** above).
 
-| Param       | Meaning                                                             |
-| ----------- | ------------------------------------------------------------------- |
-| `triage`    | One of `actionable`, `critical`, `missing_evidence`, `report_ready` |
-| `selected`  | Selected finding id for the detail panel                            |
-| `processId` | Scope findings to a monitored process                               |
+| Param       | Meaning                                                                                |
+| ----------- | -------------------------------------------------------------------------------------- |
+| `triage`    | One of `actionable`, `critical`, `missing_evidence`, `report_ready`, `since_last_scan` |
+| `selected`  | Selected finding id for the detail panel                                               |
+| `processId` | Scope findings to a monitored process                                                  |
 
 Example: `/findings?triage=missing_evidence&selected=<findingId>`
 
 When `selected` is absent or invalid, the inbox auto-selects the highest-priority finding in the filtered list and writes `selected` back to the URL.
+
+### Bulk triage
+
+Select multiple findings with row checkboxes, then use the bulk action bar:
+
+| Action           | API                                                                                   | Notes                                                                           |
+| ---------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| **Acknowledge**  | `POST /platform/findings/bulk-actions` `{ action: "acknowledge", findingIds: [...] }` | Open findings only                                                              |
+| **Assign to me** | same with `{ action: "assign" }`                                                      | Sets owner, starts remediation when needed, transitions to `remediating`        |
+| **Resolve**      | same with `{ action: "resolve" }`                                                     | Requires linked evidence and no active remediation; partial success per finding |
+
+The API returns `{ data, results }` where each `results[]` entry reports `ok` or `error` for that finding id.
 
 ## Inline remediation stepper
 
@@ -106,19 +118,20 @@ OpenAPI and generated SDKs use **finding** and **remediation** vocabulary (not l
 
 The findings queue supports slice filters via the `triage` query param:
 
-| Param    | Meaning                                                                 |
-| -------- | ----------------------------------------------------------------------- |
-| `actionable` | Open / acknowledged / remediating findings                          |
-| `since_last_scan` | Findings observed in the latest **completed** scanner run per process (or for one process when `processId` is set) |
-| `critical` | Actionable findings with critical severity                          |
-| `missing_evidence` | Actionable findings with no linked case/process evidence        |
-| `report_ready` | Resolved, suppressed, or false-positive findings                  |
+| Param              | Meaning                                                                                                            |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------ |
+| `actionable`       | Open / acknowledged / remediating findings                                                                         |
+| `since_last_scan`  | Findings observed in the latest **completed** scanner run per process (or for one process when `processId` is set) |
+| `critical`         | Actionable findings with critical severity                                                                         |
+| `missing_evidence` | Actionable findings with no linked case/process evidence                                                           |
+| `report_ready`     | Resolved, suppressed, or false-positive findings                                                                   |
 
 Example: `/findings?triage=since_last_scan&processId=<processId>`
 
-## Optional follow-ups (not yet shipped)
+## Tests
 
-- Bulk acknowledge / resolve for selected findings
+- **Unit:** `apps/web/tests/findings-inbox-filters.test.ts`, `scanner-run-triage.test.ts`, `findings-bulk-selection.test.ts`; `apps/api/tests/services/event-scanner-platform.test.ts` (bulk actions)
+- **Open gaps:** API route test and Playwright E2E for bulk triage — see [docs/TODO.md](../TODO.md#quality--tests-pre-launch)
 
 ## Operational Cases queue
 
