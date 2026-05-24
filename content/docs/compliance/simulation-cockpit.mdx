@@ -20,18 +20,21 @@ Engine and API:
 
 Open the editor toolbar **Check change** panel. Default landing is **Impact**; detail tabs:
 
-| Tab           | Question                            |
-| ------------- | ----------------------------------- |
-| **Impact**    | What breaks if I ship?              |
-| **Cases**     | Which open cases are guard-blocked? |
-| **History**   | Do historical paths still work?     |
-| **Tests**     | Do regression tests pass?           |
-| **Structure** | Is the graph and schema valid?      |
-| **Ship**      | Safe to save?                       |
+| Tab           | Question                             |
+| ------------- | ------------------------------------ |
+| **Impact**    | What breaks if I ship?               |
+| **Cases**     | Which open cases are guard-blocked?  |
+| **History**   | Do historical paths still work?      |
+| **Tests**     | Do regression tests pass?            |
+| **Ingestion** | Do connected sources cover evidence? |
+| **Structure** | Is the graph and schema valid?       |
+| **Ship**      | Safe to save?                        |
 
 Deep-link a tab with `?simulate=1&tab=cases` on the editor URL (for example `/editor?file=.kiket/workflows/foo.yaml&simulate=1&tab=ship`).
 
-The **readiness strip** shows what is being checked (proposal vs saved), baseline (saved file or `main`), and operational context (linked cases and tests).
+The **cockpit header** shows ready/blocked status, an operational summary (hover for proposal/baseline detail), baseline picker, and re-run controls. Blocker chips appear only when checks fail.
+
+**What is live:** open cases use the **saved** workflow file on the linked repo path (`currentConfigPath`), not the in-editor buffer. Unsaved edits are preview-only until Save or autosave (~2s). Git commit is for history and CI — not a separate activation step. See [editor-cockpit-ux.md § What is live?](./editor-cockpit-ux.md#what-is-live).
 
 Cases are built from live operational data via `caseToWorkflowInstance` (not legacy `context.workflowData` blobs).
 

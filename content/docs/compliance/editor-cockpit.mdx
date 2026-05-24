@@ -19,7 +19,7 @@ Historical phase roadmaps live in-repo under `docs/plans/shipped/` (not publishe
 | **Structure** | Is the graph and schema valid?           |
 | **Ship**      | Safe to save?                            |
 
-The readiness strip shows proposal (unsaved vs saved), baseline (saved file or `main`), and operational context (linked cases/tests). Empty states include CTAs; **Capture test** on forecast rows adds YAML regression tests with toast feedback.
+The cockpit header shows ready/blocked status, an operational summary (hover for proposal/baseline detail), baseline picker, and re-run controls on one row. Blocker chips appear only when checks fail. Empty states include CTAs; **Capture test** on forecast rows adds YAML regression tests with toast feedback.
 
 See [editor-cockpit-ux.md](./editor-cockpit-ux.md) for the full UX plan and acceptance criteria.
 
@@ -57,7 +57,7 @@ The cockpit merges forecast impact with live lens metrics on canvas nodes.
 
 ## Polish & scale (Phase E)
 
-- **Toolbar:** Tailwind/dark-mode aligned workflow chrome with Layout, Fit, Process config
+- **Mode bar + inspector:** Segmented Graph/YAML/Diff; undo/redo; Layout/Fit on graph; right inspector (**Selection** | **Evidence & checks**)
 - **Auto-layout:** Dagre layout (`Layout` button or `L`); fit view (`F`); auto-layout on open when nodes stack
 - **Template gallery:** New workflow → blank scaffold or flagship definition pack
 - **Keyboard help:** Press `?` on `/editor` for global + editor shortcut sections
