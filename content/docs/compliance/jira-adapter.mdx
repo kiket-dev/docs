@@ -7,13 +7,13 @@ Shipped first-party adapter: `@kiket/jira-adapter` (`kiket-ext-jira`).
 
 ## What it ingests
 
-| Jira webhook            | Normalized event   | Evidence        |
-| ----------------------- | ------------------ | --------------- |
-| `jira:issue_created`    | `case.updated`     | `jira_issue`    |
-| `jira:issue_updated`    | `case.updated`     | `jira_issue`    |
-| `comment_created`       | `evidence.observed`| `jira_comment`  |
+```
+jira:issue_created  -> case.updated      (jira_issue evidence)
+jira:issue_updated  -> case.updated      (jira_issue evidence)
+comment_created     -> evidence.observed (jira_comment evidence)
+```
 
-Link operational cases by embedding `case: <uuid>` in the Jira issue description or comment body.
+Link operational cases by embedding `case: <uuid>` in the Jira work item description or comment body.
 
 ## Webhook endpoint
 
@@ -34,8 +34,8 @@ Use the `jira-change` definition pack (`.kiket/workflows/jira-change.yaml`) for 
 
 ## Findings this unlocks
 
-- Case status diverges from Jira issue status evidence
+- Case status diverges from Jira work item status evidence
 - Missing owner on in-progress work
-- Required Jira issue evidence missing before case completion
+- Required Jira work item evidence missing before case completion
 
 See also [extension adapters](./extension-adapters.md) and the [extensions execution plan](../../plans/roadmaps/extensions-execution.md).
