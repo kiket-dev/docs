@@ -1,0 +1,66 @@
+
+---
+title: Build your first evidence adapter
+description: Scaffold, validate, and test a TypeScript evidence adapter against the Kiket platform ingestion API.
+---
+
+Evidence adapters normalize external systems into Kiket's **raw inbox** and **evidence graph**. They use scoped API keys and `/platform/*` routes.
+
+## Quick start
+
+```bash
+kiket extension init --root ./my-adapter
+kiket extension validate --file extension.yaml
+kiket extension test --file fixtures/raw-event.json
+```
+
+Use `createIngestionClient()` from `@kiket-dev/sdk` to POST raw events and evidence with least-privilege API keys (`raw-events:write`, `evidence:write`).
+
+## Architecture
+
+| Layer | Owner | Responsibility |
+| ----- | ----- | -------------- |
+| Ingress shell | Kiket API | Webhook trust, tenant/source routing, quarantine |
+| Adapter | Your repo | Normalization + evidence emission via SDK |
+| Platform | `/platform/*` | Scanner, findings, remediation, reports |
+
+## First-party adapters
+
+| Adapter | Package | Ingress |
+| ------- | ------- | ------- |
+| GitHub | `@kiket/github-adapter` | `POST /integrations/github/webhook` |
+| Slack | `@kiket/slack-adapter` | `POST /integrations/slack/webhook` |
+| Generic webhook | `@kiket/webhook-adapter` | `POST /integrations/webhook` |
+
+Register an event source with `POST /platform/event-sources`, then send webhooks with:
+
+- `X-Kiket-Organization-Id`
+- `X-Kiket-Event-Source-Key`
+
+## Generic field mapping
+
+Configure mapping on the event source:
+
+```yaml
+configuration:
+  mapping:
+    defaultEventType: approval.recorded
+    defaultEvidenceType: approval
+    fields:
+      caseId: case_id
+      sourceObjectId: object_id
+      title: title
+      approved: approved
+```
+
+## Security
+
+- Verify webhook signatures when the provider supports them.
+- Never log secrets or raw auth headers.
+- Emit normalized evidence — avoid storing unnecessary PII from source payloads.
+
+<Cards>
+  <Card title="GitHub webhook ingestion" href="/docs/integrations/github-webhook-ingestion" description="Production change flagship demo." />
+  <Card title="Engineering change pack" href="/docs/integrations/engineering-change" description="GitHub Issues source-of-work dogfood." />
+  <Card title="Evidence adapters API" href="/docs/api/extensions" description="Platform surfaces and contract." />
+</Cards>

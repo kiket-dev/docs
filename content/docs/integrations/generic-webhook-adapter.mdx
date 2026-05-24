@@ -1,0 +1,49 @@
+
+---
+title: Generic webhook adapter
+description: Map arbitrary JSON payloads into Kiket evidence using event source field mappings.
+---
+
+Use `@kiket/webhook-adapter` when a system does not have a first-party connector yet.
+
+## Event source
+
+Register with `sourceSystem: webhook` and a `configuration.mapping` object.
+
+## Ingress
+
+`POST /api/v1/integrations/webhook`
+
+Headers:
+
+- `X-Kiket-Organization-Id`
+- `X-Kiket-Event-Source-Key`
+- `X-Kiket-Event-Type` (defaults to `inbound`)
+- `X-Kiket-Delivery-Id` (recommended for idempotency)
+- `X-Kiket-Signature` or `X-Hub-Signature-256` when `webhookSecret` is configured
+
+## Mapping example
+
+```json
+{
+  "mapping": {
+    "defaultEventType": "approval.recorded",
+    "defaultEvidenceType": "approval",
+    "fields": {
+      "caseId": "case_id",
+      "sourceObjectId": "object_id",
+      "title": "title",
+      "approved": "approved",
+      "occurredAt": "occurred_at"
+    }
+  }
+}
+```
+
+Field paths use dot notation from the webhook JSON body.
+
+## CLI scaffold
+
+```bash
+kiket extension init --root ./my-webhook-adapter --template webhook
+```

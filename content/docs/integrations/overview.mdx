@@ -1,68 +1,28 @@
+
 ---
-title: Integrations
-description: Connect evidence sources that feed the operational compliance twin.
+title: Integrations overview
+description: Evidence adapters and ingress routes for operational compliance.
 ---
 
-Integrations are **evidence-source extensions**. They ingest operational events from the tools your team already uses, normalize them into the event log, attach evidence to cases, and give scanners the context they need to produce explainable findings.
+Kiket integrations are **evidence adapters** — they normalize external events into the platform raw inbox and evidence graph.
 
-Every extension declares its scopes, Kiket signs callbacks, and admins can revoke access at any time. No mystery OAuth scopes, no hidden mutation path.
+## Shipped adapters
 
-## Install one in under a minute
+| Connector | Role | Ingress |
+| --------- | ---- | ------- |
+| GitHub | Change evidence + Issues source-of-work | `/integrations/github/webhook` |
+| Slack | Approval and discussion evidence | `/integrations/slack/webhook` |
+| Generic webhook | User-defined JSON mapping | `/integrations/webhook` |
 
-<Steps>
-<Step>Open Settings → Evidence Sources.</Step>
-<Step>Choose the source that proves your first monitored process, such as GitHub for pull requests or Jira for work item status.</Step>
-<Step>Grant the minimum scopes requested by the source.</Step>
-<Step>Confirm that source events appear as evidence, scanner input, findings context, and report context.</Step>
-</Steps>
+## Getting started
 
-## What to verify after install
-
-After connecting an evidence source, use the Process Twin dashboard and Findings Inbox to confirm it is creating value:
-
-- the Process Twin **activation** checklist advances past **Connect an evidence source**
-- operational events or evidence records appear for the monitored process
-- the scanner can explain at least one finding or confirm no gaps
-- each finding shows linked case context, evidence count, and a recommended next action
-- generated reports include the source evidence and scanner explanations
-
-If a source connects successfully but no evidence appears, check the source scopes, webhook delivery logs, and ingestion failure visibility before trusting the scanner result.
-
-## Catalog
+1. Install adapter metadata with `POST /platform/extensions` (owner/admin).
+2. Register an event source with `POST /platform/event-sources`.
+3. Store webhook secrets with `POST /platform/credentials` when needed.
+4. Point the external system at the ingress URL with tenant/source headers.
 
 <Cards>
-  <Card title="Slack" href="/docs/integrations/slack" description="Approval messages, incident channels, and remediation evidence." />
-  <Card title="Microsoft Teams" href="/docs/integrations/teams" description="Adaptive Card approvals and incident response evidence." />
-  <Card title="Zoom" href="/docs/integrations/zoom" description="Meeting evidence for approval gates and incident reviews." />
-  <Card title="Twilio" href="/docs/integrations/twilio" description="SMS for critical escalations." />
-  <Card title="Email (SMTP)" href="/docs/integrations/email" description="Outbound SMTP, templated." />
-  <Card title="Mailjet (inbound)" href="/docs/integrations/mailjet-inbound" description="Inbound email → workflow event." />
-  <Card title="GitHub" href="/docs/integrations/github" description="Legacy extension README (OAuth, 1.x-oriented)." />
-  <Card title="GitHub webhook (platform)" href="/docs/integrations/github-webhook-ingestion" description="Signed ingress into the raw inbox and evidence pipeline — reference path for 2.0." />
-  <Card title="Jira" href="/docs/integrations/jira" description="Work item status, ownership, and remediation evidence." />
-  <Card title="Google OAuth" href="/docs/integrations/google-oauth" description="Sign in with Google Workspace." />
-  <Card title="Microsoft OAuth" href="/docs/integrations/microsoft-oauth" description="Sign in with Azure AD." />
-  <Card title="Google Calendar" href="/docs/integrations/google-calendar" description="SLA deadlines on calendars." />
-  <Card title="Microsoft Calendar" href="/docs/integrations/microsoft-calendar" description="Outlook + Exchange." />
-  <Card title="Make AI" href="/docs/integrations/make-ai" description="Bring your own model." />
-  <Card title="Time tracking" href="/docs/integrations/time-tracking" description="Elapsed work evidence for SLA and control checks." />
+  <Card title="First adapter" href="/docs/integrations/first-evidence-adapter" description="SDK + CLI walkthrough." />
+  <Card title="GitHub" href="/docs/integrations/github-webhook-ingestion" description="Flagship production change demo." />
+  <Card title="Engineering change" href="/docs/integrations/engineering-change" description="GitHub Issues dogfood pack." />
 </Cards>
-
-## How extensions work
-
-1. **Manifest.** Every extension ships an `extension.yaml` declaring scopes, events it receives, and evidence it can emit.
-2. **Install = OAuth.** Installing creates an org-level grant; an admin can revoke at any time.
-3. **Event ingestion.** The extension receives or pulls source events and submits them to the raw event inbox.
-4. **Normalization.** Kiket creates operational events and evidence records linked to workspaces, processes, and cases.
-5. **Scanner output.** Findings, remediation actions, reports, and optional integrity proofs reference the same evidence graph.
-
-## Can't find your tool?
-
-Build a custom evidence source: webhook in any language, manifest declaring scopes and event types, one-line install for anyone in your org. See **[Your first extension](/docs/start/first-extension)**.
-
-## Security
-
-- Scopes are least-privilege and visible in Settings.
-- Every callback is HMAC-signed; extensions that don't verify get blocked.
-- Rate-limited (per extension, per org) to prevent runaways.
-- One-click revoke — nothing survives on the extension side.

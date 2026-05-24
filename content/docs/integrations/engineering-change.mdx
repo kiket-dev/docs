@@ -1,0 +1,31 @@
+
+---
+title: Engineering change (GitHub Issues)
+description: Dogfood engineering work with GitHub Issues as source-of-work and linked change evidence.
+---
+
+The **engineering-change** definition pack tracks work from GitHub Issues through review and completion.
+
+## Pack location
+
+`definitions/engineering-change/` in the Kiket monorepo.
+
+## Story
+
+1. Create an operational case for an engineering change.
+2. Reference the case id in a GitHub Issue (`case: <uuid>`).
+3. Ingest `issues` and `issue_comment` events for discussion evidence.
+4. Link PR merge / review / CI events for change evidence.
+
+## Process template
+
+`.kiket/workflows/engineering-change.yaml` — states: intake → in_progress → review → done.
+
+## Expected findings
+
+Missing GitHub issue evidence before completion triggers `missing_evidence` checks when the process requires linked issue records.
+
+<Cards>
+  <Card title="GitHub webhook ingestion" href="/docs/integrations/github-webhook-ingestion" description="Configure GitHub ingress." />
+  <Card title="Build an adapter" href="/docs/integrations/first-evidence-adapter" description="SDK and CLI workflow." />
+</Cards>

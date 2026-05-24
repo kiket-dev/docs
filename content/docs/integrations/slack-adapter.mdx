@@ -1,0 +1,33 @@
+
+---
+title: Slack approval evidence
+description: Capture Slack approval messages as normalized evidence linked to operational cases.
+---
+
+Slack messages that include approval language and a linked case id become `approval.recorded` events with `slack_approval` evidence.
+
+## Event source
+
+```json
+{
+  "sourceKey": "slack-approvals",
+  "sourceSystem": "slack",
+  "displayName": "Slack approval channel",
+  "ingestionMode": "webhook",
+  "configuration": {
+    "signingSecret": "…"
+  }
+}
+```
+
+## Webhook URL
+
+`POST /api/v1/integrations/slack/webhook`
+
+Slack URL verification challenges are handled automatically. When a signing secret is configured, requests must include valid `X-Slack-Signature` headers.
+
+Include `case: <uuid>` or `caseId: <uuid>` in the message text to link evidence to an operational case.
+
+## Adapter package
+
+`@kiket/slack-adapter` in the Kiket monorepo; extension manifest in `kiket-ext-slack`.

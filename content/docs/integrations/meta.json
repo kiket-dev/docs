@@ -1,4 +1,11 @@
 {
   "title": "Integrations",
-  "pages": ["overview", "slack", "teams", "zoom", "twilio", "email", "make-ai", "github", "github-webhook-ingestion", "jira", "google-oauth", "microsoft-oauth", "google-calendar", "microsoft-calendar", "mailjet-inbound", "time-tracking"]
+  "pages": [
+    "overview",
+    "first-evidence-adapter",
+    "github-webhook-ingestion",
+    "engineering-change",
+    "generic-webhook-adapter",
+    "slack-adapter"
+  ]
 }
