@@ -1,0 +1,75 @@
+---
+title: "Evidence extension adapters"
+description: "kiket-extension.yaml layout, CLI scaffold, install flow, and how extension repos differ from .kiket/ process config."
+---
+
+**Status:** Shipped (2026-05-22) — platform install path + CLI scaffold
+
+## What an extension repo contains
+
+Kiket evidence adapters live in `kiket-ext-*` repositories. Each adapter declares a **platform manifest** at the repo root:
+
+```text
+kiket-ext-github/
+  kiket-extension.yaml   ← platform contract (not process config)
+  src/                   ← TypeScript normalization entrypoint
+  package.json
+  tests/
+```
+
+Do **not** put the manifest under `.kiket/`. That folder name is reserved for **operational process configuration** in customer or definition repos (`workflows/`, `checks/`, `evidence/`, `simulations/`). Extension repos are a different artifact.
+
+## Manifest format
+
+`kiket-extension.yaml` uses the Kiket extension API:
+
+```yaml
+apiVersion: kiket.dev/v1
+kind: Extension
+metadata:
+  key: kiket-ext-github
+  name: GitHub Evidence Adapter
+  version: 1.0.0
+  description: Normalize GitHub webhook events into Kiket evidence.
+spec:
+  sourceSystem: github
+  ingestionScopes:
+    - raw-events:write
+    - evidence:write
+  sourceEventTypes:
+    - pull_request
+    - pull_request_review
+  evidenceTypes:
+    - pull_request
+    - pull_request_review
+  retentionHints:
+    rawDays: 30
+    evidenceDays: 365
+```
+
+`metadata.key` matches the extension key used in Settings → Extensions and `POST /platform/extensions`.
+
+## Scaffold and validate locally
+
+```bash
+kiket extension init --template github
+kiket extension validate
+```
+
+`kiket extension init` writes `kiket-extension.yaml` and `src/adapter.ts`. Normalization for shipped first-party adapters also lives in the monorepo (`packages/github-adapter`, `packages/slack-adapter`, `packages/webhook-adapter`); extension submodules re-export those packages for packaging and tests.
+
+## Install and connect
+
+1. **Install** — Settings → Extensions (catalog) or `POST /platform/extensions` with the extension key.
+2. **Connect** — Settings → Evidence sources: register webhook credentials and map the source system.
+3. **Model** — Link evidence requirements in `.kiket/` process config (in your workspace repo or a definition pack), not inside the extension repo.
+
+Shipped integration guides:
+
+- [GitHub webhook ingestion](https://docs.kiket.dev/docs/integrations/github-webhook-ingestion)
+- [Slack adapter](https://docs.kiket.dev/docs/integrations/slack-adapter)
+- [Generic webhook adapter](https://docs.kiket.dev/docs/integrations/generic-webhook-adapter)
+
+## What was removed (Kiket 1.x)
+
+Legacy extension repos used Ruby `app.rb`, `.kiket/manifest.yaml`, custom_data modules, and analytics dashboards. That host model is gone. Adapters submit raw events and evidence through `/platform/*` only — they do not mutate cases or findings directly.

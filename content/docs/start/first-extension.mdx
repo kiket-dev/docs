@@ -70,7 +70,7 @@ See the full catalog at **[Integrations](/docs/integrations)**.
 If your tool isn't listed, ship an extension in an afternoon:
 
 1. Expose a webhook endpoint (any language, any host).
-2. Write a small `extension.yaml` manifest declaring scopes and events.
-3. Submit it to your org's private marketplace, or publish to the public one.
+2. Add `kiket-extension.yaml` at the repo root declaring ingestion scopes and evidence types.
+3. Install via Settings → Extensions or `POST /platform/extensions`, then connect an evidence source.
 
-See **[Extensions (API section)](/docs/api/extensions)** for the full recipe.
+See **[Extension adapters](/docs/compliance/extension-adapters)** and **[Evidence adapters (API)](/docs/api/extensions)** for the full recipe.

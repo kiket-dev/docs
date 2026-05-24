@@ -21,7 +21,7 @@ Evidence adapters normalize external systems into Kiket's **raw inbox** and **ev
 
 ## Authoring tools
 
-- **`kiket extension init`** — scaffold `extension.yaml` + starter adapter
+- **`kiket extension init`** — scaffold `kiket-extension.yaml` + starter adapter
 - **`kiket extension validate`** — validate manifest locally
 - **`kiket extension test`** — POST a fixture raw event using API-key auth
 - **`@kiket-dev/sdk`** — manifest Zod schema + `createIngestionClient()`
@@ -31,6 +31,7 @@ Evidence adapters normalize external systems into Kiket's **raw inbox** and **ev
 Older docs described outbound Kiket→extension webhooks with issue/comment scopes. That model is retired. New connectors are **ingress adapters** that call the platform API using the Kiket SDK.
 
 <Cards>
+  <Card title="Extension manifest" href="/docs/compliance/extension-adapters" description="kiket-extension.yaml layout and install flow." />
   <Card title="First adapter guide" href="/docs/integrations/first-evidence-adapter" description="Step-by-step TypeScript adapter walkthrough." />
   <Card title="CLI reference" href="/docs/api/cli" description="Non-interactive commands for CI." />
   <Card title="Webhooks" href="/docs/api/webhooks" description="Ingress signing and replay protection." />

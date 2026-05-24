@@ -1,6 +1,7 @@
 {
   "title": "Compliance",
   "pages": [
+    "extension-adapters",
     "ai-assistance",
     "simulation-cockpit",
     "editor-cockpit",
