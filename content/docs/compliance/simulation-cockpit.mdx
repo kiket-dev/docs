@@ -56,6 +56,19 @@ simulations:
 
 Supported event types: `created`, `transition`, `evidence_observed`, `approval_recorded`, `checklist_completed`.
 
+### Operational vs simulation vocabulary
+
+Adapters and the evidence graph use **dotted operational event types** (`evidence.observed`, `approval.recorded`, `workflow.transitioned`). YAML regression tests use **snake_case simulation verbs** (`evidence_observed`, `approval_recorded`, `transition`). The split is intentional: simulation events replay process guards and evidence requirements without requiring a live adapter.
+
+When authoring regression tests in the editor **Evidence & checks → Regression tests** tab, use the vocabulary bridge to map operational types into simulation events. Example mappings:
+
+| Operational (ingestion) | Simulation (YAML) |
+| ----------------------- | ----------------- |
+| `evidence.observed` | `evidence_observed` + requirement ids |
+| `approval.recorded` | `approval_recorded` |
+| `workflow.transitioned` | `transition` + target state |
+| `case.created` | `created` + optional initial state |
+
 Use **Capture test** on a Cases row to seed a regression test from a guard blocker.
 
 ## Canvas data lens
