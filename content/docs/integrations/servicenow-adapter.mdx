@@ -1,0 +1,58 @@
+---
+title: "ServiceNow evidence adapter"
+description: "ServiceNow task lifecycle webhooks, case linking, ingress headers, and servicenow-change process template findings."
+---
+
+Shipped first-party adapter: `@kiket/servicenow-adapter` (`kiket-ext-servicenow`).
+
+## What it ingests
+
+```
+servicenow:record_created      -> case.updated      (servicenow_task evidence)
+servicenow:record_updated      -> case.updated      (servicenow_task evidence)
+servicenow:comment_created     -> evidence.observed (servicenow_comment evidence)
+servicenow:work_note_created   -> evidence.observed (servicenow_comment evidence)
+```
+
+Link operational cases by embedding `case: <uuid>` in the ServiceNow task description or comment/work note body.
+
+## Event source
+
+```json
+{
+  "sourceKey": "servicenow-changes",
+  "sourceSystem": "servicenow",
+  "displayName": "ServiceNow change tasks",
+  "ingestionMode": "webhook",
+  "configuration": {
+    "webhookSecret": "…"
+  }
+}
+```
+
+## Webhook endpoint
+
+`POST /api/v1/integrations/servicenow/webhook`
+
+Required headers:
+
+- `X-Kiket-Organization-Id`
+- `X-Kiket-Event-Source-Key`
+
+Optional shared secret: store `webhookSecret` on the event source configuration (sealed at rest). Invalid signatures are quarantined.
+
+## Process template
+
+Use the `servicenow-change` definition pack (`.kiket/workflows/servicenow-change.yaml`) for divergence checks on owner assignment and status alignment.
+
+## Findings this unlocks
+
+- Case status diverges from ServiceNow task status evidence
+- Missing owner on in-progress work
+- Required ServiceNow task evidence missing before case completion
+
+See also [Extension adapters](/docs/compliance/extension-adapters).
+
+## Adapter package
+
+`@kiket/servicenow-adapter` in the Kiket monorepo; extension manifest in `kiket-ext-servicenow`. Pair with the `servicenow-change` definition pack from the template gallery.

@@ -1,0 +1,57 @@
+---
+title: "Jira evidence adapter"
+description: "Jira work item lifecycle webhooks, case linking, ingress headers, and jira-change process template findings."
+---
+
+Shipped first-party adapter: `@kiket/jira-adapter` (`kiket-ext-jira`).
+
+## What it ingests
+
+```
+jira:issue_created  -> case.updated      (jira_issue evidence)
+jira:issue_updated  -> case.updated      (jira_issue evidence)
+comment_created     -> evidence.observed (jira_comment evidence)
+```
+
+Link operational cases by embedding `case: <uuid>` in the Jira work item description or comment body.
+
+## Event source
+
+```json
+{
+  "sourceKey": "jira-work-items",
+  "sourceSystem": "jira",
+  "displayName": "Jira work items",
+  "ingestionMode": "webhook",
+  "configuration": {
+    "webhookSecret": "…"
+  }
+}
+```
+
+## Webhook endpoint
+
+`POST /api/v1/integrations/jira/webhook`
+
+Required headers:
+
+- `X-Kiket-Organization-Id`
+- `X-Kiket-Event-Source-Key`
+
+Optional shared secret: store `webhookSecret` on the event source configuration (sealed at rest). Invalid signatures are quarantined.
+
+## Process template
+
+Use the `jira-change` definition pack (`.kiket/workflows/jira-change.yaml`) for divergence checks on owner assignment and status alignment.
+
+## Findings this unlocks
+
+- Case status diverges from Jira work item status evidence
+- Missing owner on in-progress work
+- Required Jira work item evidence missing before case completion
+
+See also [Extension adapters](/docs/compliance/extension-adapters).
+
+## Adapter package
+
+`@kiket/jira-adapter` in the Kiket monorepo; extension manifest in `kiket-ext-jira`. Pair with the `jira-change` definition pack from the template gallery.

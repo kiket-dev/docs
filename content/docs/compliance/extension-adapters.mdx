@@ -56,7 +56,7 @@ kiket extension init --template github
 kiket extension validate
 ```
 
-`kiket extension init` writes `kiket-extension.yaml` and `src/adapter.ts`. Normalization for shipped first-party adapters also lives in the monorepo (`packages/github-adapter`, `packages/slack-adapter`, `packages/webhook-adapter`, `packages/jira-adapter`); extension submodules re-export those packages for packaging and tests.
+`kiket extension init` writes `kiket-extension.yaml` and `src/adapter.ts`. Normalization for shipped first-party adapters also lives in the monorepo (`packages/github-adapter`, `packages/slack-adapter`, `packages/webhook-adapter`, `packages/jira-adapter`, `packages/servicenow-adapter`); extension submodules re-export those packages for packaging and tests.
 
 ## Install and connect
 
@@ -70,6 +70,7 @@ Shipped integration guides:
 - [Slack adapter](https://docs.kiket.dev/docs/integrations/slack-adapter)
 - [Generic webhook adapter](https://docs.kiket.dev/docs/integrations/generic-webhook-adapter)
 - [Jira adapter](https://docs.kiket.dev/docs/integrations/jira-adapter)
+- [ServiceNow adapter](https://docs.kiket.dev/docs/integrations/servicenow-adapter)
 
 ## What was removed (Kiket 1.x)
 

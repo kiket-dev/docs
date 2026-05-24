@@ -6,6 +6,8 @@
     "github-webhook-ingestion",
     "engineering-change",
     "generic-webhook-adapter",
-    "slack-adapter"
+    "slack-adapter",
+    "jira-adapter",
+    "servicenow-adapter"
   ]
 }

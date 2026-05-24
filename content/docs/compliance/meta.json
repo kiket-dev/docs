@@ -2,6 +2,8 @@
   "title": "Compliance",
   "pages": [
     "extension-adapters",
+    "jira-adapter",
+    "servicenow-adapter",
     "ai-assistance",
     "simulation-cockpit",
     "editor-cockpit",
