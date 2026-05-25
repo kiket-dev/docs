@@ -1,29 +1,29 @@
-import { ArrowRight, BookOpen, Code2, Compass, ShieldCheck } from 'lucide-react';
+import { ArrowRight, BookOpen, Code2, Compass, ExternalLink, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 
 const LANDING_LINKS = [
   {
     icon: Compass,
     title: 'Start here',
-    body: 'Core concepts, your first workflow, and the 60-second tour.',
+    body: 'Core concepts, your first monitored process, and the operational loop in minutes.',
     href: '/docs/start/quickstart',
   },
   {
     icon: BookOpen,
     title: 'Build',
-    body: 'Workflows, boards, intake forms, automations — everything file-backed.',
+    body: 'Processes, cases, evidence, scanner runs, and git-backed `.kiket/` configuration.',
     href: '/docs/build/workflows',
   },
   {
     icon: Code2,
     title: 'API & SDKs',
-    body: 'REST reference, six language SDKs, the CLI, and webhooks.',
+    body: 'REST reference, language SDKs, the CLI, MCP tools, and webhooks.',
     href: '/docs/api',
   },
   {
     icon: ShieldCheck,
     title: 'Compliance',
-    body: 'SOC 2, HIPAA, GDPR, blockchain anchor, audit exports.',
+    body: 'Findings, audit reports, optional anchoring, and billing or plan limits.',
     href: '/docs/compliance',
   },
 ];
@@ -31,17 +31,46 @@ const LANDING_LINKS = [
 export default function HomePage() {
   return (
     <main className="mx-auto flex min-h-screen max-w-5xl flex-col px-6 py-20">
-      <div className="mb-12 max-w-2xl">
+      <div className="mb-12 max-w-3xl">
         <div className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-medium uppercase tracking-wider text-gray-600 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400">
-          Documentation
+          Operational compliance twin
         </div>
         <h1 className="text-balance text-5xl font-semibold tracking-tight text-gray-900 dark:text-white">
-          Kiket, explained.
+          Operations you can prove.
         </h1>
-        <p className="mt-4 text-lg text-gray-600 dark:text-gray-400">
-          The platform that produces audit-grade evidence as a side effect of doing the work. Start with the quickstart,
-          then dive into whichever pillar fits your role.
+        <p className="mt-3 text-lg font-medium text-gray-800 dark:text-gray-200">
+          Model policy. Observe reality. Fix drift with evidence.
         </p>
+        <p className="mt-4 max-w-2xl text-lg text-gray-600 dark:text-gray-400">
+          Kiket models how you must operate, watches how you actually operate, and closes the gap with an evidence graph,
+          explainable findings, and audit-ready exports — before audit day.
+        </p>
+        <div className="mt-8 flex flex-wrap items-center gap-3">
+          <Link
+            href="/docs/start/quickstart"
+            className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700"
+          >
+            Start the quickstart
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+          <a
+            href="https://app.kiket.dev"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 transition hover:bg-gray-50 dark:border-gray-800 dark:bg-gray-900 dark:text-white dark:hover:bg-gray-800"
+          >
+            Open the app
+            <ExternalLink className="h-4 w-4" />
+          </a>
+          <a
+            href="https://kiket.dev"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm font-semibold text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400"
+          >
+            Product site
+          </a>
+        </div>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
