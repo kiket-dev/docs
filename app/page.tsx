@@ -42,8 +42,8 @@ export default function HomePage() {
           Model policy. Observe reality. Fix drift with evidence.
         </p>
         <p className="mt-4 max-w-2xl text-lg text-gray-600 dark:text-gray-400">
-          Kiket models how you must operate, watches how you actually operate, and closes the gap with an evidence graph,
-          explainable findings, and audit-ready exports — before audit day.
+          Kiket models how you must operate, watches how you actually operate, and closes the gap with an evidence
+          graph, explainable findings, and audit-ready exports — before audit day.
         </p>
         <div className="mt-8 flex flex-wrap items-center gap-3">
           <Link
