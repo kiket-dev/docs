@@ -12,17 +12,26 @@ Evidence adapters normalize external systems into Kiket's **raw inbox** and **ev
 | Surface | Purpose |
 | ------- | ------- |
 | `POST /platform/raw-events` | Idempotent raw inbox ingest |
+| `POST /platform/raw-events/{rawEventId}/submit` | Runner submits normalization (`raw-events:submit`) |
 | `POST /platform/evidence` | Normalized evidence records |
-| `POST /platform/extensions` | Install adapter metadata (owner/admin) |
+| `POST /platform/extensions` | Install adapter; returns `runnerApiKey` once (owner/admin) |
+| `GET /platform/extensions/{id}/runtime` | Last dispatch/claim/submit and last runtime error |
+| `GET /platform/raw-events/claim` | Pull transport: lease dispatch envelopes (`raw-events:claim`) |
 | `POST /platform/event-sources` | Bind ingress (webhook URL, source key) |
 | `POST /platform/credentials` | Sealed secrets (owner/admin) |
 | `GET /platform/extension-ingestion/contract` | Machine-readable adapter contract |
+| `POST /platform/marketplace/listings` | Publish `kiket-extension.yaml` to the registry (owner/admin) |
+| `GET /platform/marketplace/listings` | List public + org-private published listings |
+| `GET /platform/marketplace/catalog` | Merged catalog (same data as `/platform/extensions/catalog`) |
 
 ## Authoring tools
 
 - **`kiket extension init`** — scaffold `kiket-extension.yaml` + starter adapter
 - **`kiket extension validate`** — validate manifest locally
 - **`kiket extension test`** — POST a fixture raw event using API-key auth
+- **`kiket extension install`** — install with `--transport catalog_hosted|push|pull` and optional `--endpoint-url`
+- **`kiket extension run`** — local runner for push (`--transport push`) or pull polling (`--transport pull`)
+- **`kiket extension publish`** — submit a manifest to the marketplace registry (`--visibility public|org`, `--git-url` or `--publisher-contact`)
 - **`@kiket-dev/sdk`** — manifest Zod schema + `createIngestionClient()`
 
 ## Legacy note

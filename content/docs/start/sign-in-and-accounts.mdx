@@ -6,7 +6,7 @@ description: Email and password, Google and GitHub OAuth, account linking, and h
 The web app signs you in with **email and password** or with **Google** or **GitHub** as an identity provider. API automation uses **API tokens** (see [API & SDKs](/docs/api)).
 
 <Callout type="info">
-Platform sign-in is separate from **integration** OAuth: connecting GitHub to clone repos uses different OAuth scopes and callbacks than “Sign in with GitHub.” The [Google OAuth extension](/docs/integrations/google-oauth) is for Calendar, Drive, and other Google APIs — not for logging into Kiket.
+Platform sign-in is separate from **integration** OAuth: connecting GitHub to clone repos uses different OAuth scopes and callbacks than “Sign in with GitHub.” Evidence adapters (GitHub, Jira, ServiceNow, webhooks) use installation-scoped API keys and ingress routes — not workspace sign-in.
 </Callout>
 
 ## Email and password

@@ -1,76 +1,70 @@
 ---
-title: Install your first extension
-description: Connect Slack so your workflows can notify your team — then browse the 14-extension catalog.
+title: Install your first evidence adapter
+description: Install a shipped adapter from Settings and connect an event source in minutes.
 ---
 
-Kiket ships 14 integrations as **extensions** — signed manifests that run outside the core platform and communicate via webhook. Install one in a few clicks and it becomes available to every workflow automation.
+Kiket ships **evidence adapters** as installable extensions — `kiket-extension.yaml` at the repo root, normalization via the SDK, and ingress through `/platform/*` with scoped API keys.
 
-## Install Slack
+## Install Slack (catalog-hosted)
 
 <Steps>
 
 <Step>
 
-### Open the marketplace
+### Open evidence sources
 
-From any project, click **Settings → Integrations → Marketplace**. You'll see the 14 available extensions grouped by category.
-
-</Step>
-
-<Step>
-
-### Pick Slack and click Install
-
-You'll be redirected to Slack's OAuth screen. Grant the requested scopes (they're least-privilege: `chat:write` for the channels you pick, nothing else).
+In the web app go to **Settings → Evidence sources** (or use [Install in app](https://kiket.dev/marketplace) from the public marketplace with `?install=kiket-ext-slack`).
 
 </Step>
 
 <Step>
 
-### Pick a default channel
+### Install from the extension catalog
 
-After OAuth completes, you're back in Kiket. Pick a Slack channel for notifications by default. You can override per-workflow later.
+Under **Extension catalog**, choose **Slack evidence adapter** and click **Install with Kiket runner** (or configure push/pull transport). Copy the runner API key when shown — it is displayed once.
 
 </Step>
 
 <Step>
 
-### Test it
+### Register an event source
 
-From the workflow automations panel, add an action: **Send notification → Slack → channel**. Save. Trigger it (drag an issue, hit an SLA, whatever) and the message lands.
+Register a Slack webhook source with `POST /platform/event-sources` (or the in-app wizard). Point Slack at `POST /integrations/slack/webhook` with `X-Kiket-Organization-Id` and `X-Kiket-Event-Source-Key`.
+
+</Step>
+
+<Step>
+
+### Verify ingestion
+
+Post a test payload with `kiket extension test` or send a real message; confirm raw events normalize and appear on linked cases.
 
 </Step>
 
 </Steps>
 
-## What extensions can (and can't) do
+## What adapters do
 
-Extensions are **webhook-based**, signed, and scoped:
+- **Ingress only** — adapters call Kiket (or receive webhooks on Kiket ingress routes), not outbound issue webhooks from core.
+- **Scoped keys** — runner keys use `raw-events:submit` and `raw-events:claim`; org API keys use least-privilege scopes.
+- **Explainable evidence** — normalized types feed the scanner; findings link back to proof.
 
-- The extension's manifest declares exactly which events it wants (`issue.created`, `sla.breach`, `comment.added`) and which scopes it needs (`issue:read`, `comment:write`).
-- Kiket signs every outbound webhook with an HMAC. The extension verifies before acting.
-- You see a live activity log of every callback — no silent background chatter.
-- Revoking is one click in Settings → Integrations; there's nothing to delete on the extension side.
-
-## Available integrations
+## Shipped adapters
 
 <Cards>
-  <Card title="Slack" href="/docs/integrations/slack" description="Approvals, notifications, SLA breaches posted to channels; replies become workflow events." />
-  <Card title="Microsoft Teams" href="/docs/integrations/teams" description="Same-channel approvals via Adaptive Cards." />
-  <Card title="GitHub" href="/docs/integrations/github" description="PRs and commits drive workflow transitions." />
-  <Card title="Jira" href="/docs/integrations/jira" description="Two-way sync for teams bridging both tools." />
-  <Card title="Zoom" href="/docs/integrations/zoom" description="Auto-create meetings for approval gates." />
-  <Card title="Google Calendar" href="/docs/integrations/google-calendar" description="Sync SLAs and deadlines to people's calendars." />
+  <Card title="GitHub" href="/docs/integrations/github-webhook-ingestion" description="PRs, reviews, CI, and deployment evidence." />
+  <Card title="Slack" href="/docs/integrations/slack-adapter" description="Approval and discussion evidence." />
+  <Card title="Jira" href="/docs/integrations/jira-adapter" description="Work-item lifecycle and comments." />
+  <Card title="ServiceNow" href="/docs/integrations/servicenow-adapter" description="ITSM records and comments." />
+  <Card title="Generic webhook" href="/docs/integrations/generic-webhook-adapter" description="Field-mapped JSON ingress." />
 </Cards>
 
-See the full catalog at **[Integrations](/docs/integrations)**.
+Browse the public [marketplace](https://kiket.dev/marketplace) or **[Integrations overview](/docs/integrations)**.
 
-## Build your own
+## Build or publish your own
 
-If your tool isn't listed, ship an extension in an afternoon:
+1. `kiket extension init` — scaffold manifest + adapter.
+2. `kiket extension validate` / `kiket extension test` — local checks.
+3. `kiket extension publish` — list in your org catalog (optional `gitUrl` for pull installs).
 
-1. Expose a webhook endpoint (any language, any host).
-2. Add `kiket-extension.yaml` at the repo root declaring ingestion scopes and evidence types.
-3. Install via Settings → Extensions or `POST /platform/extensions`, then connect an evidence source.
-
-See **[Extension adapters](/docs/compliance/extension-adapters)** and **[Evidence adapters (API)](/docs/api/extensions)** for the full recipe.
+See **[Extension adapters](/docs/compliance/extension-adapters)** and **[Evidence adapters (API)](/docs/api/extensions)**.

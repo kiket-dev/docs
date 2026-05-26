@@ -11,9 +11,13 @@ Evidence adapters normalize external systems into Kiket's **raw inbox** and **ev
 kiket extension init --root ./my-adapter
 kiket extension validate --file kiket-extension.yaml
 kiket extension test --file fixtures/raw-event.json
+
+# Install from catalog (JWT) or run a local runner (push/pull)
+kiket extension install --key kiket-ext-webhook --display-name "Webhook" --version 1.0.0 --transport catalog_hosted
+kiket extension run --transport pull --port 3020
 ```
 
-Use `createIngestionClient()` from `@kiket-dev/sdk` to POST raw events and evidence with least-privilege API keys (`raw-events:write`, `evidence:write`).
+Use `createIngestionClient()` from `@kiket-dev/sdk` to POST raw events and evidence with least-privilege API keys (`raw-events:write`, `evidence:write`). Extension runners installed via Settings receive a scoped runner key (`raw-events:submit`, `raw-events:claim`) and submit normalization with `POST /api/v1/platform/raw-events/{rawEventId}/submit`. Pull workers lease work via `GET /api/v1/platform/raw-events/claim`; push installs receive an HMAC dispatch secret. Runtime health is available at `GET /api/v1/platform/extensions/{installationId}/runtime`.
 
 ## Architecture
 
@@ -25,11 +29,15 @@ Use `createIngestionClient()` from `@kiket-dev/sdk` to POST raw events and evide
 
 ## First-party adapters
 
-| Adapter | Package | Ingress |
-| ------- | ------- | ------- |
-| GitHub | `@kiket/github-adapter` | `POST /integrations/github/webhook` |
-| Slack | `@kiket/slack-adapter` | `POST /integrations/slack/webhook` |
-| Generic webhook | `@kiket/webhook-adapter` | `POST /integrations/webhook` |
+| Adapter | Extension key | Ingress |
+| ------- | ------------- | ------- |
+| GitHub | `kiket-ext-github` | `POST /integrations/github/webhook` |
+| Slack | `kiket-ext-slack` | `POST /integrations/slack/webhook` |
+| Generic webhook | `kiket-ext-webhook` | `POST /integrations/webhook` |
+| Jira | `kiket-ext-jira` | `POST /integrations/jira/webhook` |
+| ServiceNow | `kiket-ext-servicenow` | `POST /integrations/servicenow/webhook` |
+
+Publish third-party adapters with `kiket extension publish`; listings merge into `GET /platform/extensions/catalog` for your organization.
 
 Register an event source with `POST /platform/event-sources`, then send webhooks with:
 

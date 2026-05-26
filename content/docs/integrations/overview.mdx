@@ -9,13 +9,17 @@ Kiket integrations are **evidence adapters** — they normalize external events 
 
 | Connector | Role | Ingress |
 | --------- | ---- | ------- |
-| GitHub | Change evidence + Issues source-of-work | `/integrations/github/webhook` |
-| Slack | Approval and discussion evidence | `/integrations/slack/webhook` |
-| Generic webhook | User-defined JSON mapping | `/integrations/webhook` |
+| GitHub | Change evidence + repository signals | `POST /integrations/github/webhook` |
+| Slack | Approval and discussion evidence | `POST /integrations/slack/webhook` |
+| Generic webhook | User-defined JSON mapping | `POST /integrations/webhook` |
+| Jira | Work-item lifecycle and comment evidence | `POST /integrations/jira/webhook` |
+| ServiceNow | ITSM record and comment evidence | `POST /integrations/servicenow/webhook` |
+
+Legacy 1.x placeholder extension repos (email, Teams, calendar/OAuth helpers, etc.) were removed. New connectors ship via [`kiket extension publish`](/docs/api/extensions) and install from Settings → Extensions.
 
 ## Getting started
 
-1. Install adapter metadata with `POST /platform/extensions` (owner/admin).
+1. Install adapter metadata with `POST /platform/extensions` (owner/admin) or **Install in app** from the [marketplace](https://kiket.dev/marketplace).
 2. Register an event source with `POST /platform/event-sources`.
 3. Store webhook secrets with `POST /platform/credentials` when needed.
 4. Point the external system at the ingress URL with tenant/source headers.
@@ -23,5 +27,6 @@ Kiket integrations are **evidence adapters** — they normalize external events 
 <Cards>
   <Card title="First adapter" href="/docs/integrations/first-evidence-adapter" description="SDK + CLI walkthrough." />
   <Card title="GitHub" href="/docs/integrations/github-webhook-ingestion" description="Flagship production change demo." />
-  <Card title="Engineering change" href="/docs/integrations/engineering-change" description="GitHub Issues dogfood pack." />
+  <Card title="Jira" href="/docs/integrations/jira-adapter" description="Work-item and comment normalization." />
+  <Card title="ServiceNow" href="/docs/integrations/servicenow-adapter" description="ITSM record and comment normalization." />
 </Cards>

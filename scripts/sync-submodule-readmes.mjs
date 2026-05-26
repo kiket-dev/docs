@@ -8,30 +8,16 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const DOCS_ROOT = resolve(__dirname, '..');
 const SIBLING_ROOT = resolve(DOCS_ROOT, '..');
 
+/** Shipped evidence adapter submodules only — hand-authored *-adapter.mdx pages are canonical. */
+const EXTENSION_SOURCES = ['github', 'slack', 'webhook', 'jira', 'servicenow'].map((slug) => ({
+  localPath: `extensions/${slug}`,
+  repo: `kiket-dev/kiket-ext-${slug}`,
+  output: `content/docs/integrations/${slug}-readme.mdx`,
+  description: `${titleCase(slug)} extension README (auto-synced).`,
+}));
+
 const SOURCES = [
-  ...[
-    'slack',
-    'teams',
-    'zoom',
-    'twilio',
-    'github',
-    'gitlab',
-    'bitbucket',
-    'jira',
-    'google-oauth',
-    'microsoft-oauth',
-    'google-calendar',
-    'microsoft-calendar',
-    'mailjet-inbound',
-    'time-tracking',
-    'email',
-    'make-ai',
-  ].map((slug) => ({
-    localPath: `extensions/${slug}`,
-    repo: `kiket-dev/kiket-ext-${slug}`,
-    output: `content/docs/integrations/${slug}.mdx`,
-    description: `${titleCase(slug)} integration for Kiket.`,
-  })),
+  ...EXTENSION_SOURCES,
 
   {
     localPath: 'sdk/nodejs',
