@@ -7,7 +7,9 @@
     "engineering-change",
     "generic-webhook-adapter",
     "slack-adapter",
+    "gitlab-adapter",
     "jira-adapter",
-    "servicenow-adapter"
+    "servicenow-adapter",
+    "linear-adapter"
   ]
 }

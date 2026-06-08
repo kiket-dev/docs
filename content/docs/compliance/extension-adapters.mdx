@@ -56,7 +56,11 @@ kiket extension init --template github
 kiket extension validate
 ```
 
-`kiket extension init` writes `kiket-extension.yaml` and `src/adapter.ts`. Normalization for shipped first-party adapters also lives in the monorepo (`packages/github-adapter`, `packages/slack-adapter`, `packages/webhook-adapter`, `packages/jira-adapter`, `packages/servicenow-adapter`); extension submodules re-export those packages for packaging and tests.
+`kiket extension init` writes `kiket-extension.yaml` and `src/adapter.ts`. Normalization lives in the extension repo (`src/normalize.ts`, exported via `src/adapter.ts`). The platform API stores raw events only; the extension runner normalizes and submits via the SDK to `POST /api/v1/platform/raw-events/{rawEventId}/submit` with the installation-scoped runner API key (`raw-events:submit` scope). The key is returned once from `POST /api/v1/platform/extensions` as `runnerApiKey`.
+
+For custom external runners, set `KIKET_EXTENSION_RUNNER_API_KEY` to that key and `KIKET_PLATFORM_BASE_URL` in the runner process. Catalog-hosted first-party extensions normalize in-process on the API (no separate runner). See [extension runtime registry](../architecture/extension-source-registry.md).
+
+For customer-owned extensions and the public registry, see [extension runtime registry (uniform Model A)](../architecture/extension-source-registry.md).
 
 ## Install and connect
 
@@ -67,6 +71,7 @@ kiket extension validate
 Shipped integration guides:
 
 - [GitHub webhook ingestion](https://docs.kiket.dev/docs/integrations/github-webhook-ingestion)
+- [GitLab evidence adapter](https://docs.kiket.dev/docs/integrations/gitlab-adapter)
 - [Slack adapter](https://docs.kiket.dev/docs/integrations/slack-adapter)
 - [Generic webhook adapter](https://docs.kiket.dev/docs/integrations/generic-webhook-adapter)
 - [Jira adapter](https://docs.kiket.dev/docs/integrations/jira-adapter)

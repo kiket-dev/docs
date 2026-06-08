@@ -3,7 +3,7 @@ title: "ServiceNow evidence adapter"
 description: "ServiceNow task lifecycle webhooks, case linking, ingress headers, and servicenow-change process template findings."
 ---
 
-Shipped first-party adapter: `@kiket/servicenow-adapter` (`kiket-ext-servicenow`).
+Shipped first-party adapter: `kiket-ext-servicenow` (normalization in the extension repo).
 
 ## What it ingests
 
@@ -14,7 +14,7 @@ servicenow:comment_created     -> evidence.observed (servicenow_comment evidence
 servicenow:work_note_created   -> evidence.observed (servicenow_comment evidence)
 ```
 
-Link operational cases by embedding `case: <uuid>` in the ServiceNow task description or comment/work note body.
+Link operational cases by embedding `case: <uuid>` in the ServiceNow record description or comment/work note body.
 
 ## Event source
 
@@ -47,12 +47,12 @@ Use the `servicenow-change` definition pack (`.kiket/workflows/servicenow-change
 
 ## Findings this unlocks
 
-- Case status diverges from ServiceNow task status evidence
+- Case status diverges from ServiceNow record status evidence
 - Missing owner on in-progress work
-- Required ServiceNow task evidence missing before case completion
+- Required ServiceNow record evidence missing before case completion
 
 See also [Extension adapters](/docs/compliance/extension-adapters).
 
 ## Adapter package
 
-`@kiket/servicenow-adapter` in the Kiket monorepo; extension manifest in `kiket-ext-servicenow`. Pair with the `servicenow-change` definition pack from the template gallery.
+`@kiket/ext-servicenow` in the Kiket monorepo; extension manifest in `kiket-ext-servicenow`. Pair with the `servicenow-change` definition pack from the template gallery.

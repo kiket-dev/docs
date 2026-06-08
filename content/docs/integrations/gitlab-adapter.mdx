@@ -1,0 +1,58 @@
+---
+title: "GitLab evidence adapter"
+description: "GitLab merge request and pipeline webhooks, case linking, ingress headers, and engineering-change process template findings."
+---
+
+Shipped first-party adapter: `kiket-ext-gitlab` (normalization in the extension repo).
+
+## What it ingests
+
+```
+merge_request (merged) -> repository.pull_request_merged (merge_request evidence)
+pipeline (success)     -> deployment.completed          (pipeline evidence)
+```
+
+Link operational cases by embedding `case: <uuid>` in the merge request description or pipeline note metadata.
+
+## Event source
+
+```json
+{
+  "sourceKey": "gitlab-merge-requests",
+  "sourceSystem": "gitlab",
+  "displayName": "GitLab merge requests",
+  "ingestionMode": "webhook",
+  "configuration": {
+    "webhookSecret": "…"
+  }
+}
+```
+
+## Webhook endpoint
+
+`POST /api/v1/integrations/gitlab/webhook`
+
+Required headers:
+
+- `X-Kiket-Organization-Id`
+- `X-Kiket-Event-Source-Key`
+
+Optional shared secret: store `webhookSecret` on the event source configuration (sealed at rest). GitLab sends the secret as `X-Gitlab-Token`; invalid tokens are quarantined.
+
+Subscribe to **Merge request events** and **Pipeline events** on your GitLab repository or group webhook.
+
+## Process template
+
+Use the `engineering-change` definition pack (same operational loop as GitHub change evidence).
+
+## Findings this unlocks
+
+- Merge request merged without required approvals (when paired with process checks)
+- Successful pipeline evidence missing before case completion
+- Repository change divergence vs modeled process
+
+See also [Extension adapters](/docs/compliance/extension-adapters).
+
+## Adapter package
+
+`@kiket/ext-gitlab` in the Kiket monorepo; extension manifest in `kiket-ext-gitlab`. Pair with the `engineering-change` definition pack from the template gallery.

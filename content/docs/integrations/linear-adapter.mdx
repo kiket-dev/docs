@@ -1,0 +1,57 @@
+---
+title: "Linear evidence adapter"
+description: "Linear issue lifecycle webhooks, case linking, ingress headers, and linear-change process template findings."
+---
+
+Shipped first-party adapter: `kiket-ext-linear` (`extensions/linear` submodule).
+
+## What it ingests
+
+```
+linear:issue_created  -> case.updated      (linear_issue evidence)
+linear:issue_updated  -> case.updated      (linear_issue evidence)
+linear:comment_created -> evidence.observed (linear_comment evidence)
+```
+
+Link operational cases by embedding `case: <uuid>` in the Linear issue description or comment body.
+
+## Event source
+
+```json
+{
+  "sourceKey": "linear-work-items",
+  "sourceSystem": "linear",
+  "displayName": "Linear work items",
+  "ingestionMode": "webhook",
+  "configuration": {
+    "webhookSecret": "…"
+  }
+}
+```
+
+## Webhook endpoint
+
+`POST /api/v1/integrations/linear/webhook`
+
+Required headers:
+
+- `X-Kiket-Organization-Id`
+- `X-Kiket-Event-Source-Key`
+
+Optional shared secret: store `webhookSecret` on the event source configuration (sealed at rest). Invalid signatures are quarantined. Linear sends `Linear-Signature` (HMAC SHA-256); Kiket also accepts `X-Kiket-Signature` for manual testing.
+
+## Process template
+
+Use the `linear-change` definition pack (`.kiket/workflows/linear-change.yaml`) for divergence checks on owner assignment and status alignment.
+
+## Findings this unlocks
+
+- Case status diverges from Linear work item status evidence
+- Missing owner on in-progress work
+- Required Linear work item evidence missing before case completion
+
+See also [Extension adapters](/docs/compliance/extension-adapters).
+
+## Adapter package
+
+`@kiket/ext-linear` in the Kiket monorepo; extension manifest in `kiket-ext-linear`. Pair with the `linear-change` definition pack from the template gallery.
