@@ -5,12 +5,13 @@ description: Model Context Protocol server for Kiket.
 
 {/* AUTO-SYNCED from the upstream README. Edit the source repo, not this file. */}
 
-
 Model Context Protocol server for Kiket — agent-facing tools over the authorized operational compliance platform API.
 
 ## Role in the monorepo
 
 Exposes only stable, real API capabilities (no legacy paths or fake tools). Uses `@kiket/api-client` for contract alignment. Submodule checkout: see [docs/architecture/submodules.md](../docs/architecture/submodules.md).
+
+Implements the MCP JSON-RPC handshake (`initialize`, `ping`, `tools/list`, `tools/call`) required by Cursor MCP V2 and other current clients. Strategy for investigation tools: [docs/plans/roadmaps/ai-integration-strategy.md](../docs/plans/roadmaps/ai-integration-strategy.md).
 
 ## Current tool surface
 
@@ -31,6 +32,16 @@ Exposes only stable, real API capabilities (no legacy paths or fake tools). Uses
 - `kiket_verify_report`
 - `kiket_create_anchor_proof`
 - `kiket_verify_anchor`
+- `kiket_get_case_graph`
+- `kiket_get_evidence_provenance`
+- `kiket_semantic_search`
+- `kiket_get_case_context`
+- `kiket_get_finding_context`
+- `kiket_get_evidence_context`
+- `kiket_generate_proof_packet`
+- `kiket_get_scanner_run_diff`
+
+MCP prompt: `kiket_investigate_case` (grounded case investigation playbook).
 
 ## Security Boundaries
 

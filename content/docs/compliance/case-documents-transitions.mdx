@@ -5,11 +5,11 @@ description: Upload required documents, satisfy engine guards, and move cases th
 
 # Case documents and transitions
 
-Operational cases follow the workflow definition linked to their monitored process. State-level **documents** define required file slots; transition-level **`require_documents: true`** tells the engine to block the move until every required slot is filled in `case.context.providedDocuments`.
+Operational cases follow the workflow definition linked to their monitored process. State-level **documents** define required file slots; transition-level **require_documents: true** tells the engine to block the move until every required slot is filled in the case `providedDocuments` context array.
 
 ## Model the requirements
 
-In `.kiket/workflows/*.yaml`:
+In the `.kiket/workflows/` directory (workflow YAML files):
 
 1. Attach document slots to a state:
 
@@ -37,28 +37,28 @@ In the visual editor, select the transition edge and enable **Require documents*
 
 Related guard toggles on the same edge:
 
-- **Require checklist** → `require_checklist: true`
-- **Require approval** → `require_approval: true`
+- **Require checklist** → require_checklist: true
+- **Require approval** → require_approval: true
 
 ## Runtime behavior
 
 When a user uploads a file for a case:
 
 1. The attachment is stored through `/api/v1/attachments/upload` (dev) or `/attachments/presign-upload` (production storage).
-2. Pass `documentRequirementId` matching the workflow `RequiredDocument.id`.
-3. The API writes `{ id, filename, attachmentKey, ... }` into `case.context.providedDocuments`.
-4. Transition checks read that array through the engine `documentGuard`.
+2. Pass documentRequirementId matching the workflow RequiredDocument id.
+3. The API writes a document record (id, filename, attachmentKey, and related metadata) into the case `providedDocuments` context array.
+4. Transition checks read that array through the engine documentGuard.
 
-Direct `PATCH /platform/cases/{id}` with `currentStateKey` is rejected. Use the transition API instead so guards always run.
+Direct PATCH /platform/cases/:id with currentStateKey is rejected. Use the transition API instead so guards always run.
 
 ## API surface
 
 | Method | Path | Purpose |
 | ------ | ---- | ------- |
-| `GET` | `/platform/cases/{id}/transitions` | Reachable transitions, blockers, and current document requirements |
-| `GET` | `/platform/cases/{id}/check-transition?toState=` | Dry-run a single transition |
-| `POST` | `/platform/cases/{id}/transition` | Execute `{ "toState": "..." }` through engine semantics |
-| `POST` | `/attachments/upload` | Multipart upload; include `caseId` + `documentRequirementId` |
+| GET | /platform/cases/:id/transitions | Reachable transitions, blockers, and current document requirements |
+| GET | /platform/cases/:id/check-transition?toState= | Dry-run a single transition |
+| POST | /platform/cases/:id/transition | Execute a JSON body with toState through engine semantics |
+| POST | /attachments/upload | Multipart upload; include caseId + documentRequirementId |
 
 ## Web UI
 
@@ -70,4 +70,4 @@ Open **Operational Cases**, select a case, and use **Workflow controls**:
 
 ## Scanner alignment
 
-The event scanner already evaluates blocked transitions using the same engine `canTransition` path. Keeping uploads and transitions on the platform APIs ensures UI actions, scanner findings, and audit evidence stay consistent.
+The event scanner already evaluates blocked transitions using the same engine canTransition path. Keeping uploads and transitions on the platform APIs ensures UI actions, scanner findings, and audit evidence stay consistent.
