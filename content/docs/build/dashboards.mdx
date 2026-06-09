@@ -1,101 +1,275 @@
 ---
 title: Dashboards
-description: Charts, metrics, and widgets answering "how is work flowing?" — declared in YAML, live-updated.
+description: Compliance-native operational views declared in YAML and rendered from the closed dashboard query catalog.
 ---
 
-Dashboards go beyond boards by showing *aggregate* views — throughput, cycle time, SLA breach rate, approval bottlenecks, workload by assignee. Like every other config primitive, they're YAML files in your repo.
+Dashboards answer **operational compliance** questions — open findings, remediation backlog, scanner activity, evidence gaps — for a workspace (and optionally one monitored process). They are file-backed config in your connected repository, not ad-hoc BI.
 
 ## File location
 
-`.kiket/dashboards/*.yaml`. One file per dashboard. Addressable at `/dashboards/<key>` in the app.
+`.kiket/dashboards/*.yaml` — one file per dashboard. The Process Twin home surface loads `process-health` by default when present.
 
 ## Minimum dashboard
 
 ```yaml
-key: team-health
-name: Team health
-
+dashboard:
+  key: process-health
+  name: Process health
+  description: Open findings, remediation pipeline, scanner activity, and evidence gaps for this workspace.
+  scope: workspace
+layout:
+  columns: 12
 widgets:
-  - kind: stat
+  - id: open_findings_by_severity
+    type: chart
+    title: Open findings by severity
+    query_key: platform.open_findings_by_severity
+    config:
+      chart: bar
+    position: { x: 0, y: 0, w: 3, h: 2 }
+  - id: open_cases
+    type: metric
     title: Open cases
-    query: "state_category == 'active'"
-
-  - kind: line-chart
-    title: Throughput (last 30 days)
-    metric: cases.completed
-    group_by: day
-
-  - kind: bar-chart
-    title: Average cycle time by type
-    metric: cycle_time.p50
-    group_by: caseType
+    query_key: workspace.open_cases_count
+    position: { x: 3, y: 0, w: 3, h: 1 }
 ```
 
-## Widget kinds
+## Widget types
 
-| Kind | Shows |
-|------|-------|
-| `stat` | Single number (count, p50, sum) |
-| `line-chart` | Time series |
-| `bar-chart` | Grouped counts |
-| `pie-chart` | Share breakdown |
-| `heatmap` | Calendar heatmap (days × assignees) |
-| `table` | Tabular rows with sortable columns |
-| `case-list` | Filtered list of cases |
-| `sla-stoplight` | Green/amber/red across workflows |
-| `approval-queue` | Who owes an approval right now |
+| Type | Purpose |
+|------|---------|
+| `metric` | Single number with optional tone |
+| `chart` | Bar, line, area, or pie chart (`config.chart`) |
+| `list` | Compact rows (findings, evidence gaps) with `config.limit` |
+| `table` | Tabular rows with pagination limit |
+| `text` | Static markdown-safe copy from `config.body` |
+| `embed` | **Deferred in runtime v1** — validation fails until allowlisted embeds ship |
 
-## Metrics
+## Query catalog (closed)
 
-Built-in metrics:
+Widgets bind to **`query_key`** values from a closed catalog — not free SQL or arbitrary JSONPath. Unknown keys fail editor validation and return errors from the batch executor.
 
-- `cases.created` / `cases.completed` (legacy deployments may still expose `issues.*` metric ids until fully migrated)
-- `cycle_time.mean|p50|p95` — time in active states
-- `lead_time.mean|p50|p95` — time from creation to completion
-- `sla.breach_rate`
-- `approvals.pending_count` / `approvals.latency.mean`
-- `ai.suggestion_acceptance_rate`
+| `query_key` | Typical widget types | Data |
+|-------------|---------------------|------|
+| `platform.open_findings_by_severity` | `metric`, `chart` | Unresolved findings by severity |
+| `platform.findings_by_status` | `chart`, `table` | Findings grouped by triage status |
+| `platform.remediation_pipeline` | `chart`, `list` | Remediation proof/completion pipeline |
+| `platform.scanner_run_history` | `chart`, `table` | Findings observed per recent scanner run |
+| `platform.findings_since_last_scan` | `list` | Findings first seen since last completed scan |
+| `platform.latest_scanner_run` | `metric`, `text` | Most recent completed scanner run |
+| `workspace.open_cases_count` | `metric` | Active operational cases (optional `processId` scope) |
+| `workspace.evidence_gaps` | `list`, `table` | Open findings for missing required evidence |
 
-Custom metrics:
+List the catalog at runtime:
+
+`GET /platform/dashboard-queries/catalog`
+
+Execute one or more queries in a single round trip:
+
+`POST /platform/dashboard-queries/execute`
+
+```json
+{
+  "workspaceId": "<uuid>",
+  "processId": "<uuid optional>",
+  "queries": [
+    { "queryKey": "platform.open_findings_by_severity" },
+    { "queryKey": "workspace.evidence_gaps", "limit": 5 }
+  ]
+}
+```
+
+Resolve parsed YAML from a workspace-linked repository:
+
+`GET /platform/dashboard-queries/workspaces/{workspaceId}/dashboards/{dashboardKey}`
+
+## Runtime routes
+
+| Surface | URL | Notes |
+|---------|-----|-------|
+| Process Twin (default) | `/` | Loads `process-health` from repo YAML or built-in default |
+| Workspace dashboard | `/workspaces/{workspaceId}/dashboards/{dashboardKey}` | Deep-linkable generic runtime view |
+| Visual editor | `/editor?file=.kiket/dashboards/{key}.yaml` | Layout + query picker + live preview when a workspace is selected |
+
+## Create a new dashboard
+
+In the visual editor, use **New → Dashboard** (or click the ghost `dashboards/` folder when empty). Kiket scaffolds `.kiket/dashboards/{your-key}.yaml` with workspace scope and one starter metric widget (`workspace.open_cases_count`). Add widgets in the editor, pick `query_key` values from the catalog, and use **Live preview** when a workspace is selected.
+
+Validate dashboard YAML locally:
+
+```bash
+kiket validate --file .kiket/dashboards/process-health.yaml --local
+```
+
+## Scope
+
+- **`scope: workspace`** (default) — aggregates across all monitored processes in the workspace.
+- **`scope: process`** with `process_id` — restrict widgets to one monitored process when the dashboard is mounted in a process-specific shell.
+
+## Layout
+
+`layout.columns` defines the grid width (1–24). Each widget has `position: { x, y, w, h }` in column units. The editor visual canvas uses the same model.
+
+## Examples
+
+### Process health (flagship)
+
+The default Process Twin surface loads `process-health` when the file exists in your connected repo. It binds all eight catalog queries across charts, metrics, and lists — see `definitions/engineering-change/.kiket/dashboards/process-health.yaml` in the definitions pack.
+
+Open it at runtime:
+
+`/workspaces/{workspaceId}/dashboards/process-health`
+
+### Starter dashboard (editor scaffold)
+
+**New → Dashboard** in the visual editor produces a minimal workspace dashboard with one metric widget:
 
 ```yaml
+dashboard:
+  key: team-ops
+  name: Team operations overview
+  description: Operational compliance dashboard for this workspace.
+  scope: workspace
+layout:
+  columns: 12
 widgets:
-  - kind: stat
-    title: Contract value this quarter
-    query: 'workflow == "contract_review" && completed_at >= start_of_quarter'
-    aggregate: sum(fields.total_value_usd)
+  - id: open_cases
+    type: metric
+    title: Open cases
+    query_key: workspace.open_cases_count
+    position: { x: 0, y: 0, w: 3, h: 1 }
 ```
 
-## Filters
+Add widgets in the editor, pick `query_key` values from the catalog dropdown, and expand the grid from there.
 
-Global dashboard filters are surfaced as dropdowns at the top:
+### Findings triage focus
+
+A narrower dashboard for daily triage — severity, status, and new findings since the last scan:
 
 ```yaml
-filters:
-  - kind: date-range
-    default: last_30_days
-  - kind: workflow
-  - kind: assignee
+dashboard:
+  key: findings-triage
+  name: Findings triage
+  description: Severity mix, status pipeline, and deltas since the last completed scanner run.
+  scope: workspace
+layout:
+  columns: 12
+widgets:
+  - id: severity
+    type: chart
+    title: Open findings by severity
+    query_key: platform.open_findings_by_severity
+    config:
+      chart: bar
+    position: { x: 0, y: 0, w: 4, h: 2 }
+  - id: status
+    type: chart
+    title: Finding status
+    query_key: platform.findings_by_status
+    config:
+      chart: bar
+    position: { x: 4, y: 0, w: 4, h: 2 }
+  - id: since_scan
+    type: list
+    title: Findings since last scan
+    query_key: platform.findings_since_last_scan
+    config:
+      limit: 8
+    position: { x: 8, y: 0, w: 4, h: 2 }
 ```
 
-Every widget respects the active filters.
+Deep links on list rows open the Findings Inbox for the selected finding.
 
-## Sharing
+### Evidence gaps table
 
-Dashboards can be made **public** with a password or a signed URL — for exec reviews without giving stakeholders full app access:
+Use a `table` widget when reviewers need sortable rows instead of compact list cards:
 
 ```yaml
-sharing:
-  mode: public
-  password: "***"
-  allow_export: true
+dashboard:
+  key: evidence-review
+  name: Evidence review
+  scope: workspace
+layout:
+  columns: 12
+widgets:
+  - id: gaps_table
+    type: table
+    title: Evidence gaps
+    query_key: workspace.evidence_gaps
+    config:
+      limit: 20
+    position: { x: 0, y: 0, w: 12, h: 3 }
 ```
 
-Public dashboards are read-only and have no sidebar.
+### Process-scoped dashboard
+
+Restrict all widgets to one monitored process by setting scope on the dashboard and passing `processId` when executing queries (the runtime API accepts an optional `processId` on `POST /platform/dashboard-queries/execute`):
+
+```yaml
+dashboard:
+  key: change-approval-health
+  name: Change approval health
+  description: Health view for the production change approval process only.
+  scope: process
+  process_id: "<monitored-process-uuid>"
+layout:
+  columns: 12
+widgets:
+  - id: open_cases
+    type: metric
+    title: Open cases (process)
+    query_key: workspace.open_cases_count
+    position: { x: 0, y: 0, w: 3, h: 1 }
+  - id: scanner_trend
+    type: chart
+    title: Scanner findings trend
+    query_key: platform.scanner_run_history
+    config:
+      chart: line
+    position: { x: 3, y: 0, w: 9, h: 2 }
+```
+
+Replace `process_id` with the UUID from **Processes** or `GET /platform/processes`. Process Twin remains workspace-wide; use this pattern when a dashboard is mounted in a process-specific shell.
+
+### Scanner status strip
+
+Combine a metric and static guidance text for operators watching scanner runs:
+
+```yaml
+dashboard:
+  key: scanner-ops
+  name: Scanner operations
+  scope: workspace
+layout:
+  columns: 12
+widgets:
+  - id: last_run
+    type: metric
+    title: Last scanner run
+    query_key: platform.latest_scanner_run
+    position: { x: 0, y: 0, w: 4, h: 1 }
+  - id: trend
+    type: chart
+    title: Findings per run
+    query_key: platform.scanner_run_history
+    config:
+      chart: line
+    position: { x: 4, y: 0, w: 8, h: 2 }
+  - id: runbook
+    type: text
+    title: Runbook
+    config:
+      body: |
+        Run a manual scanner pass after new evidence arrives.
+        Triage new findings in the inbox before closing remediations.
+    position: { x: 0, y: 1, w: 4, h: 2 }
+```
+
+`text` widgets do not bind a `query_key`; they render `config.body` as static copy.
 
 ## What's next?
 
 <Cards>
   <Card title="Boards" href="/docs/build/boards" description="Per-workflow operational views." />
-  <Card title="Case types" href="/docs/build/case-types" description="Define the fields you can aggregate on." />
+  <Card title="Workflows" href="/docs/build/workflows" description="Model the process your dashboard monitors." />
 </Cards>
