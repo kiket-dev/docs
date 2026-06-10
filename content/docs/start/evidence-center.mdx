@@ -1,0 +1,114 @@
+---
+title: Evidence Center
+description: Browse normalized evidence, explore the provenance graph, and navigate to linked cases and findings.
+---
+
+The **Evidence Center** (`/evidence`) is the audit-ready catalog of **evidence records** — durable proof objects normalized from operational events and adapter ingestion. Each record carries type, source system, capture time, content hash, and links to the **case** and **process** it supports.
+
+Evidence is server-owned platform data (not git-backed). Configuration for *what* evidence a process requires lives in `.kiket/` workflow YAML; the center shows *what was actually observed*.
+
+<Callout type="info">
+In the UI, inbound connectors are **Evidence sources** (Settings → Evidence sources, route `/settings/integrations`). That label is distinct from outbound notification webhooks on the same page.
+</Callout>
+
+## Layout
+
+| Region | Purpose |
+| ------ | ------- |
+| **Filter banner** | Shows active scope (case, process, or finding) with a quick **Show all evidence** action. |
+| **Provenance graph** | Interactive graph of cases, evidence, findings, and events for the current scope. |
+| **Evidence list** | Rows with title, type, source, timestamp, content hash, linked case, and optional anchor status. |
+
+When no records exist, the empty state points to **Connect evidence source** (Settings) or **Open Process Twin**.
+
+## URL parameters
+
+Query params scope the list and graph (deep-linkable):
+
+| Param | Meaning |
+| ----- | ------- |
+| `caseId` | Show evidence linked to one operational case. |
+| `processId` | Filter to a monitored process (combine with `caseId` for AND scope). |
+| `findingId` | Show evidence linked to a specific finding (via evidence links). |
+| `selected` | Highlight and scroll to one evidence row by id. |
+
+Examples:
+
+```text
+/evidence?caseId=<uuid>
+/evidence?caseId=<uuid>&processId=<uuid>
+/evidence?findingId=<uuid>
+/evidence?selected=<evidenceId>
+```
+
+From **Operational Cases**, the **Evidence for this case** shortcut opens `/evidence?caseId=…`. From the **Findings Inbox**, attach-proof steps navigate to Evidence Center with finding or case scope.
+
+The command palette action **Open Evidence for selected case** works when `/cases?selected=<caseId>` is in the URL.
+
+## Provenance graph
+
+The graph visualizes how entities connect in the compliance twin:
+
+- **Cases** — operational work items flowing through the monitored process.
+- **Evidence** — normalized proof records.
+- **Findings** — scanner output tied to cases and checks.
+- **Events** — operational events that produced or contextualize evidence.
+
+Click a node to open the corresponding case, finding, or evidence row. Edge labels show **link types** (for example `supports`).
+
+### API
+
+The UI loads the graph from:
+
+```text
+GET /platform/evidence/provenance-graph
+```
+
+Query parameters mirror the page filters:
+
+| Param | Behavior |
+| ----- | -------- |
+| `caseId` | Full case graph (case ↔ evidence ↔ findings ↔ events). |
+| `findingId` | Graph centered on one finding and its linked evidence. |
+| `processId` | Process-scoped evidence and related findings. |
+| `workspaceId` | Optional tenant scope when listing without a case. |
+
+Response shape matches the case graph schema (`nodes`, `edges`) used elsewhere (`GET /platform/cases/:id/graph`).
+
+<Callout>
+Unscoped org-wide requests return a capped sample when no `caseId`, `findingId`, or `processId` is set — prefer scoped deep links for investigation.
+</Callout>
+
+## How evidence links to cases and findings
+
+Evidence records are created during **normalization** (adapter or replay) and can be linked explicitly:
+
+| Link target | Typical use |
+| ----------- | ----------- |
+| **Case** | `caseId` on the evidence record scopes proof to one operational case. |
+| **Finding** | Scanner runs create `evidence_links` with `targetType: finding` when a check references supporting proof. |
+| **Operational event** | Events that emitted or contextualize evidence appear as graph neighbors. |
+
+From a finding in the inbox, open **Evidence Center** to attach or review proof before resolving. From a case detail panel, the **case evidence graph** uses the same layout primitives with case-first scope.
+
+### Related context APIs
+
+| Route | Purpose |
+| ----- | ------- |
+| `GET /platform/evidence` | List evidence records (workspace/process/case filters). |
+| `GET /platform/evidence/:id/context` | Integrity hashes, source event, graph neighbor counts, anchor proof ids. |
+| `GET /platform/cases/:id/graph` | Case-scoped graph (alternative entry when starting from a case). |
+
+## Integrity and anchors
+
+Each evidence row displays a **content hash** and, when present, an **anchor pill** for optional chain-backed integrity proofs. Anchoring is additive — local hashes and PostgreSQL storage remain authoritative for day-to-day operations. See [Audit Room](/docs/compliance/audit-room) for the attestation stepper.
+
+## What's next?
+
+<Cards>
+  <Card title="Operational loop" href="/docs/start/operational-loop" description="How evidence fits the full compliance cycle." />
+  <Card title="Scanner runs" href="/docs/start/scanner-runs" description="When scans run and how findings link evidence." />
+  <Card title="Findings and remediation" href="/docs/compliance/findings-remediation" description="Triage findings and attach proof from Evidence Center." />
+  <Card title="First evidence adapter" href="/docs/integrations/first-evidence-adapter" description="Ingest raw events and emit normalized evidence." />
+  <Card title="Quickstart" href="/docs/start/quickstart" description="Connect a source and reach first evidence in onboarding." />
+</Cards>

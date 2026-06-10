@@ -9,7 +9,7 @@ description: Kiket Java SDK.
 
 ## Features
 
-- 🔌 **Webhook handlers** – register handlers for events with `sdk.register("issue.created", "v1", handler)`.
+- 🔌 **Webhook handlers** – register handlers for events with `sdk.register("case.created", "v1", handler)`.
 - 🔐 **Transparent authentication** – HMAC verification for inbound payloads, workspace-token client for outbound calls.
 - 🔑 **Secret manager** – list, fetch, rotate, and delete extension secrets stored in Google Secret Manager.
 - 🌐 **Built-in Spring Boot app** – serve extension webhooks locally or in production without extra wiring.
@@ -48,21 +48,21 @@ public class Main {
             .build();
 
         // Register webhook handler (v1)
-        sdk.register("issue.created", "v1", (payload, context) -> {
-            String summary = (String) ((Map) payload.get("issue")).get("title");
+        sdk.register("case.created", "v1", (payload, context) -> {
+            String summary = (String) ((Map) payload.get("case")).get("title");
             System.out.println("Event version: " + context.getEventVersion());
 
-            context.getEndpoints().logEvent("issue.created", Map.of("summary", summary));
+            context.getEndpoints().logEvent("case.created", Map.of("summary", summary));
             context.getSecrets().set("WEBHOOK_TOKEN", "abc123");
 
             return Map.of("ok", true);
         });
 
         // Register webhook handler (v2)
-        sdk.register("issue.created", "v2", (payload, context) -> {
-            String summary = (String) ((Map) payload.get("issue")).get("title");
+        sdk.register("case.created", "v2", (payload, context) -> {
+            String summary = (String) ((Map) payload.get("case")).get("title");
 
-            context.getEndpoints().logEvent("issue.created", Map.of(
+            context.getEndpoints().logEvent("case.created", Map.of(
                 "summary", summary,
                 "schema", "v2"
             ));
@@ -80,8 +80,8 @@ public class Main {
 When your manifest defines `custom_data.permissions`, the SDK automatically uses the runtime token provided in the webhook payload for API calls via `context.getClient()`:
 
 ```java
-sdk.register("issue.created", "v1", (payload, context) -> {
-    String projectId = String.valueOf(((Map<?, ?>) payload.get("issue")).get("project_id"));
+sdk.register("case.created", "v1", (payload, context) -> {
+    String projectId = String.valueOf(((Map<?, ?>) payload.get("case")).get("project_id"));
     var customData = context.getEndpoints().customData(projectId);
 
     var options = new CustomDataClient.CustomDataListOptions();
@@ -104,7 +104,7 @@ SLA monitors raise `workflow.sla_status` events. Use the helper to inspect curre
 
 ```java
 sdk.register("workflow.sla_status", "v1", (payload, context) -> {
-    String projectId = String.valueOf(((Map<?, ?>) payload.get("issue")).get("project_id"));
+    String projectId = String.valueOf(((Map<?, ?>) payload.get("case")).get("project_id"));
     var slaClient = context.getEndpoints().slaEvents(projectId);
 
     var options = new SlaEventsClient.SlaEventsListOptions();
@@ -247,7 +247,7 @@ The `secret()` method provides a simple way to retrieve secrets with automatic f
 String slackToken = context.secret("SLACK_BOT_TOKEN");
 
 // Example usage
-sdk.register("issue.created", "v1", (payload, context) -> {
+sdk.register("case.created", "v1", (payload, context) -> {
     String apiKey = context.secret("API_KEY");
     if (apiKey == null) {
         throw new IllegalStateException("API_KEY not configured");

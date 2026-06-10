@@ -15,7 +15,7 @@ Drag states, draw transitions, pick approvers from a dropdown. No syntax, no ind
 
 **Trade-off**: some advanced patterns (nested conditions, custom automation hooks) fall out of range. The canvas *shows* every field the engine understands, but a power user will hit a ceiling around ~40 states.
 
-Start at **[Build your first workflow](/docs/start/first-workflow)** to learn the canvas.
+Start at **[Build your first monitored process](/docs/start/first-workflow)** to learn the Modeling Cockpit.
 
 ## Low-code — YAML in your editor
 
@@ -59,13 +59,13 @@ Drive Kiket from your own application. Six SDKs, a CLI, a REST API, an MCP serve
 from kiket import Client
 
 kiket = Client(api_key=os.environ["KIKET_API_KEY"])
-issue = kiket.issues.create(
-    project_key="LEGAL",
-    issue_type="contract",
+case = kiket.cases.create(
+    workspace_id="…",
+    process_id="…",
     title="Acme renewal",
-    fields={"total_value_usd": 250_000},
+    context={"total_value_usd": 250_000},
 )
-kiket.issues.transition(issue.id, "legal_review")
+kiket.cases.transition(case.id, "legal_review")
 ```
 
 Start with **[API & SDKs](/docs/api)**.
@@ -75,5 +75,5 @@ Start with **[API & SDKs](/docs/api)**.
 The canvas writes YAML. The YAML produces the same runtime the SDKs talk to. The SDKs read the same audit events the canvas shows. There's one source of truth — the git-backed YAML config — and every surface is a thin editor on top.
 
 <Callout title="Switching surfaces is always free">
-Start in the canvas. When a YAML edit would be faster, open the file in your editor. When you need to drive it from a script, reach for the SDK. You never need to migrate — every issue, workflow, and audit entry is accessible from every surface.
+Start in the canvas. When a YAML edit would be faster, open the file in your editor. When you need to drive it from a script, reach for the SDK. You never need to migrate — every case, process model, and audit entry is accessible from every surface.
 </Callout>

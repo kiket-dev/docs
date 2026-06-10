@@ -9,7 +9,7 @@ description: Kiket .NET SDK.
 
 ## Features
 
-- 🔌 **Webhook handlers** – register handlers for events with `sdk.Register("issue.created", "v1", handler)`.
+- 🔌 **Webhook handlers** – register handlers for events with `sdk.Register("case.created", "v1", handler)`.
 - 🔐 **Transparent authentication** – HMAC verification for inbound payloads, workspace-token client for outbound calls.
 - 🔑 **Secret manager** – list, fetch, rotate, and delete extension secrets stored in Google Secret Manager.
 - 🌐 **Built-in ASP.NET Core app** – serve extension webhooks locally or in production without extra wiring.
@@ -37,12 +37,12 @@ var sdk = new KiketSDK(new SDKConfig
 });
 
 // Register webhook handler (v1)
-sdk.Register("issue.created", "v1", async (payload, context) =>
+sdk.Register("case.created", "v1", async (payload, context) =>
 {
-    var summary = payload["issue"]["title"].ToString();
+    var summary = payload["case"]["title"].ToString();
     Console.WriteLine($"Event version: {context.EventVersion}");
 
-    await context.Endpoints.LogEventAsync("issue.created", new Dictionary<string, object>
+    await context.Endpoints.LogEventAsync("case.created", new Dictionary<string, object>
     {
         ["summary"] = summary
     });
@@ -52,11 +52,11 @@ sdk.Register("issue.created", "v1", async (payload, context) =>
 });
 
 // Register webhook handler (v2)
-sdk.Register("issue.created", "v2", async (payload, context) =>
+sdk.Register("case.created", "v2", async (payload, context) =>
 {
-    var summary = payload["issue"]["title"].ToString();
+    var summary = payload["case"]["title"].ToString();
 
-    await context.Endpoints.LogEventAsync("issue.created", new Dictionary<string, object>
+    await context.Endpoints.LogEventAsync("case.created", new Dictionary<string, object>
     {
         ["summary"] = summary,
         ["schema"] = "v2"
@@ -73,9 +73,9 @@ sdk.Run("0.0.0.0", 8080);
 When your manifest declares `custom_data.permissions`, the SDK automatically uses the runtime token provided in the webhook payload for API calls via `context.Client`. Use the helper to work with module data:
 
 ```csharp
-sdk.Register("issue.created", "v1", async (payload, context) =>
+sdk.Register("case.created", "v1", async (payload, context) =>
 {
-    var projectId = payload["issue"]["project_id"].ToString();
+    var projectId = payload["case"]["project_id"].ToString();
     var customData = context.Endpoints.CustomData(projectId!);
 
     var list = await customData.ListAsync("com.example.crm.contacts", "automation_records", new CustomDataListOptions
@@ -101,7 +101,7 @@ Inspect the SLA alert feed for an installation:
 ```csharp
 sdk.Register("workflow.sla_status", "v1", async (payload, context) =>
 {
-    var projectId = payload["issue"]["project_id"].ToString();
+    var projectId = payload["case"]["project_id"].ToString();
     var slaClient = context.Endpoints.SlaEvents(projectId!);
 
     var events = await slaClient.ListAsync(new SlaEventsListOptions
@@ -249,7 +249,7 @@ The `Secret()` method provides a simple way to retrieve secrets with automatic f
 var slackToken = context.Secret("SLACK_BOT_TOKEN");
 
 // Example usage
-sdk.Register("issue.created", "v1", async (payload, context) =>
+sdk.Register("case.created", "v1", async (payload, context) =>
 {
     var apiKey = context.Secret("API_KEY");
     if (apiKey is null)

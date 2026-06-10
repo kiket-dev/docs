@@ -1,14 +1,16 @@
 {
   "title": "Compliance",
   "pages": [
+    "overview",
     "extension-adapters",
-    "jira-adapter",
-    "servicenow-adapter",
+    "privacy-dsar-playbook",
     "ai-assistance",
     "simulation-cockpit",
     "editor-cockpit",
     "editor-cockpit-ux",
     "findings-remediation",
-    "audit-room"
+    "audit-room",
+    "blockchain",
+    "case-documents-transitions"
   ]
 }

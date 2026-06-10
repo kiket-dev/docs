@@ -1,43 +1,108 @@
 ---
 title: CLI
-description: Kiket command-line interface.
+description: Install and use the Kiket CLI for config validation, scans, evidence, and audit reports.
 ---
 
-{/* AUTO-SYNCED from the upstream README. Edit the source repo, not this file. */}
+The Kiket CLI is a non-interactive, machine-readable client for the platform API. Use it in CI pipelines, local `.kiket/` workflows, and one-off operational tasks.
 
-Modern TypeScript CLI for Kiket — workspace/process/case/evidence/finding/report/anchor platform loop and local `.kiket/` validation.
-
-## Role in the monorepo
-
-Non-interactive, machine-readable client for the platform API. Uses `@kiket/api-client` for contract alignment. Submodule checkout: see [docs/architecture/submodules.md](../docs/architecture/submodules.md).
-
-## Current scope
-
-- `kiket init`
-- `kiket validate`
-- `kiket migrate-config`
-- `kiket simulate`
-- `kiket scan`
-- `kiket findings list`
-- `kiket evidence import`
-- `kiket report generate`
-- `kiket report verify`
-- `kiket anchor create`
-- `kiket anchor verify`
-- `kiket extension test`
-
-## Commands
+## Install
 
 ```bash
-pnpm --filter @kiket/cli test
-pnpm --filter @kiket/cli check
-pnpm --filter @kiket/cli lint
-pnpm --filter @kiket/cli build
+npm install -g @kiket/cli
+# or
+pnpm add -g @kiket/cli
 ```
 
-## Related docs
+Requires Node.js 24+.
 
-- [MCP server](../mcp/README.md) — agent-facing tools over the same API
-- [API client](../packages/api-client/README.md)
-- [CLI/MCP/SDK skill](../.cursor/skills/kiket-cli-mcp-sdk/SKILL.md)
-- [Public CLI docs](https://docs.kiket.dev/docs/cli/overview) (docs-site)
+## Configure
+
+Set credentials once (shell profile, CI secret store, or `.env`):
+
+| Variable | Purpose |
+| -------- | ------- |
+| `KIKET_API_KEY` | Long-lived API key from **Settings → API Keys** |
+| `KIKET_API_URL` | API base (default `https://api.kiket.dev`) |
+| `KIKET_ORGANIZATION_ID` | Organization UUID for tenant-scoped commands |
+
+You can override per invocation with global flags: `--api-key`, `--api-url`, `--organization-id`, `--format json|text`.
+
+```bash
+export KIKET_API_KEY="kik_..."
+export KIKET_API_URL="https://api.kiket.dev"
+export KIKET_ORGANIZATION_ID="org_..."
+```
+
+## Local `.kiket/` workflow
+
+These commands work on YAML in your repo without calling the API (unless noted):
+
+```bash
+kiket init                          # scaffold .kiket/ starter layout
+kiket validate --file .kiket/workflows/privacy-request.yaml --local
+kiket migrate-config --file .kiket/workflows/privacy-request.yaml --write
+kiket simulate \
+  --original baseline.yaml \
+  --modified proposed.yaml \
+  --instances '[]'
+```
+
+Drop `--local` on `validate` to run server-side validation against the live API.
+
+## Platform operations
+
+Commands below require `KIKET_API_KEY` (or `--api-key`):
+
+```bash
+# Trigger a compliance scanner run
+kiket scan \
+  --workspace-id "$WORKSPACE_ID" \
+  --process-id "$PROCESS_ID" \
+  --trigger manual
+
+# List open findings
+kiket findings list --status open --workspace-id "$WORKSPACE_ID"
+
+# Import normalized evidence from a JSON fixture
+kiket evidence import --file evidence-record.json
+
+# Generate and verify an audit report snapshot
+kiket report generate \
+  --report-key privacy-dsar-summary \
+  --title "Q2 DSAR summary" \
+  --workspace-id "$WORKSPACE_ID"
+kiket report verify --id "$REPORT_ID"
+
+# Optional: anchor proof create/verify for audit trails
+kiket anchor create \
+  --subject-type audit_report \
+  --subject-id "$REPORT_ID" \
+  --subject-hash "$SHA256"
+kiket anchor verify --id "$ANCHOR_ID"
+```
+
+## Extension authoring
+
+For evidence adapter development:
+
+```bash
+kiket extension init --template webhook
+kiket extension validate --file kiket-extension.yaml
+kiket extension test --file fixtures/raw-event.json
+kiket extension install --key my-adapter --display-name "My adapter" --version 0.1.0
+kiket extension publish --visibility org --file kiket-extension.yaml
+```
+
+See [Build your first evidence adapter](/docs/integrations/first-evidence-adapter) for the full walkthrough.
+
+## Output
+
+Default output is JSON on stdout; errors go to stderr with exit code `1`. Use `--format text` for human-readable summaries in ad hoc shells.
+
+## Related
+
+<Cards>
+  <Card title="API overview" href="/docs/api/overview" description="Auth, common REST tasks, rate limits." />
+  <Card title="MCP server" href="/docs/api/mcp" description="Wire Kiket into Cursor or Claude." />
+  <Card title="Evidence adapters" href="/docs/api/extensions" description="Install and publish ingestion connectors." />
+</Cards>

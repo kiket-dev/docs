@@ -1,74 +1,99 @@
 ---
 title: MCP server
-description: Model Context Protocol server for Kiket.
+description: Connect Kiket to Cursor, Claude Desktop, or any MCP-aware agent.
 ---
 
-{/* AUTO-SYNCED from the upstream README. Edit the source repo, not this file. */}
+The Kiket MCP server exposes operational compliance tools over the [Model Context Protocol](https://modelcontextprotocol.io). Agents can list cases and findings, run scans, import evidence, and generate audit reports — using the same authorized platform API as the web app.
 
-Model Context Protocol server for Kiket — agent-facing tools over the authorized operational compliance platform API.
+## Install and run
 
-## Role in the monorepo
-
-Exposes only stable, real API capabilities (no legacy paths or fake tools). Uses `@kiket/api-client` for contract alignment. Submodule checkout: see [docs/architecture/submodules.md](../docs/architecture/submodules.md).
-
-Implements the MCP JSON-RPC handshake (`initialize`, `ping`, `tools/list`, `tools/call`) required by Cursor MCP V2 and other current clients. Strategy for investigation tools: [docs/plans/roadmaps/ai-integration-strategy.md](../docs/plans/roadmaps/ai-integration-strategy.md).
-
-## Current tool surface
-
-- `kiket_list_workspaces`
-- `kiket_list_processes`
-- `kiket_list_cases`
-- `kiket_list_findings`
-- `kiket_list_evidence`
-- `kiket_list_scanner_runs`
-- `kiket_list_reports`
-- `kiket_list_anchor_proofs`
-- `kiket_list_ingestion_failures`
-- `kiket_validate_config`
-- `kiket_run_simulation`
-- `kiket_trigger_scan`
-- `kiket_import_evidence`
-- `kiket_generate_report`
-- `kiket_verify_report`
-- `kiket_create_anchor_proof`
-- `kiket_verify_anchor`
-- `kiket_get_case_graph`
-- `kiket_get_evidence_provenance`
-- `kiket_semantic_search`
-- `kiket_get_case_context`
-- `kiket_get_finding_context`
-- `kiket_get_evidence_context`
-- `kiket_generate_proof_packet`
-- `kiket_get_scanner_run_diff`
-
-MCP prompt: `kiket_investigate_case` (grounded case investigation playbook).
-
-## Security Boundaries
-
-The MCP server intentionally avoids broad access to high-risk API surfaces:
-
-- no auth, password, TOTP, or session management tools
-- no API key creation/revocation tools
-- no admin tools
-- no billing or Stripe tools
-- no raw export/download tools
-- no webhook receiver tools
-- no repository write, commit, push, or pull-request tools
-
-This keeps the default MCP useful for day-to-day assistant workflows while minimizing GDPR and credential exposure risk.
-
-## Commands
+The server ships as `@kiket/mcp` and speaks MCP over stdio (one JSON-RPC message per line).
 
 ```bash
-pnpm --filter @kiket/mcp test
-pnpm --filter @kiket/mcp check
-pnpm --filter @kiket/mcp lint
-pnpm --filter @kiket/mcp build
+npx @kiket/mcp
 ```
 
-## Related docs
+Build from source is only needed for contributors; most users should use `npx`.
 
-- [CLI](../cli/README.md)
-- [API client](../packages/api-client/README.md)
-- [CLI/MCP/SDK skill](../.cursor/skills/kiket-cli-mcp-sdk/SKILL.md)
-- [Cursor MCP config](../.cursor/README.md)
+## Required environment
+
+| Variable | Purpose |
+| -------- | ------- |
+| `KIKET_API_KEY` or `KIKET_API_TOKEN` | API key (preferred) or short-lived JWT |
+| `KIKET_ORGANIZATION_ID` | Organization UUID — tools always run in this tenant |
+| `KIKET_API_URL` | Optional; defaults to `https://api.kiket.dev` |
+
+Create an API key in **Settings → API Keys**.
+
+## Cursor configuration
+
+Add to `.cursor/mcp.json` (project) or Cursor **Settings → MCP**:
+
+```json
+{
+  "mcpServers": {
+    "kiket": {
+      "command": "npx",
+      "args": ["-y", "@kiket/mcp"],
+      "env": {
+        "KIKET_API_KEY": "kik_...",
+        "KIKET_ORGANIZATION_ID": "org_...",
+        "KIKET_API_URL": "https://api.kiket.dev"
+      }
+    }
+  }
+}
+```
+
+Restart Cursor after saving. The server implements the standard MCP handshake (`initialize`, `tools/list`, `tools/call`).
+
+## Claude Desktop (and other MCP clients)
+
+Use the same `command`, `args`, and `env` block in your client's MCP config file. Point `KIKET_API_KEY` at a scoped key with the minimum permissions your workflow needs.
+
+## Tool surface (plain language)
+
+**Read and navigate**
+
+- List workspaces, monitored processes, and operational cases
+- List compliance findings, evidence records, and scanner runs
+- List audit reports, anchor proofs, ingestion failures, and event sources
+- Semantic search across indexed cases, evidence, findings, and reports
+
+**Act on the platform**
+
+- Validate process YAML and run what-if simulations
+- Trigger scanner runs and import normalized evidence
+- Generate and verify audit report snapshots
+- Create and verify anchor proofs
+
+**Investigate**
+
+- Fetch case, finding, or evidence context bundles for grounded answers
+- Build case graphs and evidence provenance chains
+- Compare scanner run diffs and generate proof packets
+
+**Prompt**
+
+- `kiket_investigate_case` — structured playbook for case investigation
+
+Tool names in clients use the `kiket_*` prefix (for example `kiket_list_cases`, `kiket_trigger_scan`).
+
+## Security boundaries
+
+The MCP server deliberately **does not** expose:
+
+- Authentication, password, or session management
+- API key creation or revocation
+- Admin, billing, or raw bulk export endpoints
+- Inbound webhook receivers or repository write/push tools
+
+This keeps assistant integrations useful for day-to-day compliance work while limiting credential and GDPR exposure. Use the CLI or REST API directly when you need administrative actions.
+
+## Related
+
+<Cards>
+  <Card title="CLI" href="/docs/api/cli" description="Scriptable commands for CI and local YAML." />
+  <Card title="API overview" href="/docs/api/overview" description="REST auth and common tasks." />
+  <Card title="Assistive AI" href="/docs/compliance/ai-assistance" description="How AI fits under engine rules and evidence." />
+</Cards>

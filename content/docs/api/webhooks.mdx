@@ -3,31 +3,26 @@ title: Webhooks
 description: Subscribe to events and have Kiket POST to your endpoint with signed payloads.
 ---
 
-Webhooks are how Kiket tells your systems about things happening. Register a URL + a list of events; we POST to it whenever those events fire.
+Webhooks are how Kiket tells your systems about things happening. Register a URL and a list of events; Kiket POSTs to it whenever those events fire.
 
 ## Register a webhook
 
-<Tabs items={["API", "CLI", "UI"]}>
+<Tabs items={["API", "UI"]}>
   <Tab value="API">
     ```bash
     curl -X POST https://api.kiket.dev/api/v1/webhooks \
       -H "Authorization: Bearer $KIKET_API_KEY" \
+      -H "Content-Type: application/json" \
       -d '{
         "url": "https://your-service.example.com/kiket",
-        "events": ["issue.created", "issue.transitioned", "sla.breach"],
-        "secret": "optional-override"
+        "events": ["case.created", "case.transitioned", "sla.breach"]
       }'
     ```
-  </Tab>
-  <Tab value="CLI">
-    ```bash
-    kiket webhooks create \
-      --url https://your-service.example.com/kiket \
-      --events issue.created,issue.transitioned,sla.breach
-    ```
+
+    The signing secret is generated automatically and returned masked on subsequent GET requests. Copy it from the create response or from **Settings → Webhooks** when you need to verify signatures.
   </Tab>
   <Tab value="UI">
-    App → Settings → Webhooks → **New webhook**. Paste URL, pick events, save. Secret is generated automatically; copy it somewhere safe.
+    App → **Settings → Webhooks** → **New webhook**. Paste URL, pick events, save. Copy the signing secret somewhere safe — it is shown once at creation.
   </Tab>
 </Tabs>
 
@@ -35,35 +30,43 @@ Webhooks are how Kiket tells your systems about things happening. Register a URL
 
 | Event | Fires when |
 |-------|------------|
-| `issue.created` | A new issue is created |
-| `issue.updated` | Any field changes |
-| `issue.transitioned` | State changes (includes `from` and `to`) |
-| `issue.assigned` | Assignee changes |
-| `issue.commented` | Comment added |
+| `case.created` | A new operational case is created |
+| `case.updated` | Any mutable field changes |
+| `case.transitioned` | Workflow state changes (includes `from` and `to`) |
+| `case.assigned` | Assignee changes |
+| `case.commented` | Comment added |
 | `sla.warning` | Warning threshold crossed |
 | `sla.breach` | Breach threshold crossed |
 | `approval.requested` | Approval chain starts |
-| `approval.granted` / `approval.denied` | Approver responds |
-| `workflow.updated` | Workflow config changes |
-| `ai.suggested` | AI agent produces a suggestion |
+| `approval.decided` | Approver grants or denies |
+| `workspace.updated` | Workspace metadata changes |
+
+These match the event picker in **Settings → Webhooks** and notification preferences.
 
 ## Payload shape
 
 ```json
 {
   "id": "evt_01HGZ...",
-  "type": "issue.transitioned",
+  "type": "case.transitioned",
   "createdAt": "2026-04-14T10:00:00Z",
   "organizationId": "org_01HGZ...",
-  "projectKey": "LEGAL",
+  "workspaceId": "ws_01HGZ...",
   "data": {
-    "issue": { "id": "ISS-42", "title": "Acme renewal", "...": "..." },
+    "case": {
+      "id": "case_01HGZ...",
+      "processId": "proc_01HGZ...",
+      "title": "Acme renewal",
+      "currentStateKey": "legal_review"
+    },
     "from": "intake",
     "to": "legal_review",
     "actor": { "id": "usr_01HGZ...", "email": "pm@acme.com" }
   }
 }
 ```
+
+Exact fields vary by event type; always branch on `type` and treat unknown keys as forward-compatible.
 
 ## Signing
 
@@ -99,7 +102,7 @@ The signature is `HMAC-SHA256(secret, "<timestamp>.<body>")`. Verify before trus
 ## Retries
 
 - 5xx and timeouts retry with exponential backoff: 30s, 1m, 5m, 30m, 2h, 8h.
-- After 6 attempts, the delivery is marked **failed** and shown in Settings → Webhooks → Deliveries.
+- After 6 attempts, the delivery is marked **failed** and shown in **Settings → Webhooks → Deliveries**.
 - 4xx (except 429) don't retry — fix your endpoint and redeliver.
 
 ## Redelivery
@@ -113,12 +116,16 @@ curl -X POST https://api.kiket.dev/api/v1/webhooks/deliveries/dlv_.../redeliver 
 
 ## Debugging
 
-- Settings → Webhooks → **Deliveries** shows the last 100 attempts with request + response.
-- Use a tool like [webhook.site](https://webhook.site) or [ngrok](https://ngrok.com) to inspect payloads in dev.
+- **Settings → Webhooks → Deliveries** shows recent attempts with request and response bodies.
+- Use [webhook.site](https://webhook.site) or [ngrok](https://ngrok.com) to inspect payloads in dev.
 
 ## Best practices
 
-- Return `2xx` fast. If you need to do heavy work, queue it and return immediately.
+- Return `2xx` fast. If you need heavy work, queue it and return immediately.
 - Verify the signature on every call.
 - Use the `id` field for idempotency — Kiket may redeliver the same event if your ack is late.
 - Subscribe to specific events, not wildcards, to avoid noise.
+
+## Inbound vs outbound
+
+This page covers **outbound** webhooks (Kiket → your HTTPS endpoint). **Evidence adapters** use separate **ingress** URLs (`POST /integrations/*/webhook`) to send operational events *into* Kiket. See [Integrations overview](/docs/integrations/overview).

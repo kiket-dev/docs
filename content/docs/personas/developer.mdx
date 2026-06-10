@@ -1,200 +1,128 @@
 ---
-title: For developers
-description: Drive Kiket from code — API, six SDKs, CLI, MCP, webhooks.
+title: Developer
+description: Build on Kiket with the API, SDKs, CLI, and MCP — cases, evidence, findings, and automation.
 ---
 
-You're integrating Kiket into a larger automation stack. You want client libraries, idempotency, stable types, and the ability to script anything you can do in the UI.
+# Developer
 
-## Your starter path
+Developers use Kiket to **integrate operational evidence**, **automate compliance checks**, and **build custom workflows** on top of the platform API.
 
-<Steps>
+## What you can build
 
-<Step>
+| Capability | Use case |
+|------------|----------|
+| **REST API** | Create cases, link evidence, run scans, manage findings |
+| **Webhooks** | React to `case.created`, `finding.opened`, `scan.completed` |
+| **SDKs** | TypeScript, Python, Go, Java, .NET clients |
+| **CLI** | Script scans, exports, and workspace operations |
+| **MCP** | Give AI agents structured access to cases and findings |
 
-### Create an API token
-
-App → Settings → API tokens → **New token**. Give it a name and the scopes you need:
-
-- `issue:read`, `issue:write`
-- `workflow:read`, `workflow:write`
-- `comment:write`
-- `webhook:manage`
-
-Tokens are shown once. Store in a secrets manager.
-
-</Step>
-
-<Step>
-
-### Install an SDK
-
-<Tabs items={["Node.js", "Python", "Go", "Ruby", "Java", ".NET"]}>
-  <Tab value="Node.js">
-    ```bash
-    npm install @kiket/sdk
-    ```
-    ```ts
-    import { Client } from '@kiket/sdk';
-    const kiket = new Client({ apiKey: process.env.KIKET_API_KEY });
-    ```
-  </Tab>
-  <Tab value="Python">
-    ```bash
-    pip install kiket
-    ```
-    ```python
-    from kiket import Client
-    kiket = Client(api_key=os.environ["KIKET_API_KEY"])
-    ```
-  </Tab>
-  <Tab value="Go">
-    ```bash
-    go get github.com/kiket-dev/kiket-go-sdk
-    ```
-    ```go
-    import "github.com/kiket-dev/kiket-go-sdk"
-    client := kiket.NewClient(os.Getenv("KIKET_API_KEY"))
-    ```
-  </Tab>
-  <Tab value="Ruby">
-    ```bash
-    gem install kiket
-    ```
-    ```ruby
-    require 'kiket'
-    client = Kiket::Client.new(api_key: ENV['KIKET_API_KEY'])
-    ```
-  </Tab>
-  <Tab value="Java">
-    ```xml
-    <dependency>
-      <groupId>dev.kiket</groupId>
-      <artifactId>kiket-sdk</artifactId>
-      <version>1.0.0</version>
-    </dependency>
-    ```
-  </Tab>
-  <Tab value=".NET">
-    ```bash
-    dotnet add package Kiket.Sdk
-    ```
-  </Tab>
-</Tabs>
-
-</Step>
-
-<Step>
-
-### Drive a workflow from code
-
-```ts
-// Create an issue in the contract_review workflow
-const issue = await kiket.issues.create({
-  projectKey: 'LEGAL',
-  issueType: 'contract',
-  title: 'Acme renewal',
-  fields: { counterparty: 'Acme Corp', total_value_usd: 250_000 },
-});
-
-// Transition it
-await kiket.issues.transition(issue.id, 'legal_review');
-
-// Listen for its transitions
-kiket.webhooks.on('issue.transitioned', async (event) => {
-  if (event.issueId === issue.id && event.to === 'approved') {
-    await startBilling(event.fields.counterparty, event.fields.total_value_usd);
-  }
-});
-```
-
-</Step>
-
-<Step>
-
-### Use the CLI for one-offs
+## Quick start
 
 ```bash
-# Install
+# Install CLI
 npm install -g @kiket/cli
 
-# Auth
-kiket login
+# Authenticate
+kiket auth login
 
-# List issues
-kiket issues list --project LEGAL --state legal_review
+# List cases in a workspace
+kiket cases list --workspace acme-corp
 
-# Transition one
-kiket issues transition ISS-42 approved --comment "Green-lit by CFO"
+# Run a compliance scan
+kiket scan run --framework soc2
 ```
 
-</Step>
+## API authentication
 
-<Step>
+Create scoped keys under **Settings → API Keys** in the web app, or use OAuth for user-delegated access:
 
-### Connect AI agents via MCP
+```bash
+curl -H "Authorization: Bearer $KIKET_API_KEY" \
+  https://api.kiket.io/v1/workspaces/acme-corp/cases
+```
 
-Kiket's Model Context Protocol server exposes tool definitions for issue CRUD, workflow lookup, and audit queries. Wire it into Claude, Cursor, or any MCP-aware client:
+See [API overview](/docs/api/overview) for scopes and rate limits.
+
+## SDK example
+
+```typescript
+import { KiketClient } from '@kiket/sdk';
+
+const client = new KiketClient({ apiKey: process.env.KIKET_API_KEY });
+
+const cases = await client.cases.list({ workspaceId: 'acme-corp' });
+const findings = await client.findings.list({ severity: 'high' });
+```
+
+## Webhook integration
+
+```typescript
+// Express handler for Kiket webhooks
+app.post('/webhooks/kiket', (req, res) => {
+  const { event, data } = req.body;
+
+  switch (event) {
+    case 'finding.opened':
+      notifySlack(`New finding: ${data.title}`);
+      break;
+    case 'scan.completed':
+      updateDashboard(data.scanId, data.summary);
+      break;
+  }
+
+  res.status(200).send('OK');
+});
+```
+
+## MCP for AI agents
+
+Configure the Kiket MCP server so Cursor or Claude can query cases and findings:
 
 ```json
 {
   "mcpServers": {
     "kiket": {
       "command": "npx",
-      "args": ["@kiket/mcp"],
-      "env": { "KIKET_API_KEY": "..." }
+      "args": ["-y", "@kiket/mcp-server"],
+      "env": { "KIKET_API_KEY": "your-key" }
     }
   }
 }
 ```
 
-</Step>
+See [MCP server](/docs/api/mcp) for available tools.
 
-</Steps>
+## Common patterns
 
-## Patterns
+### CI/CD gate
 
-### Idempotent writes
+Block deploys when critical findings are open:
 
-Every mutating endpoint accepts an `Idempotency-Key` header. Safe to retry transient failures:
-
-```ts
-await kiket.issues.create(
-  { projectKey: 'LEGAL', title: 'Acme renewal', /* … */ },
-  { idempotencyKey: 'acme-renewal-2026-Q1' },
-);
+```yaml
+- name: Kiket compliance gate
+  run: |
+    FINDINGS=$(kiket findings list --severity critical --status open --json)
+    if [ "$(echo $FINDINGS | jq length)" -gt 0 ]; then
+      echo "Critical findings block deploy"
+      exit 1
+    fi
 ```
 
-### Pagination
+### Evidence ingestion
 
-Collection endpoints use cursor pagination:
+Push custom evidence via webhook or API:
 
-```ts
-for await (const page of kiket.issues.list({ projectKey: 'LEGAL' })) {
-  for (const issue of page.items) { /* … */ }
-}
+```bash
+curl -X POST https://api.kiket.io/v1/events \
+  -H "Authorization: Bearer $KIKET_API_KEY" \
+  -d '{"source":"ci","type":"deployment","workspaceId":"acme-corp"}'
 ```
 
-### Webhook signing
+## Resources
 
-Outbound webhooks sign requests with HMAC-SHA256. Verify in your receiver:
-
-```ts
-import { verifyWebhook } from '@kiket/sdk/webhooks';
-
-app.post('/kiket-webhook', express.raw({ type: '*/*' }), (req, res) => {
-  if (!verifyWebhook(req.body, req.headers['x-kiket-signature'], WEBHOOK_SECRET)) {
-    return res.sendStatus(403);
-  }
-  const event = JSON.parse(req.body);
-  // …
-});
-```
-
-## Related pages
-
-<Cards>
-  <Card title="REST API" href="/docs/api" description="Full endpoint reference." />
-  <Card title="SDKs" href="/docs/api/sdk/nodejs" description="Language-specific docs." />
-  <Card title="CLI" href="/docs/api/cli" description="Terminal workflow." />
-  <Card title="MCP server" href="/docs/api/mcp" description="AI agent integration." />
-</Cards>
+- [API reference](/docs/api/overview)
+- [CLI commands](/docs/api/cli)
+- [SDK packages](/docs/build/sdks)
+- [Webhook events](/docs/api/webhooks)
+- [Operational loop](/docs/start/operational-loop) — how cases, evidence, and findings connect

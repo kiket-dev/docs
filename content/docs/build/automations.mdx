@@ -9,9 +9,9 @@ Automations are **triggers** + **actions**. When something happens (state change
 
 From the **Automations** page:
 
-1. Click **New recipe**. Pick a name, trigger (`issue.created`, `sla.breach`, etc.), and a primary action (`notify`, `webhook`, `assign`, `transition`, `add_comment`).
+1. Click **New recipe**. Pick a name, trigger (`case.created`, `sla.breach`, etc.), and a primary action (`notify`, `webhook`, `assign`, `transition`, `add_comment`).
 2. Save. The recipe is active by default — toggle the enable pill on the card to pause it.
-3. Fine-tune the action payload (channel, webhook URL, predicate) by opening the recipe's YAML in the project editor.
+3. Fine-tune the action payload (channel, webhook URL, predicate) by opening the recipe's YAML in the workspace editor.
 
 Cards expose **Edit** (re-opens the name/trigger/action dropdowns), **Delete** (stops firing immediately; audit log retained), and an enable/disable pill for quick pauses.
 
@@ -31,30 +31,30 @@ states:
       - escalate: { to: oncall }
 ```
 
-2. **As a standalone automation file** (`.kiket/automations/*.yaml`), scoped to a project:
+2. **As a standalone automation file** (`.kiket/automations/*.yaml`), scoped to a workspace:
 
 ```yaml
 key: notify-on-high-priority
-name: Notify on high-priority issues
+name: Notify on high-priority cases
 trigger:
-  event: issue.created
+  event: case.created
   when: "priority == 'high'"
 actions:
   - notify: { channel: slack:#urgent }
   - assign: { to: "@oncall" }
 ```
 
-Use in-workflow for state-specific actions (on-enter, on-breach). Use standalone for cross-workflow patterns ("notify on anything with `security` label, anywhere").
+Use in-workflow for state-specific actions (on-enter, on-breach). Use standalone for cross-process patterns ("notify on anything with `security` label, anywhere").
 
 ## Triggers
 
 | Event | Fires when |
 |-------|------------|
-| `issue.created` | An issue is created (via UI, intake form, or API) |
-| `issue.updated` | Any field change |
-| `issue.transitioned` | State change (with `from` / `to` attributes) |
-| `issue.commented` | Comment added |
-| `issue.assigned` | Assignee changes |
+| `case.created` | A case is created (via UI, intake form, or API) |
+| `case.updated` | Any field change |
+| `case.transitioned` | State change (with `from` / `to` attributes) |
+| `case.commented` | Comment added |
+| `case.assigned` | Assignee changes |
 | `sla.warning` | SLA warning threshold crossed |
 | `sla.breach` | SLA breach threshold crossed |
 | `approval.requested` | Approval chain started |
@@ -69,13 +69,13 @@ Built-in actions:
 
 - `notify` — send a notification (in-app, email, or via an extension like Slack).
 - `webhook` — POST to an arbitrary URL with the event payload.
-- `transition` — move the issue to another state.
+- `transition` — move the case to another state.
 - `assign` — set the assignee.
 - `set_field` — mutate a field.
 - `add_comment` — post a comment as a system user.
 - `escalate` — page the on-call rotation.
 - `ai_analyze` — call an AI agent; the result attaches as a comment with reasoning.
-- `create_issue` — create a related issue in another workflow.
+- `create_case` — create a related case in another monitored process.
 
 Custom actions come from installed extensions (Slack, Teams, Twilio, etc.). Each extension declares which actions it exposes.
 
@@ -85,7 +85,7 @@ Custom actions come from installed extensions (Slack, Teams, Twilio, etc.). Each
 
 ```yaml
 trigger:
-  event: issue.created
+  event: case.created
   when: "fields.team == 'security'"
 actions:
   - assign: { to: "@security-oncall" }
@@ -111,7 +111,7 @@ actions:
       url: https://hooks.example.com/kiket-weekly
       body: |
         {
-          "stuck_issues": {{ query("state == 'in_review' && sla.breached") }}
+          "stuck_cases": {{ query("state == 'in_review' && sla.breached") }}
         }
 ```
 
@@ -124,7 +124,7 @@ actions:
 
 ## Editing surfaces
 
-The workflow visual editor has an **Automations** tab on every state's inspector. The standalone `.kiket/automations/*.yaml` files are edited in the project editor or your IDE.
+The workflow visual editor has an **Automations** tab on every state's inspector. The standalone `.kiket/automations/*.yaml` files are edited in the workspace editor or your IDE.
 
 ## What's next?
 

@@ -12,7 +12,7 @@ A workspace is the tenant-local home for process configuration and runtime evide
 ## Pick your path
 
 <Cards>
-  <Card title="Explore Sample Data" description="Use the seeded operational twin to see cases, evidence, findings, remediation, and reports immediately." />
+  <Card title="Load demo timeline" description="Use the seeded operational twin to see cases, evidence, findings, remediation, and reports immediately." />
   <Card title="Start from Template" description="Pick a compliance process such as vendor review, incident response, contract approval, privacy request, or production change." />
   <Card title="Connect Existing Config" description="Connect a repository that already contains `.kiket/` process configuration and evidence-source settings." />
 </Cards>
@@ -25,7 +25,7 @@ A workspace is the tenant-local home for process configuration and runtime evide
 
 ### Create your account
 
-Visit [app.kiket.dev](https://app.kiket.dev/register) and sign up with **email and password** or with **Google** or **GitHub**. You'll land in an empty organization — its name is taken from your email domain, you can rename it later. For details on linking accounts and sign-in options, see [Sign-in and accounts](/docs/start/sign-in-and-accounts).
+Visit [app.kiket.dev/login?mode=register](https://app.kiket.dev/login?mode=register) and sign up with **email and password** or with **Google** or **GitHub**. You'll land in an empty organization — its name is taken from your email domain, you can rename it later. For details on linking accounts and sign-in options, see [Sign-in and accounts](/docs/start/sign-in-and-accounts).
 
 </Step>
 
@@ -41,7 +41,7 @@ In onboarding, choose the outcome you want to monitor first. Kiket shows what th
 - evidence sources to connect
 - report output
 
-For the fastest path, choose **Explore sample data** or a template with a built-in evidence path such as production change approval.
+For the fastest path, choose **Load demo timeline** or a template with a built-in evidence path such as production change approval.
 
 </Step>
 
@@ -84,14 +84,14 @@ If you are evaluating Kiket, use this checklist as the acceptance path after set
 
 ### Connect an evidence source
 
-Open **Settings → Evidence Sources** and connect the source that can prove the process happened. Typical first sources are:
+Open **Settings → Evidence Sources** and connect the source that can prove the process happened.
 
 - GitHub for pull requests, reviews, commits, and deployment evidence
 - Jira or Linear for work item status and ownership
 - Slack or Teams for approval and incident context
 - webhook/API ingestion for internal systems
 
-Each source produces raw events, normalized operational events, evidence records, and scanner context.
+Each source produces raw events, normalized operational events, evidence records, and scanner context. For programmatic setup, create scoped keys under **Settings → API Keys** — see **[API & SDKs](/docs/api/overview)**.
 
 </Step>
 
@@ -127,7 +127,7 @@ Open **Audit Room** and generate a report for the monitored process. The report 
 <Cards>
   <Card title="Sign-in and accounts" href="/docs/start/sign-in-and-accounts" description="Email, Google, GitHub, and account linking." />
   <Card title="Core concepts" href="/docs/start/core-concepts" description="Processes, cases, evidence, findings, remediation, reports, and integrity proofs." />
-  <Card title="Build your first process" href="/docs/start/first-workflow" description="Walk through authoring a monitored process model on the canvas." />
+  <Card title="Build your first process" href="/docs/start/first-workflow" description="Walk through authoring a monitored process model in the Modeling Cockpit." />
   <Card title="Workspace management" href="/docs/build/workspace-management" description="Manage workspaces, repositories, sync, and activity operations from Settings." />
   <Card title="Status and support" href="/docs/start/status-and-support" description="Check status.kiket.dev and find the right support channel." />
   <Card title="Connect an evidence source" href="/docs/start/first-extension" description="Connect a tool that emits operational evidence into the twin." />

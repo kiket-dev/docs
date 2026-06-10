@@ -1,15 +1,15 @@
 ---
-title: Build your first workflow
-description: Author a contract-review workflow on the visual canvas, step by step, in about 15 minutes.
+title: Build your first monitored process
+description: Author a contract-review process in the Modeling Cockpit, simulate before merge, and ship file-backed YAML in about 15 minutes.
 ---
 
-By the end of this walkthrough you'll have a three-state workflow with an SLA, a two-person approval chain, and an automation that posts to Slack on breach. Every step is doable on the canvas — we'll also show the YAML so you can see what the canvas is writing.
+By the end of this walkthrough you'll have a three-state monitored process with an SLA, a two-person approval chain, and an automation that posts to Slack on breach. Every step is doable in the **Modeling Cockpit** — we'll also show the YAML so you can see what the editor writes.
 
 <Callout>
-Prefer YAML-first? The equivalent workflow file is at the bottom of this page. You can paste it into `.kiket/workflows/contract_review.yaml` in your workspace repo and skip the canvas.
+Prefer YAML-first? Paste the workflow at the bottom of this page into `.kiket/workflows/contract_review.yaml` in your workspace configuration repository and open it in the Modeling Cockpit to verify structure and run simulation.
 </Callout>
 
-## Goal: a contract-review workflow
+## Goal: a contract-review process
 
 You need legal to review every contract, CFO to co-sign anything over $100k, and the team to be paged if review drags past 48 hours.
 
@@ -17,11 +17,11 @@ You need legal to review every contract, CFO to co-sign anything over $100k, and
 
 <Step>
 
-### Open the visual editor
+### Open the Modeling Cockpit
 
-From your project's sidebar, click **Workflows → New workflow**. Enter a key (`contract_review`), a name (`Contract Review`), and click **Create**.
+From the workspace sidebar, open **Processes** and click **New process** (or open an existing process and choose **Edit in Modeling Cockpit**). Enter a key (`contract_review`), a name (`Contract Review`), and confirm.
 
-You'll land in the visual editor with an empty canvas and a single **Intake** state pre-dropped.
+You'll land in the Modeling Cockpit with an empty canvas and a single **Intake** state pre-dropped. The editor opens `.kiket/workflows/contract_review.yaml` in your linked configuration repository.
 
 </Step>
 
@@ -29,7 +29,7 @@ You'll land in the visual editor with an empty canvas and a single **Intake** st
 
 ### Add the Legal Review state
 
-Click the **+ Add state** button in the toolbar. Name it **Legal Review**. The canvas places it to the right of Intake; drag it wherever you like.
+Click **+ Add state** in the toolbar. Name it **Legal Review**. The canvas places it to the right of Intake; drag it wherever you like.
 
 Click the state to open its inspector. In the **Category** dropdown, leave it as *Active*.
 
@@ -52,10 +52,10 @@ Back in the inspector for Legal Review, scroll to **SLA**. Set:
 - **Warning**: `24h` (notify team early)
 - **Breach**: `48h` (escalate to on-call)
 
-Click **Save**. The canvas commits the change; you'll see a small green dot in the top-right for a second.
+Save the file. Autosave commits YAML to your workspace repository; you'll see a brief save indicator in the header.
 
 <Callout title="What just happened?">
-The canvas wrote a YAML edit to `.kiket/workflows/contract_review.yaml` and committed it to your workspace repo with a message like "Update Legal Review SLA". Open the repo on GitHub to see it.
+The Modeling Cockpit wrote `.kiket/workflows/contract_review.yaml` in your configuration repository. Open the repo on GitHub to inspect the diff — canvas and YAML are the same source of truth.
 </Callout>
 
 </Step>
@@ -82,38 +82,40 @@ Click **+ Add state**. Name it **Approved**. In the inspector, set **Category** 
 
 ### Wire the breach automation
 
-On the Legal Review state, open the inspector's **Automations** tab. Click **Add automation** and pick the trigger `on_sla_breach`. For the action, pick **Send notification** and choose your Slack channel from the dropdown (if you haven't installed Slack yet, do that first — see [Your first extension](/docs/start/first-extension)).
+On the Legal Review state, open the inspector's **Automations** tab. Click **Add automation** and pick the trigger `on_sla_breach`. For the action, pick **Send notification** and choose your Slack channel from the dropdown (if you haven't connected Slack yet, do that first — see [Your first extension](/docs/start/first-extension)).
 
-Save. Now when an issue sits in Legal Review past 48h, Slack gets a message.
-
-</Step>
-
-<Step>
-
-### Test it
-
-Click **Simulate** in the top-right. The simulator drops a dummy issue into Intake and walks it through transitions. You'll see:
-
-- Green check when the transition is allowed.
-- Red cross + reason when it's blocked (missing approval, SLA not expired, etc.).
-
-Simulate is read-only; it doesn't create real issues.
+Save. Now when a case sits in Legal Review past 48h, Slack gets a message.
 
 </Step>
 
 <Step>
 
-### Ship it
+### Simulate before merge
 
-Click **Publish**. The workflow becomes available on the project's boards. Anyone can now create an issue against it.
+Open **Check change** in the Modeling Cockpit toolbar (or add `?simulate=1` to the editor URL). The **Impact** tab forecasts guard blockers; use **Cases** and **History** to replay open cases against your edits.
 
-Your repo's `.kiket/workflows/contract_review.yaml` now contains the result of everything you did on the canvas.
+Click **Re-run** after each change. You'll see:
+
+- Green check when a transition is allowed.
+- Red cross + reason when it's blocked (missing approval, SLA not expired, missing evidence, etc.).
+
+Simulation is read-only against live case data using the **saved** workflow file — unsaved buffer edits preview until you save. Resolve blockers on the **Ship** tab before merging process changes to production.
+
+</Step>
+
+<Step>
+
+### Ship the process
+
+When the **Ship** tab shows ready, save (if needed) and merge your configuration change through your normal git workflow. The monitored process becomes active for the workspace: operators can open cases against it, evidence adapters can link proof, and scanner runs evaluate compliance.
+
+Your repo's `.kiket/workflows/contract_review.yaml` now contains everything you configured in the Modeling Cockpit.
 
 </Step>
 
 </Steps>
 
-## The YAML the canvas wrote
+## The YAML the Modeling Cockpit wrote
 
 ```yaml
 key: contract_review
@@ -150,7 +152,8 @@ transitions:
 ## What's next?
 
 <Cards>
-  <Card title="Set up a board" href="/docs/build/boards" description="Visualize issues flowing through this workflow as columns." />
-  <Card title="Create an intake form" href="/docs/build/intake-forms" description="Let people submit contract requests without making them issue authors." />
-  <Card title="Add a dashboard" href="/docs/build/dashboards" description="Track how long contracts spend in each state, and where they stall." />
+  <Card title="Simulation cockpit" href="/docs/compliance/simulation-cockpit" description="Impact, Cases, History, Tests, and Ship tabs before you merge process changes." />
+  <Card title="Editor modeling cockpit" href="/docs/compliance/editor-cockpit" description="Live lens, branch compare, and Ship verdict reference." />
+  <Card title="Workflows reference" href="/docs/build/workflows" description="Full YAML anatomy for monitored processes." />
+  <Card title="Connect evidence" href="/docs/start/first-extension" description="Install an adapter so scanner runs have proof to evaluate." />
 </Cards>

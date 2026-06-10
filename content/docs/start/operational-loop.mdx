@@ -1,0 +1,116 @@
+---
+title: Operational loop
+description: The closed compliance loop from raw inbox through evidence, scanner runs, findings, remediation, and audit snapshots.
+---
+
+Kiket is an **operational compliance twin**: it models how work should happen, ingests what actually happened, compares the two, and produces audit-ready output. Every primary surface in the web app maps to one stage of this loop.
+
+<Callout type="info">
+Use **workspace** (not project) and **case** (not issue) in product copy and API vocabulary. Workflows are internal process configuration — the monitored **process** and its runtime evidence are the product center.
+</Callout>
+
+## The closed loop
+
+```text
+Raw inbox → Operational events → Evidence records → Scanner run → Finding → Remediation → Audit snapshot
+```
+
+| Stage | What happens | Where to look |
+| ----- | ------------ | ------------- |
+| **Raw inbox** | Adapters and webhooks deliver untrusted payloads; Kiket stores them durably with idempotency keys. | Settings → Evidence sources; `GET /platform/raw-events` |
+| **Operational events** | Normalization maps raw payloads to typed events tied to workspace, process, and case. | Process Twin activity; `GET /platform/operational-events` |
+| **Evidence records** | Durable proof objects (approvals, commits, tickets) linked to cases and findings. | [Evidence Center](/docs/start/evidence-center) (`/evidence`) |
+| **Scanner run** | Checks compare the process model with observed evidence and emit explainable findings. | [Scanner runs](/docs/start/scanner-runs) |
+| **Finding** | Actionable gap with severity, explanation, and recommended remediation. | [Findings inbox and remediation](/docs/compliance/findings-remediation) (`/findings`) |
+| **Remediation** | Accountability loop — acknowledge, assign, attach proof, resolve. | Remediation Workbench (`/remediation`) |
+| **Audit snapshot** | Point-in-time report over the same graph, with optional integrity proofs. | [Audit Room](/docs/compliance/audit-room) (`/audit-room`) |
+
+The **Process Twin** dashboard and the shell **operational loop** strip show where you are in this sequence for the selected workspace.
+
+## Evaluator acceptance path
+
+If you are evaluating Kiket, treat the loop as your acceptance checklist. Each step should leave visible artifacts — not just configuration.
+
+<Steps>
+
+<Step>
+
+### Connect an evidence source
+
+Open **Settings → Evidence sources** and connect a source that can prove your first monitored process (GitHub, Jira, Linear, Slack, or a generic webhook). Adapters write to the **raw inbox**; normalization produces **operational events** and **evidence records**.
+
+See [Connect an evidence source](/docs/start/first-extension) or [Build your first evidence adapter](/docs/integrations/first-evidence-adapter) for adapter details.
+
+</Step>
+
+<Step>
+
+### Confirm a case and evidence
+
+Open **Operational Cases** (`/cases`) and select a case for your monitored process. From the case detail panel, open **Evidence for this case** — or go directly to [Evidence Center](/docs/start/evidence-center) with `?caseId=<uuid>`.
+
+You should see at least one evidence row and a populated **provenance graph** after a scanner pass.
+
+</Step>
+
+<Step>
+
+### Run or observe a scanner pass
+
+Trigger a **manual** scan from the Process Twin dashboard, the command palette (**Run compliance scanner**), or wait for an **event-driven** pass after normalization. Scanner runs are idempotent — see [Scanner runs](/docs/start/scanner-runs).
+
+</Step>
+
+<Step>
+
+### Triage one finding
+
+Open **Findings Inbox** (`/findings`). Select a finding, read the **explanation** and **source check**, and follow the inline remediation stepper. Use the `since_last_scan` triage filter to focus on output from the latest completed run.
+
+Full triage and bulk actions: [Findings inbox and remediation](/docs/compliance/findings-remediation).
+
+</Step>
+
+<Step>
+
+### Close remediation with proof
+
+Attach evidence that satisfies the finding (Evidence Center link from the inbox), complete remediation in the workbench if needed, and **resolve** the finding. Resolved findings feed **report-ready** triage and audit scope.
+
+</Step>
+
+<Step>
+
+### Generate an audit snapshot
+
+Open **Audit Room** (`/audit-room`), generate a report for the monitored process, and walk the integrity stepper. The snapshot pulls from the same cases, evidence, findings, remediation trail, and scanner runs you validated above.
+
+See [Audit Room](/docs/compliance/audit-room) for URL filters and API routes.
+
+</Step>
+
+</Steps>
+
+## Deep links between stages
+
+The web app keeps loop context in the URL so you can share and bookmark state:
+
+| Intent | URL pattern |
+| ------ | ----------- |
+| Case selected | `/cases?selected=<caseId>` |
+| Evidence scoped to case | `/evidence?caseId=<caseId>` |
+| Evidence scoped to finding | `/evidence?findingId=<findingId>` |
+| Findings for a process | `/findings?processId=<processId>` |
+| Since last scan | `/findings?triage=since_last_scan&processId=<processId>` |
+| Audit Room snapshot | `/audit-room?selected=<reportId>` |
+
+## What's next?
+
+<Cards>
+  <Card title="Evidence Center" href="/docs/start/evidence-center" description="Provenance graph, evidence list, and links to cases and findings." />
+  <Card title="Scanner runs" href="/docs/start/scanner-runs" description="Triggers, explainability, dedupe, and triage filters." />
+  <Card title="Findings and remediation" href="/docs/compliance/findings-remediation" description="Master–detail inbox, bulk triage, and remediation workbench." />
+  <Card title="Audit Room" href="/docs/compliance/audit-room" description="Report snapshots, integrity stepper, and attestation." />
+  <Card title="Quickstart" href="/docs/start/quickstart" description="Zero to first scan and report in one guided flow." />
+  <Card title="Core concepts" href="/docs/start/core-concepts" description="Workflows, cases, SLAs, and audit trail vocabulary." />
+</Cards>

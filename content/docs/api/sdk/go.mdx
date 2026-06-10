@@ -38,9 +38,9 @@ func main() {
     defer sdk.Close()
 
     // Register webhook handlers
-    sdk.On("issue.created", func(ctx context.Context, payload kiket.WebhookPayload, hctx *kiket.HandlerContext) (interface{}, error) {
-        issue := payload["issue"].(map[string]interface{})
-        log.Printf("New issue created: %s", issue["title"])
+    sdk.On("case.created", func(ctx context.Context, payload kiket.WebhookPayload, hctx *kiket.HandlerContext) (interface{}, error) {
+        case := payload["case"].(map[string]interface{})
+        log.Printf("New case created: %s", case["title"])
 
         // Access custom data
         customData := hctx.Endpoints.CustomData(payload["project_id"])
@@ -85,7 +85,7 @@ sdk, err := kiket.New(kiket.Config{
 
 ### Manifest File
 
-Create `extension.yaml` in your project root:
+Create `extension.yaml` in your workspace root:
 
 ```yaml
 id: com.example.my-extension
@@ -104,11 +104,11 @@ Register handlers for Kiket events:
 
 ```go
 // Issue events
-sdk.On("issue.created", handleIssueCreated)
-sdk.On("issue.updated", handleIssueUpdated)
-sdk.On("issue.status_changed", handleStatusChange)
-sdk.On("issue.assigned", handleAssignment)
-sdk.On("issue.closed", handleClosed)
+sdk.On("case.created", handleIssueCreated)
+sdk.On("case.updated", handleIssueUpdated)
+sdk.On("case.status_changed", handleStatusChange)
+sdk.On("case.assigned", handleAssignment)
+sdk.On("case.closed", handleClosed)
 
 // Workflow events
 sdk.On("workflow.triggered", handleWorkflowTrigger)
@@ -166,7 +166,7 @@ The `Secret()` method provides a simple way to retrieve secrets with automatic f
 slackToken := hctx.Secret("SLACK_BOT_TOKEN")
 
 // Example usage
-sdk.On("issue.created", func(ctx context.Context, payload kiket.WebhookPayload, hctx *kiket.HandlerContext) (interface{}, error) {
+sdk.On("case.created", func(ctx context.Context, payload kiket.WebhookPayload, hctx *kiket.HandlerContext) (interface{}, error) {
     apiKey := hctx.Secret("API_KEY")
     if apiKey == "" {
         return nil, fmt.Errorf("API_KEY not configured")
@@ -260,7 +260,7 @@ The SDK automatically verifies JWT runtime tokens from webhook payloads. The tok
 
 ```go
 // Access authentication context in handlers
-sdk.On("issue.created", func(ctx context.Context, payload kiket.WebhookPayload, hctx *kiket.HandlerContext) (interface{}, error) {
+sdk.On("case.created", func(ctx context.Context, payload kiket.WebhookPayload, hctx *kiket.HandlerContext) (interface{}, error) {
     // Auth context is available after JWT verification
     if hctx.Auth != nil {
         log.Printf("Org ID: %d", *hctx.Auth.OrgID)

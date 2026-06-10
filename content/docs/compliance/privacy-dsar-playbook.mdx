@@ -1,0 +1,96 @@
+---
+title: "Privacy / DSAR evaluator playbook"
+description: "End-to-end data-subject request loop with the privacy-request template, generic webhook intake, compliance clock, and audit exports."
+---
+
+**Audience:** DPO, privacy ops, and compliance evaluators  
+**Pack:** [`definitions/privacy-request/`](../../definitions/privacy-request/.kiket/)  
+**Strategy:** compliance-vertical-strategy.md
+
+## Goal
+
+Complete an end-to-end data-subject request loop in under 30 minutes using only the generic webhook adapter and the `privacy-request` template—no proprietary intake connector required.
+
+## Steps
+
+### 1. Install the template (≈5 min)
+
+1. Sign in and open **Onboarding** or **Templates**.
+2. Choose **Privacy Request** (`privacy-request`).
+3. Connect or create a configuration repository and finish workspace setup.
+
+Creating a monitored process with `processKey: privacy-request` automatically provisions a **Privacy DSAR intake (webhook)** event source on that workspace.
+
+### 2. Create or open a case (≈2 min)
+
+1. Open **Processes** → Privacy Request → **Cases**.
+2. Create a case with `context.privacy`:
+
+```json
+{
+  "privacy": {
+    "jurisdiction": "gdpr",
+    "receivedAt": "2026-05-01T12:00:00.000Z",
+    "requesterEmail": "subject@example.com"
+  }
+}
+```
+
+Jurisdiction deadlines sync on create, transition, and intake events (GDPR/UK 30 days, CCPA/CPRA 45 days + optional `extensionDays`).
+
+### 3. Wire intake (≈10 min)
+
+POST to the generic webhook integration with your org, event source key `privacy-intake`, and HMAC signature (if configured):
+
+```http
+POST /api/v1/integrations/webhook
+X-Kiket-Organization-Id: <org-id>
+X-Kiket-Event-Source-Key: privacy-intake
+X-Kiket-Delivery-Id: delivery-001
+X-Kiket-Signature: sha256=<hmac>
+Content-Type: application/json
+
+{
+  "case_id": "<case-uuid>",
+  "request_id": "req-001",
+  "subject": "Access all personal data",
+  "received_at": "2026-05-01T12:00:00.000Z"
+}
+```
+
+Field mapping matches `privacy_request.received` and `privacy_intake` evidence (see `apps/web/src/lib/privacy-intake-mapping.ts`).
+
+**Support desk (Zendesk, Intercom, etc.):** create a second webhook event source and use the support-desk preset in `apps/web/src/lib/support-intake-mapping.ts` (`ticket_id`, `created_at`, `subject`). Same event types; map `case_id` from your automation or ticket custom field.
+
+### 4. Observe compliance clock (≈2 min)
+
+On **Process Twin**, the **Privacy compliance clock** panel lists open DSARs by regulatory risk (breached → at risk → days remaining). API: `GET /platform/analytics/privacy-clock`.
+
+### 5. Scanner and findings (≈5 min)
+
+- Event-driven scans run after intake normalization.
+- Hourly **scheduled** sweeps re-sync deadlines and evaluate `privacy-deadline-monitor`, identity, and export checks for all open privacy cases.
+- Trigger a manual scan from the case or Process Twin if needed.
+
+### 6. Response bundle and audit report (≈5 min)
+
+1. `POST /platform/cases/{id}/privacy/response-bundle` — assembles timeline, evidence, and findings into `privacy_response_bundle` evidence.
+2. Generate report key **`privacy-request-audit`** from the case or Audit Room — includes `deadline_summary`, `request_timeline`, and `response_exports` sections with SHA-256 integrity.
+
+### 7. Regulator draft (optional, assistive)
+
+On a privacy case, **Draft regulator update** calls `POST /platform/cases/{id}/privacy/regulator-draft`. Output is grounded on linked evidence and findings only; requires `MISTRAL_API_KEY` or `OPENAI_API_KEY` (503 otherwise).
+
+## Demo seed
+
+`pnpm --filter api db:seed` includes an overdue GDPR case in workspace **Privacy Operations** with intake evidence, scanner findings, and a sample audit snapshot.
+
+## Honest limits
+
+Kiket proves **operational control** (deadlines, evidence, findings, audit exports). Data fulfillment (delete/export in backend systems) remains in customer tooling.
+
+## Related
+
+- [Generic webhook adapter](/docs/compliance/extension-adapters)
+- Compliance vertical strategy
+- Phase 0 validation notes

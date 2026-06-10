@@ -1,60 +1,66 @@
 ---
 title: Marketplace bundles
-description: One-click install of a workflow template plus the extensions it needs to work end-to-end.
+description: How templates and evidence adapters are installed today — no atomic bundle rollback.
 ---
 
-A **bundle** is a curated pack: one project template plus the extensions
-that make it useful on day one. Instead of configuring GitHub, Slack,
-email, time-tracking, and a workflow one by one, you install a bundle
-and the pieces show up together, pre-wired.
+Older docs described **marketplace bundles**: one-click packs that installed a workflow template, several extensions, and rolled back atomically if any step failed. That product surface was never shipped as described.
 
-## Built-in bundles
+## What exists today
 
-| Bundle | What's in the box | Best for |
+Onboarding is two separate flows:
+
+1. **Template gallery** — when you create a workspace, pick **Copy from Template** in the new-workspace wizard. Kiket scaffolds a repo from a GitHub template or copies `.kiket/` from a curated pack. See [Templates](/docs/build/templates) and [Definition packs](/docs/build/definition-packs).
+2. **Evidence adapters** — install connectors one at a time from **Settings → Evidence sources** (or the public marketplace catalog). Each adapter registers ingress, optional credentials, and event sources. See [Integrations overview](/docs/integrations/overview).
+
+There is **no** single "bundle install" transaction, **no** automatic rollback across template + adapter steps, and **no** guaranteed all-or-nothing state if one adapter fails mid-setup.
+
+## Recommended path
+
+<Steps>
+
+<Step>
+
+### Start from a template or definition pack
+
+Use the template gallery at workspace creation, or copy a flagship pack into your repo under `.kiket/`. You get workflows, case types, checks, and simulations without installing every connector upfront.
+
+</Step>
+
+<Step>
+
+### Connect evidence sources as you need them
+
+Open **Settings → Evidence sources** and install adapters (GitHub, Slack, generic webhook, Jira, ServiceNow, or published marketplace listings). Configure credentials and webhook URLs per adapter — installs are independent.
+
+</Step>
+
+<Step>
+
+### Validate in the Modeling Cockpit
+
+Before going live, run impact checks and YAML regression tests in the editor. See [Simulation cockpit](/docs/compliance/simulation-cockpit).
+
+</Step>
+
+</Steps>
+
+## Legacy bundle table (archived)
+
+The table below reflected pre-launch planning fiction. Do not rely on these bundle IDs or atomic install behavior.
+
+| Planned bundle | Intended contents | Status |
 | --- | --- | --- |
-| **DevOps Starter** | Kanban workflow · GitHub · Slack | Engineering teams shipping continuously |
-| **Developer Toolkit** | Scrum workflow · GitHub · Slack · (opt.) Jira, Time Tracking | Sprint-based product teams |
-| **GDPR Compliance Pack** | GDPR Request workflow · Email · Time Tracking · (opt.) Slack | Data-protection officers, privacy teams |
-| **Enterprise Security** | Contract review · Jira · Teams · Microsoft OAuth · (opt.) Email | Security-minded enterprises |
-| **Business Operations Suite** | Business-ops + Support + Sales + Engineering workflows · Email, Slack, GitHub · (opt.) Marketing, Partners, Product, Finance, Legal | Running a whole SaaS company |
-| **Customer Support** | E-commerce support workflow · Email · Slack · Teams · Twilio · (opt.) Mailjet Inbound | Multi-channel customer support |
-| **Marketing Suite** | Marketing-ops + Campaigns workflows · Email · Slack · Make.com · (opt.) Google Calendar | Campaign and content ops |
+| DevOps Starter | Kanban + GitHub + Slack | Use [Templates](/docs/build/templates) + GitHub/Slack adapters separately |
+| GDPR Compliance Pack | Privacy workflow + email | Use [Definition packs](/docs/build/definition-packs) privacy pack + adapters |
+| Enterprise Security | Contract review + Jira | Template + Jira adapter |
+| Others | Multi-workflow "suites" | Not shipped as unified bundles |
 
-## How install works
+## What's next
 
-1. **Pick a bundle** on the Marketplace page.
-2. **Review what's included.** Required items are pre-checked; optional
-   items appear under "Recommended" for you to opt in or skip.
-3. **Choose a target project.** Either create a fresh project (we'll
-   scaffold it from the bundle's suggested template) or pick an
-   existing one.
-4. **Install.** A progress panel shows per-step status: project created
-   → template applied → each extension installed. If any step fails,
-   the whole install rolls back — no half-configured state left behind.
-5. **Configure.** Some extensions need credentials (Slack tokens, SMTP
-   hosts, …). Install completes even without credentials — fill them
-   in from Settings → Extensions when you're ready.
+Curated **starter sets** (template + recommended adapters as documentation, not a single install button) may return on the roadmap. Until then, treat templates and evidence adapters as composable pieces you install and configure explicitly.
 
-## Atomic rollback
-
-Bundle installs run inside a database transaction. If, for example,
-the Twilio extension fails to install, the transaction aborts and no
-new rows are written — the target project's extension list is
-identical to what it was before you clicked "Install." Retry once the
-underlying issue (credentials, network) is fixed.
-
-## Optional items
-
-Every bundle has a "Recommended" list that the wizard surfaces
-separately. They are *not* installed automatically — you opt in.
-Examples: Time Tracking in the DevOps Starter (useful if you bill
-hours), Mailjet Inbound in Customer Support (useful if you want to
-turn support emails directly into tickets).
-
-## Can I make my own bundle?
-
-Not yet — user-created bundles are on the roadmap. Today, bundles are
-Kiket-curated. The architecture is ready for it: a bundle is just a
-marketplace record with an `items` array, each item carrying a
-`required` flag. When self-service bundles land, you'll be able to
-export your current project's configuration as a sharable bundle.
+<Cards>
+  <Card title="Templates" href="/docs/build/templates" description="Gallery and GitHub template workflow." />
+  <Card title="Integrations" href="/docs/integrations/overview" description="Evidence adapters and ingress." />
+  <Card title="Definition packs" href="/docs/build/definition-packs" description="Flagship compliance verticals." />
+</Cards>

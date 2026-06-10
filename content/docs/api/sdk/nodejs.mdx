@@ -25,7 +25,7 @@ Use `createIngestionClient()` to POST raw events and evidence to `/platform/*`. 
 
 ## Features
 
-- 🔌 **Webhook decorators** – define handlers with `sdk.webhook("issue.created", "v1")`.
+- 🔌 **Webhook decorators** – define handlers with `sdk.webhook("case.created", "v1")`.
 - 🔐 **Transparent authentication** – HMAC verification for inbound payloads, workspace-token client for outbound calls.
 - 🔑 **Secret manager** – list, fetch, rotate, and delete extension secrets stored in Google Secret Manager.
 - 📉 **Rate-limit helper** – introspect `/api/v1/ext/rate_limit` so long-running jobs can throttle themselves.
@@ -54,21 +54,21 @@ const sdk = new KiketSDK({
 });
 
 // Register webhook handler (v1)
-sdk.webhook('issue.created', 'v1')((payload, context) => {
-  const summary = payload.issue.title;
+sdk.webhook('case.created', 'v1')((payload, context) => {
+  const summary = payload.case.title;
   console.log(`Event version: ${context.eventVersion}`);
 
-  await context.endpoints.logEvent('issue.created', { summary });
+  await context.endpoints.logEvent('case.created', { summary });
   await context.secrets.set('WEBHOOK_TOKEN', 'abc123');
 
   return { ok: true };
 });
 
 // Register webhook handler (v2)
-sdk.webhook('issue.created', 'v2')(async (payload, context) => {
-  const summary = payload.issue.title;
+sdk.webhook('case.created', 'v2')(async (payload, context) => {
+  const summary = payload.case.title;
 
-  await context.endpoints.logEvent('issue.created', {
+  await context.endpoints.logEvent('case.created', {
     summary,
     schema: 'v2'
   });
@@ -90,8 +90,8 @@ sdk.run('0.0.0.0', 8080);
 When your manifest declares `custom_data.permissions`, the SDK automatically uses the runtime token provided in the webhook payload for API calls via `context.client`:
 
 ```typescript
-sdk.webhook('issue.created', 'v1')(async (payload, context) => {
-  const projectId = payload.issue.project_id;
+sdk.webhook('case.created', 'v1')(async (payload, context) => {
+  const projectId = payload.case.project_id;
 
   const contacts = await context.endpoints.customData(projectId).list(
     'com.example.crm.contacts',
@@ -115,7 +115,7 @@ Listen for `workflow.sla_status` webhooks and enrich the alert with the REST hel
 
 ```typescript
 sdk.webhook('workflow.sla_status', 'v1')(async (payload, context) => {
-  const projectId = payload.issue.project_id;
+  const projectId = payload.case.project_id;
 
   const events = await context.endpoints.slaEvents(projectId).list({
     state: 'imminent',
@@ -194,21 +194,21 @@ The SDK includes comprehensive test utilities:
 import { createSignedPayload, createTestContext } from '@kiket-dev/sdk/test';
 
 describe('My webhook handler', () => {
-  it('should handle issue.created event', async () => {
+  it('should handle case.created event', async () => {
     const sdk = new KiketSDK({ webhookSecret: 'test-secret' });
 
-    const handler = sdk.webhook('issue.created', 'v1')((payload, context) => {
-      return { processed: payload.issue.id };
+    const handler = sdk.webhook('case.created', 'v1')((payload, context) => {
+      return { processed: payload.case.id };
     });
 
     // Create signed payload for testing
     const { body, headers } = createSignedPayload('test-secret', {
-      issue: { id: '123', title: 'Test Issue' }
+      case: { id: '123', title: 'Test Issue' }
     });
 
     // Test the handler
     const response = await request(sdk.app)
-      .post('/v/1/webhooks/issue.created')
+      .post('/v/1/webhooks/case.created')
       .set(headers)
       .send(body);
 
@@ -233,7 +233,7 @@ The SDK automatically reads from these environment variables:
 
 ### Manifest File
 
-Create an `extension.yaml` or `manifest.yaml` file in your project root:
+Create an `extension.yaml` or `manifest.yaml` file in your workspace root:
 
 ```yaml
 id: com.example.marketing
@@ -317,7 +317,7 @@ The `secret()` method provides a simple way to retrieve secrets with automatic f
 const slackToken = context.secret('SLACK_BOT_TOKEN');
 
 // Example usage
-sdk.webhook('issue.created', 'v1')(async (payload, context) => {
+sdk.webhook('case.created', 'v1')(async (payload, context) => {
   const apiKey = context.secret('API_KEY');
   if (!apiKey) {
     throw new Error('API_KEY not configured');
@@ -338,7 +338,7 @@ This allows organizations to override extension defaults with their own credenti
 The Kiket platform sends a per-invocation `runtime_token` in each webhook payload. This token is automatically extracted and used for all API calls made through `context.client` and `context.endpoints`. The runtime token provides organization-scoped access and is preferred over static tokens.
 
 ```typescript
-sdk.webhook('issue.created', 'v1')(async (payload, context) => {
+sdk.webhook('case.created', 'v1')(async (payload, context) => {
   // Access authentication context
   console.log(`Token expires at: ${context.auth.expiresAt}`);
   console.log(`Scopes: ${context.auth.scopes.join(', ')}`);
@@ -356,12 +356,12 @@ Extensions can declare required scopes when registering handlers. The SDK will a
 
 ```typescript
 // Declare required scopes at registration time
-sdk.register('issue.created', handler, 'v1', ['issues.read', 'issues.write']);
+sdk.register('case.created', handler, 'v1', ['cases.read', 'cases.write']);
 
 // Or using the decorator
-sdk.webhook('issue.created', 'v1', ['issues.read', 'issues.write'])(async (payload, context) => {
+sdk.webhook('case.created', 'v1', ['cases.read', 'cases.write'])(async (payload, context) => {
   // Handler only executes if scopes are present
-  await context.endpoints.logEvent('issue.processed', { id: payload.issue.id });
+  await context.endpoints.logEvent('case.processed', { id: payload.case.id });
   return { ok: true };
 });
 

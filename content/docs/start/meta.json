@@ -1,4 +1,16 @@
 {
   "title": "Start",
-  "pages": ["quickstart", "sign-in-and-accounts", "core-concepts", "billing", "three-ways", "first-workflow", "first-extension", "status-and-support"]
+  "pages": [
+    "quickstart",
+    "operational-loop",
+    "sign-in-and-accounts",
+    "core-concepts",
+    "evidence-center",
+    "scanner-runs",
+    "billing",
+    "three-ways",
+    "first-workflow",
+    "first-extension",
+    "status-and-support"
+  ]
 }

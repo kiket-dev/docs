@@ -18,12 +18,12 @@ Self-hosted deployments use their own domain.
 Two ways to act on behalf of a **human** in the product, and one for **machines**:
 
 - **Interactive session** — Email/password or **Google** / **GitHub** OAuth on the web app; short-lived access tokens with refresh (see [Sign-in and accounts](/docs/start/sign-in-and-accounts)).
-- **API token** (long-lived, scoped) — what SDKs, CLI, and webhook receivers use when there is no browser.
+- **API key** (long-lived, scoped) — what SDKs, CLI, and automation use when there is no browser.
 
-Create an API token in **Settings → API tokens**. Pass it as a Bearer header:
+Create an API key in **Settings → API Keys**. Pass it as a Bearer header:
 
 ```bash
-curl -H "Authorization: Bearer $KIKET_API_KEY" https://api.kiket.dev/api/v1/issues
+curl -H "Authorization: Bearer $KIKET_API_KEY" https://api.kiket.dev/api/v1/platform/cases
 ```
 
 ## Shape
@@ -65,7 +65,7 @@ An OpenAPI spec lives at **[api.kiket.dev/api/v1/docs](https://api.kiket.dev/api
 
 ## Rate limits
 
-- Default: **1,200 requests/min** per API token.
+- Default: **1,200 requests/min** per API key.
 - Bulk endpoints have separate, lower caps.
 - `X-RateLimit-Remaining` and `X-RateLimit-Reset` headers on every response.
 - `429` with `Retry-After` when you exceed.
@@ -74,49 +74,67 @@ Enterprise plans can raise limits; contact us.
 
 ## Webhook security
 
-Outbound webhooks sign requests with HMAC-SHA256. The signature header is `X-Kiket-Signature`; the shared secret is in your webhook settings. Always verify before acting — SDK helpers do this for you.
+Outbound webhooks sign requests with HMAC-SHA256. The signature header is `X-Kiket-Signature`; the shared secret is shown once when you create the subscription. Always verify before acting — SDK helpers do this for you.
 
 ## Common tasks
 
 <Accordions>
-<Accordion title="Create an issue">
+<Accordion title="Create a case">
 ```bash
-curl -X POST https://api.kiket.dev/api/v1/issues \
+curl -X POST https://api.kiket.dev/api/v1/platform/cases \
   -H "Authorization: Bearer $KIKET_API_KEY" \
   -H "Content-Type: application/json" \
-  -H "Idempotency-Key: create-ACME-2026-Q1" \
+  -H "Idempotency-Key: create-acme-renewal-2026" \
   -d '{
-    "projectKey": "LEGAL",
-    "issueType": "contract",
+    "workspaceId": "ws_01HGZ...",
+    "processId": "proc_01HGZ...",
+    "caseNumber": 42,
     "title": "Acme renewal",
-    "fields": { "total_value_usd": 250000 }
+    "currentStateKey": "intake",
+    "currentStateLabel": "Intake",
+    "context": { "total_value_usd": 250000 }
   }'
 ```
+
+`processId` identifies the monitored process (linked workflow). `caseNumber` is the display sequence within the workspace.
 </Accordion>
 
-<Accordion title="Transition an issue">
+<Accordion title="Transition a case">
+List allowed transitions, then execute one:
+
 ```bash
-curl -X POST https://api.kiket.dev/api/v1/issues/ISS-42/transitions \
+curl https://api.kiket.dev/api/v1/platform/cases/CASE_UUID/transitions \
+  -H "Authorization: Bearer $KIKET_API_KEY"
+
+curl -X POST https://api.kiket.dev/api/v1/platform/cases/CASE_UUID/transition \
   -H "Authorization: Bearer $KIKET_API_KEY" \
-  -d '{ "to": "legal_review", "comment": "Contract pinned" }'
+  -H "Content-Type: application/json" \
+  -d '{ "toState": "legal_review" }'
 ```
+
+Workflow guards (checklists, documents, approvals) are evaluated by the engine; blocked transitions return `409` with blocker details.
 </Accordion>
 
-<Accordion title="Query issues">
+<Accordion title="List cases">
 ```bash
-curl "https://api.kiket.dev/api/v1/issues?projectKey=LEGAL&state=legal_review&limit=50" \
+curl "https://api.kiket.dev/api/v1/platform/cases?workspaceId=ws_01HGZ..." \
   -H "Authorization: Bearer $KIKET_API_KEY"
 ```
+
+Omit `workspaceId` to list cases across the organization. Filter further in your client or use semantic search when embeddings are enabled.
 </Accordion>
 
 <Accordion title="Subscribe to webhooks">
 ```bash
 curl -X POST https://api.kiket.dev/api/v1/webhooks \
   -H "Authorization: Bearer $KIKET_API_KEY" \
+  -H "Content-Type: application/json" \
   -d '{
     "url": "https://your-service.example.com/kiket",
-    "events": ["issue.created", "issue.transitioned", "sla.breach"]
+    "events": ["case.created", "case.transitioned", "sla.breach"]
   }'
 ```
+
+Manage subscriptions in **Settings → Webhooks**. See [Webhooks](/docs/api/webhooks) for the full event catalog and signing details.
 </Accordion>
 </Accordions>

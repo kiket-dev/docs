@@ -61,21 +61,6 @@ const SOURCES = [
     label: 'Go',
     description: 'Kiket Go SDK.',
   },
-
-  {
-    localPath: 'cli',
-    repo: 'kiket-dev/kiket-cli',
-    output: 'content/docs/api/cli.mdx',
-    label: 'CLI',
-    description: 'Kiket command-line interface.',
-  },
-  {
-    localPath: 'mcp',
-    repo: 'kiket-dev/kiket-mcp',
-    output: 'content/docs/api/mcp.mdx',
-    label: 'MCP server',
-    description: 'Model Context Protocol server for Kiket.',
-  },
 ];
 
 function titleCase(s) {
@@ -83,6 +68,16 @@ function titleCase(s) {
     .split(/[-_ ]+/)
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
     .join(' ');
+}
+
+/** Maintainer script: reject paths that escape an expected root (static SOURCES only). */
+function assertResolvedWithin(rootDir, targetPath) {
+  const root = resolve(rootDir);
+  const target = resolve(targetPath);
+  if (target !== root && !target.startsWith(`${root}/`)) {
+    throw new Error(`Refusing path outside ${root}: ${targetPath}`);
+  }
+  return target;
 }
 
 const BANNER = '{/* AUTO-SYNCED from the upstream README. Edit the source repo, not this file. */}\n';
@@ -97,7 +92,7 @@ async function exists(p) {
 }
 
 async function readReadme(src) {
-  const local = join(SIBLING_ROOT, src.localPath, 'README.md');
+  const local = assertResolvedWithin(SIBLING_ROOT, join(SIBLING_ROOT, src.localPath, 'README.md'));
   if (await exists(local)) return readFile(local, 'utf8');
 
   const res = await fetch(`https://api.github.com/repos/${src.repo}/readme`, {
@@ -125,7 +120,7 @@ async function main() {
         BANNER,
         sanitizeLegacyContent(stripH1(content)),
       ].join('\n');
-      const out = join(DOCS_ROOT, src.output);
+      const out = assertResolvedWithin(DOCS_ROOT, join(DOCS_ROOT, src.output));
       await mkdir(dirname(out), { recursive: true });
       await writeFile(out, body, 'utf8');
       return src.output;

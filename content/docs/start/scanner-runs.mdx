@@ -1,0 +1,137 @@
+---
+title: Scanner runs
+description: How compliance scanner runs are triggered, deduplicated, and explained — and how output reaches the Findings Inbox.
+---
+
+A **scanner run** evaluates one scoped slice of your operational twin: it loads the process model (workflow definition), case context, linked **evidence**, and recent **operational events**, runs configured **checks**, and upserts **findings** with human-readable explanations.
+
+Runs are durable records — you can list them, diff consecutive passes, and triage inbox output **since last scan**.
+
+<Callout type="info">
+Scanner logic lives in the platform API and `@kiket/engine` checks — not in LLM output. Findings include a fixed **source check** id and structured **explanation** text derived from check results.
+</Callout>
+
+## Triggers
+
+Each run stores a `trigger` value describing why it started:
+
+| Trigger | When it runs |
+| ------- | ------------ |
+| `event` | After successful normalization of a new operational event (when workspace or process scope is known). Idempotency key: `scan:event:<event dedupe key>`. |
+| `scheduled` | Periodic sweeps — for example privacy-request deadline checks keyed per case and hour bucket. |
+| `manual` | Operator-initiated from Process Twin, the command palette (**Run compliance scanner**), or `POST /platform/scanner-runs`. |
+| `backfill` | Historical or replay scans over existing data. |
+| `simulation` | Editor or cockpit simulation — evaluates a supplied workflow definition without mutating production state beyond the run record. |
+
+### Event-driven path
+
+```text
+Raw inbox → normalize → operational event → enqueue scanner run → checks → findings
+```
+
+Normalization skips scheduling when the operational event is a duplicate or lacks workspace/process scope. In local dev without job queues, the scanner may run inline immediately after normalization.
+
+### Manual path
+
+The web app posts:
+
+```text
+POST /platform/scanner-runs
+{
+  "trigger": "manual",
+  "idempotencyKey": "<unique>",
+  "workspaceId": "...",
+  "processId": "...",
+  "caseId": "...",
+  "eventId": "..."   // optional — adds event-scoped evidence context
+}
+```
+
+The CLI exposes the same contract: `kiket scan --trigger manual …`.
+
+Production workers process **queued** runs asynchronously (`status`: `queued` → `running` → `completed` or `failed`). Tests and no-queue environments run deterministically inline and return findings in the `202` response.
+
+## Run lifecycle and visibility
+
+| Field | Meaning |
+| ----- | ------- |
+| `status` | `queued`, `running`, `completed`, or `failed`. |
+| `summary` | JSON summary — e.g. `checksEvaluated`, `findingsObserved`. |
+| `startedAt` / `completedAt` / `failedAt` | Timestamps for timeline and triage windows. |
+| `error` | Server message when `status` is `failed`. |
+
+Process Twin shows recent runs in the activity feed. Full history:
+
+```text
+GET /platform/scanner-runs?workspaceId=&processId=&caseId=
+```
+
+Compare two consecutive completed runs in scope:
+
+```text
+GET /platform/scanner-runs/:id/diff
+```
+
+Returns **added** and **resolved** findings between the run and the previous completed run.
+
+## Explainability
+
+Every finding emitted by a scanner run includes:
+
+| Field | Purpose |
+| ----- | ------- |
+| `sourceCheck` | Stable check identifier (maps to engine / YAML check definition). |
+| `explanation` | Human-readable reason the check failed or observed a gap. |
+| `remediation` | Structured hints (action type, instructions) used by the inbox stepper — not model-generated prose. |
+| `severity` | `critical`, `high`, `medium`, `low`, or informational tiers for triage. |
+| `auditHistory` | Append-only log; new observations record `scannerRunId` and timestamp. |
+
+The **Findings Inbox** detail panel surfaces explanation and recommended next steps. **Assistive** panels may summarize metrics but do not replace check output as the source of truth.
+
+Linked **evidence ids** from the check are stored as evidence links (`targetType: finding`, `linkType: supports`) so reviewers can open [Evidence Center](/docs/start/evidence-center) from the finding.
+
+## Dedupe behavior
+
+Scanner runs and findings both dedupe to keep the loop idempotent under retries and webhook redelivery.
+
+### Scanner run dedupe
+
+Runs are unique per organization on **`idempotencyKey`** (`organization_id` + `idempotency_key` unique index).
+
+- If a duplicate request arrives and the existing run is already **`completed`**, the API returns that run and existing findings without re-executing checks.
+- Event-driven scheduling uses deterministic keys (`scan:event:…`) so the same operational event does not spawn parallel runs.
+
+### Finding dedupe
+
+Findings upsert on **`dedupeKey`** per organization. Re-observation during a later run updates `lastSeenAt` and appends to `auditHistory` rather than creating duplicate inbox rows.
+
+Closed findings (`resolved`, `suppressed`, `false_positive`) follow transition rules — reopening requires an explicit status change, not silent overwrite.
+
+## From scanner run to Findings Inbox
+
+After a completed run, open **Findings Inbox** (`/findings`):
+
+| Triage filter | Use |
+| ------------- | --- |
+| `since_last_scan` | Findings observed during the latest **completed** run (per process when `processId` is set). |
+| `actionable` | Open, acknowledged, or remediating items needing work. |
+| `missing_evidence` | Actionable findings with no linked proof. |
+| `critical` | Highest-severity actionable queue. |
+
+Example deep link:
+
+```text
+/findings?triage=since_last_scan&processId=<uuid>&selected=<findingId>
+```
+
+Full inbox, bulk triage, and remediation stepper: [Findings inbox and remediation](/docs/compliance/findings-remediation).
+
+## What's next?
+
+<Cards>
+  <Card title="Findings and remediation" href="/docs/compliance/findings-remediation" description="Triage scanner output and close the accountability loop." />
+  <Card title="Evidence Center" href="/docs/start/evidence-center" description="Review proof linked to findings and cases." />
+  <Card title="Operational loop" href="/docs/start/operational-loop" description="End-to-end evaluator path through the twin." />
+  <Card title="Audit Room" href="/docs/compliance/audit-room" description="Snapshot findings, evidence, and runs for reviewers." />
+  <Card title="API overview" href="/docs/api/overview" description="OpenAPI routes for scanner runs, findings, and evidence." />
+</Cards>
