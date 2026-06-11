@@ -1,14 +1,36 @@
 ---
 title: "Editor modeling cockpit"
-description: "Check change panel: readiness strip, Impact / Cases / History / Tests / Structure / Ship tabs for file-backed workflow governance."
+description: "Check change panel: proposal vs baseline vs live cases, Impact / Cases / History / Tests / Ingestion / Structure / Ship tabs, Capture test, and Ship verdict with Fix links."
 ---
 
 **Status:** Phases A–F shipped (2026-05-22)  
-**See also:** [simulation-cockpit.md](./simulation-cockpit.md), [editor-cockpit-ux.md](./editor-cockpit-ux.md)
+**See also:** [simulation-cockpit.md](./simulation-cockpit.md)
 
 Historical phase roadmaps live in-repo under `docs/plans/shipped/` (not published on the docs-site).
 
-## Modeling Cockpit tabs (Phase F)
+## North star
+
+**One guided question:** _Is it safe to ship this process change?_
+
+Open **Check change** in the editor toolbar to show the Modeling Cockpit.
+
+### Three visible inputs
+
+| Input                | Source                         | User control                                    |
+| -------------------- | ------------------------------ | ----------------------------------------------- |
+| **Proposal**         | Current editor buffer          | What you edited                                 |
+| **Baseline**         | Saved file or `main` branch    | Baseline picker in cockpit header               |
+| **Operational data** | Linked process cases + history | Inline summary chip; full detail in detail tabs |
+
+### Guided flow
+
+```text
+Header (ready/blocked + controls) → Impact summary → Detail tabs → Ship verdict
+```
+
+Default landing: **Impact**. **Ship** is the terminal step.
+
+## Modeling Cockpit tabs
 
 | Tab           | Question                                 |
 | ------------- | ---------------------------------------- |
@@ -16,18 +38,51 @@ Historical phase roadmaps live in-repo under `docs/plans/shipped/` (not publishe
 | **Cases**     | Which open cases are guard-blocked?      |
 | **History**   | Do historical paths still work?          |
 | **Tests**     | Do regression tests pass?                |
+| **Ingestion** | Do connected sources cover evidence?     |
 | **Structure** | Is the graph and schema valid?           |
 | **Ship**      | Safe to save?                            |
 
 The cockpit header shows ready/blocked status, an operational summary (hover for proposal/baseline detail), baseline picker, and re-run controls on one row. Blocker chips appear only when checks fail. Empty states include CTAs; **Capture test** on forecast rows adds YAML regression tests with toast feedback.
 
-See [editor-cockpit-ux.md](./editor-cockpit-ux.md) for the full UX plan and acceptance criteria.
-
 Toggle **Live lens** in the cockpit header to overlay open cases, findings, and SLA breaches on the canvas.
+
+## What is live?
+
+Process models in the editor follow three layers — there is **no separate “activate” button** beyond linking a process and saving the file.
+
+| Layer                 | What it is                                                            | Affects live cases?                                                                        |
+| --------------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| **Editor buffer**     | What you see while typing                                             | **No** — preview only (Modeling Cockpit **Check change** uses this as the proposal)        |
+| **Saved file**        | Written to the workspace repo clone (manual **Save** or ~2s autosave) | **Yes**, when a [process twin](#process-twin) is linked to this path                       |
+| **Git commit / push** | Version history and CI on `main`                                      | **No extra runtime step** — commit is for audit and team workflow, not a second activation |
+
+### Process twin
+
+A **process twin** is a platform `process` record whose `currentConfigPath` points at this workflow file (for example `.kiket/workflows/vendor-onboarding.yaml`). The API reads that path from the linked repo when:
+
+- Resolving case transitions and guards
+- Running the compliance scanner against operational cases
+- Building simulation **Cases** / **History** tabs in the Modeling Cockpit
+
+If no twin is linked, you can still edit and save YAML in git — but open cases will not use the model until onboarding or workspace setup creates a monitored process for this path.
+
+The editor shows a **config lifecycle** strip above the canvas: pending save (amber), live config (green), or saved but unlinked (neutral).
 
 ## Process context bar
 
 When the Modeling Cockpit is open on a workflow file, the editor shows a context bar with workspace, repo/branch, process name, open case/finding counts, and links to cases and findings.
+
+## Workflow editor chrome (shipped 2026-05)
+
+The workflow canvas uses a **mode bar** and **right inspector** instead of a bottom Process drawer:
+
+| Surface             | Purpose                                                                                                     |
+| ------------------- | ----------------------------------------------------------------------------------------------------------- |
+| **Mode bar**        | Segmented **Graph \| YAML \| Diff**; undo/redo; Layout/Fit on graph only                                    |
+| **Right inspector** | **Selection** (node/edge fields) \| **Evidence & checks** (evidence, checks, remediation, regression tests) |
+| **Page header**     | Save, **Check change**, Git (workspace actions)                                                             |
+
+Coverage warnings on the canvas banner link to **Evidence & checks**. Cockpit **Edit** actions on Tests and Ingestion open the same inspector tab.
 
 ## Visual process config (Phase B)
 
@@ -57,7 +112,6 @@ The cockpit merges forecast impact with live lens metrics on canvas nodes.
 
 ## Polish & scale (Phase E)
 
-- **Mode bar + inspector:** Segmented Graph/YAML/Diff; undo/redo; Layout/Fit on graph; right inspector (**Selection** | **Evidence & checks**)
 - **Auto-layout:** Dagre layout (`Layout` button or `L`); fit view (`F`); auto-layout on open when nodes stack
 - **Template gallery:** New workflow → blank scaffold or flagship definition pack
 - **Keyboard help:** Press `?` on `/editor` for global + editor shortcut sections
@@ -65,9 +119,97 @@ The cockpit merges forecast impact with live lens metrics on canvas nodes.
 
 Template file API: `GET /templates/catalog/:key/file?path=.kiket/workflows/...`
 
+## Deep links
+
+Share or bookmark a specific cockpit view with URL query params on the editor:
+
+| Param      | Value       | Meaning                                  |
+| ---------- | ----------- | ---------------------------------------- |
+| `simulate` | `1`         | Open the Modeling Cockpit bottom panel   |
+| `tab`      | see tab map | Active detail tab (`impact`, `cases`, …) |
+
+Example: `/editor?file=.kiket/workflows/vendor-onboarding.yaml&simulate=1&tab=cases`
+
+Tab changes update the URL in place so refresh and share round-trip.
+
+## Shipped UX (Phase F)
+
+- **Compact cockpit header** — ready/blocked chip, operational summary, baseline picker, re-run, auto-check, and tabs on one row; blocker chips only when present
+- **Impact default** — aggregated status rows drill into detail tabs
+- **Capture test** — from Cases rows; toast + highlight; duplicate detection
+- **Add test** / **Edit** — opens Evidence & checks → regression tests
+- **Ingestion** — source health, coverage gaps, **Edit evidence requirements** → Evidence & checks
+- **Re-run check**, auto-check toggle, baseline picker (saved vs `main`)
+- **Ship** tab — Fix links to detail tabs; Save when ready
+- **Live lens legend** on canvas overlay
+- **URL state** — `?simulate=1&tab=<tab>` deep links; inline package process cockpit retired
+
+## Walkthrough (30 seconds)
+
+<Steps>
+
+<Step>
+
+### Open the cockpit
+
+Open a workflow in the editor and click **Check change**.
+
+</Step>
+
+<Step>
+
+### Read readiness
+
+Scan the **cockpit header**: ready/blocked chip, operational summary (hover for proposal/baseline detail), baseline picker, and re-run controls.
+
+</Step>
+
+<Step>
+
+### Scan impact
+
+Start on **Impact** — scan status rows; click a row to jump to the failing detail tab.
+
+</Step>
+
+<Step>
+
+### Review cases
+
+On **Cases**, see guard-blocked open cases; use **Capture test** to seed a regression test from a failing row.
+
+</Step>
+
+<Step>
+
+### Confirm tests
+
+On **Tests**, confirm YAML scenarios pass; **Edit** opens structured scenario fields in Evidence & checks.
+
+</Step>
+
+<Step>
+
+### Ship when ready
+
+On **Ship**, review blocking checks; use **Fix** to jump back, then **Save** when ready.
+
+</Step>
+
+</Steps>
+
 ## Ship verdict
 
 The **Ship** tab aggregates YAML schema, graph validity, reachability warnings, replay failures, scenario failures, and new guard blockers vs the saved definition. Each failed check includes a **Fix** link to the relevant detail tab.
+
+## Acceptance criteria
+
+Within 30 seconds of opening the cockpit, a user can answer:
+
+1. What is being checked?
+2. Against what baseline and how many live cases?
+3. What failed?
+4. What is the next action?
 
 ## API extensions
 

@@ -8,17 +8,12 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const DOCS_ROOT = resolve(__dirname, '..');
 const SIBLING_ROOT = resolve(DOCS_ROOT, '..');
 
-/** Shipped evidence adapter submodules only — hand-authored *-adapter.mdx pages are canonical. */
-const EXTENSION_SOURCES = ['github', 'slack', 'webhook', 'jira', 'servicenow'].map((slug) => ({
-  localPath: `extensions/${slug}`,
-  repo: `kiket-dev/kiket-ext-${slug}`,
-  output: `content/docs/integrations/${slug}-readme.mdx`,
-  description: `${titleCase(slug)} extension README (auto-synced).`,
-}));
-
+/**
+ * SDK READMEs only. Extension READMEs are intentionally NOT synced — the
+ * hand-authored / compliance-synced *-adapter.mdx pages in
+ * content/docs/integrations/ are canonical and listed in that meta.json.
+ */
 const SOURCES = [
-  ...EXTENSION_SOURCES,
-
   {
     localPath: 'sdk/nodejs',
     repo: 'kiket-dev/kiket-nodejs-sdk',

@@ -3,14 +3,13 @@
   "pages": [
     "quickstart",
     "operational-loop",
-    "sign-in-and-accounts",
     "core-concepts",
+    "sign-in-and-accounts",
     "evidence-center",
     "scanner-runs",
-    "billing",
-    "three-ways",
     "first-workflow",
     "first-extension",
+    "billing",
     "status-and-support"
   ]
 }

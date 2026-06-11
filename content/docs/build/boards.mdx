@@ -1,9 +1,11 @@
 ---
 title: Boards
-description: Kanban-style views of a workflow — columns, swimlanes, WIP limits, card templates.
+description: Optional workflow-state views over process state — columns, swimlanes, WIP limits, card templates.
 ---
 
-Boards visualize a workflow as columns you can drag cases between. Each column is backed by one or more workflow states. Boards don't *own* data — they're pure view config — but they shape how your team sees and moves work.
+Boards are **views over process state, not the product center**. Kiket's primary surfaces are the cases queue, the findings inbox, and the evidence center; a board is an optional, columnar lens on the same workflow states for teams that want a spatial picture of where cases sit.
+
+Each column is backed by one or more workflow states, so a board never invents its own status model — moving a case between columns fires a real workflow transition with the same guards, approvals, and audit trail as any other transition. Boards don't *own* data; they're pure view config in YAML.
 
 ## File location
 
@@ -89,7 +91,7 @@ Filters are YAML-declared so they live with the board's config, not hidden in ea
 
 ## Fallback columns
 
-If you haven't written a board YAML yet, Kiket auto-generates one from your workflow's states. That's fine for demos; you'll want a real config to use swimlanes, WIP limits, or filters.
+If you haven't written a board YAML yet, Kiket auto-generates a view from your workflow's states. That's fine for demos; you'll want a real config to use swimlanes, WIP limits, or filters — and many teams never need a board at all.
 
 ## Editing surfaces
 

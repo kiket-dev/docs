@@ -34,7 +34,7 @@ Deep-link a tab with `?simulate=1&tab=cases` on the editor URL (for example `/ed
 
 The **cockpit header** shows ready/blocked status, an operational summary (hover for proposal/baseline detail), baseline picker, and re-run controls. Blocker chips appear only when checks fail.
 
-**What is live:** open cases use the **saved** workflow file on the linked repo path (`currentConfigPath`), not the in-editor buffer. Unsaved edits are preview-only until Save or autosave (~2s). Git commit is for history and CI — not a separate activation step. See [editor-cockpit-ux.md § What is live?](./editor-cockpit-ux.md#what-is-live).
+**What is live:** open cases use the **saved** workflow file on the linked repo path (`currentConfigPath`), not the in-editor buffer. Unsaved edits are preview-only until Save or autosave (~2s). Git commit is for history and CI — not a separate activation step. See [editor-cockpit.md § What is live?](./editor-cockpit.md#what-is-live).
 
 Cases are built from live operational data via `caseToWorkflowInstance` (not legacy `context.workflowData` blobs).
 
@@ -84,4 +84,4 @@ Toggle **Live lens** in the cockpit header to merge:
 - **CI:** flagship definition packs validated after package build (privacy-request, contract-review)
 - **Ship tab** output matches the CLI report shape (schema, graph, scenarios)
 
-See [editor-cockpit.md](./editor-cockpit.md) and [editor-cockpit-ux.md](./editor-cockpit-ux.md) for branch compare, template gallery, and guided UX.
+See [editor-cockpit.md](./editor-cockpit.md) for branch compare, template gallery, and guided UX.
