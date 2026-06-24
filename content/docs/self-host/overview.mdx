@@ -78,7 +78,9 @@ For air-gapped: bring your own cluster; we provide a values-only path.
 - Cache / queue URL
 - Object storage credentials
 - Blockchain anchor private key (or leave blank to skip)
-- SMTP or SendGrid creds for email notifications
+- **Mailjet** credentials for notification email and password reset mail:
+  - `MAILJET_API_KEY`, `MAILJET_SECRET_KEY`, `MAILJET_FROM_EMAIL`, optional `MAILJET_FROM_NAME`
+  - `APP_URL` must match your web app origin so links in email resolve correctly
 
 Use [SOPS](https://github.com/getsops/sops) or your platform’s native secret store. The chart doesn’t prescribe one.
 

@@ -25,7 +25,9 @@ If you already have a Kiket account with a given email address and you sign in w
 
 If the provider does not confirm the email as verified, automatic linking is blocked and you will see an explanatory error — use your password, or ensure the provider account uses a verified email.
 
-Accounts that only use OAuth **do not have a password**. Use **Continue with Google/GitHub**, or set a password through your product’s password-reset flow if available.
+Accounts that only use OAuth **do not have a password**. Use **Continue with Google/GitHub**, or request a password reset from the sign-in screen when email delivery is configured for your deployment.
+
+Password reset and notification email require **Mailjet** (or equivalent platform configuration) on self-managed deployments. Operators set `MAILJET_*` secrets and `APP_URL`; see [Self-host](/docs/self-host).
 
 ## Private and self-managed deployments
 
